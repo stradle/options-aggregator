@@ -1,25 +1,43 @@
-import React from 'react';
-import logo from './logo.svg';
-import './App.css';
+import type { Theme } from "theme-ui";
+import { ThemeProvider } from "theme-ui";
+import { DeribitProvider } from "./exchanges/deribit";
+
+import MarketsGrid from "./pages/MarketsGrid";
+import styled from "styled-components";
+import { LyraProvider } from "./exchanges/lyra";
+import { QueryClient, QueryClientProvider } from "react-query";
+
+export const theme: Theme = {
+  fonts: {
+    body: "system-ui, sans-serif",
+    heading: '"Avenir Next", sans-serif',
+    monospace: "Menlo, monospace",
+  },
+  colors: {
+    text: "#000",
+    background: "#fff",
+    primary: "#33e",
+  },
+};
+
+const Wrapper = styled.div`
+  margin: 10rem;
+`;
+const queryClient = new QueryClient();
 
 function App() {
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.tsx</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+    <DeribitProvider>
+      <QueryClientProvider client={queryClient}>
+        <LyraProvider>
+          <ThemeProvider theme={theme}>
+            <Wrapper>
+              <MarketsGrid />
+            </Wrapper>
+          </ThemeProvider>
+        </LyraProvider>
+      </QueryClientProvider>
+    </DeribitProvider>
   );
 }
 
