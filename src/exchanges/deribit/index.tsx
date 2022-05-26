@@ -3,10 +3,12 @@ import {
   ReactNode,
   useContext,
   useEffect,
+  useMemo,
   useState,
 } from "react";
 import moment from "moment";
 import { pick } from "lodash";
+import { useEthPrice } from "../../util";
 import { Option, OptionsMap, OptionType, ProviderType } from "../../types";
 
 // const authRequest = {
@@ -75,16 +77,10 @@ export type DeribitItem = {
 };
 const ws = new WebSocket("wss://www.deribit.com/ws/api/v2");
 
-// TODO: fetch price from coingecko
-const ETH_PRICE = 1967;
-
-const parseDeribitOption = ({
-  instrument_name,
-  ask_price,
-  bid_price,
-  mid_price,
-}: DeribitItem): Option &
-  Pick<OptionsMap, "term" | "strike" | "expiration"> => {
+const parseDeribitOption = (
+  { instrument_name, ask_price, bid_price, mid_price }: DeribitItem,
+  ethPrice: number
+): Option & Pick<OptionsMap, "term" | "strike" | "expiration"> => {
   // 'ETH-27MAY22-2400-C'
   const [, term, strike, callOrPut] = instrument_name.split("-");
 
@@ -93,9 +89,9 @@ const parseDeribitOption = ({
     strike: strike,
     type: callOrPut === "P" ? OptionType.PUT : OptionType.CALL,
     expiration: +moment(term, "DDMMMYY"),
-    askPrice: (ask_price ?? 0) * ETH_PRICE,
-    midPrice: (mid_price ?? 0) * ETH_PRICE,
-    bidPrice: (bid_price ?? 0) * ETH_PRICE,
+    askPrice: (ask_price ?? 0) * ethPrice,
+    midPrice: (mid_price ?? 0) * ethPrice,
+    bidPrice: (bid_price ?? 0) * ethPrice,
   };
 };
 
@@ -123,41 +119,42 @@ const useDeribitData = () => {
   return [ethData];
 };
 
-export const DeribitProvider = ({ children }: { children?: ReactNode }) => {
+export const useDeribitRates = () => {
   const [data] = useDeribitData();
+  const ethPrice = useEthPrice();
+  const optionsMap = useMemo(
+    () =>
+      data
+        .filter(({ mid_price, ask_price, bid_price }) => ask_price && bid_price)
+        .map((item) => parseDeribitOption(item, ethPrice))
+        .reduce<OptionsMap[]>((acc, option) => {
+          const found = acc.find(
+            ({ term, strike }) =>
+              option.term === term && option.strike === strike
+          );
 
-  const optionsMap = data
-    .filter(({ mid_price, ask_price, bid_price }) => ask_price && bid_price)
-    .map((item) => parseDeribitOption(item))
-    .reduce<OptionsMap[]>((acc, option) => {
-      const found = acc.find(
-        ({ term, strike }) => option.term === term && option.strike === strike
-      );
+          if (found) {
+            // @ts-ignore
+            found.options[option.type] = option;
+          } else {
+            acc.push({
+              ...pick(option, ["term", "strike", "expiration"]),
+              provider: ProviderType.DERIBIT,
+              options: {
+                [option.type]: pick(option, [
+                  "askPrice",
+                  "bidPrice",
+                  "midPrice",
+                  "type",
+                ]),
+              },
+            });
+          }
 
-      if (found) {
-        // @ts-ignore
-        found.options[option.type] = option;
-      } else {
-        acc.push({
-          ...pick(option, ["term", "strike", "expiration"]),
-          provider: ProviderType.DERIBIT,
-          options: {
-            [option.type]: pick(option, [
-              "askPrice",
-              "bidPrice",
-              "midPrice",
-              "type",
-            ]),
-          },
-        });
-      }
-
-      return acc;
-    }, []);
-
-  return (
-    <WebSocketContext.Provider value={optionsMap}>
-      {children}
-    </WebSocketContext.Provider>
+          return acc;
+        }, []),
+    [data, ethPrice]
   );
+
+  return [optionsMap];
 };

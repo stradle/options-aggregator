@@ -1,9 +1,9 @@
 import Lyra from "@lyrafinance/lyra-js";
-import { createContext, ReactNode, useContext } from "react";
+import { createContext } from "react";
 import { BigNumber } from "ethers";
 import moment from "moment";
-import { OptionsMap, OptionType, ProviderType } from "../../types";
 import { useQuery } from "react-query";
+import { OptionsMap, OptionType, ProviderType } from "../../types";
 
 const lyra = new Lyra(undefined, true);
 
@@ -39,14 +39,14 @@ const getMarketData = async () => {
             options: {
               [OptionType.CALL]: {
                 type: OptionType.CALL,
-                askPrice: callBuyPrice,
-                bidPrice: callSellPrice,
+                askPrice: callSellPrice,
+                bidPrice: callBuyPrice,
                 midPrice: (callBuyPrice + callSellPrice) / 2,
               },
               [OptionType.PUT]: {
                 type: OptionType.PUT,
-                askPrice: putBuyPrice,
-                bidPrice: putSellPrice,
+                askPrice: putSellPrice,
+                bidPrice: putBuyPrice,
                 midPrice: (putBuyPrice + putSellPrice) / 2,
               },
             },
@@ -59,16 +59,8 @@ const getMarketData = async () => {
   return options.flat();
 };
 
-const LyraContext = createContext<OptionsMap[] | null>(null);
-
-export const useLyraContext = () => {
-  return useContext(LyraContext);
-};
-
-export const LyraProvider = ({ children }: { children?: ReactNode }) => {
+export const useLyraRates = () => {
   const { data } = useQuery("lyra", getMarketData, { refetchInterval: 30000 });
 
-  return (
-    <LyraContext.Provider value={data ?? null}>{children}</LyraContext.Provider>
-  );
+  return [data];
 };

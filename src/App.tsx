@@ -1,11 +1,9 @@
 import type { Theme } from "theme-ui";
 import { ThemeProvider } from "theme-ui";
-import { DeribitProvider } from "./exchanges/deribit";
-
-import MarketsGrid from "./pages/MarketsGrid";
 import styled from "styled-components";
-import { LyraProvider } from "./exchanges/lyra";
 import { QueryClient, QueryClientProvider } from "react-query";
+import MarketsGrid from "./pages/MarketsGrid";
+import { RateProvider } from "./exchanges/RateProvider";
 
 export const theme: Theme = {
   fonts: {
@@ -27,17 +25,15 @@ const queryClient = new QueryClient();
 
 function App() {
   return (
-    <DeribitProvider>
-      <QueryClientProvider client={queryClient}>
-        <LyraProvider>
-          <ThemeProvider theme={theme}>
-            <Wrapper>
-              <MarketsGrid />
-            </Wrapper>
-          </ThemeProvider>
-        </LyraProvider>
-      </QueryClientProvider>
-    </DeribitProvider>
+    <QueryClientProvider client={queryClient}>
+      <RateProvider>
+        <ThemeProvider theme={theme}>
+          <Wrapper>
+            <MarketsGrid />
+          </Wrapper>
+        </ThemeProvider>
+      </RateProvider>
+    </QueryClientProvider>
   );
 }
 

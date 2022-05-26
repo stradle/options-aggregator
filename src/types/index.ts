@@ -1,6 +1,7 @@
 export enum ProviderType {
   LYRA = "LYRA",
   DERIBIT = "DERIBIT",
+  PREMIA = "PREMIA",
 }
 
 export enum OptionType {
@@ -10,9 +11,9 @@ export enum OptionType {
 
 export interface Option {
   type: OptionType;
-  askPrice: number;
-  bidPrice: number;
-  midPrice: number;
+  askPrice?: number;
+  bidPrice?: number;
+  midPrice?: number;
 }
 
 export type CallOption = Option & { type: OptionType.CALL };
@@ -31,4 +32,6 @@ export type OptionsMap = {
   options: OptionCouple;
 };
 
-export type OptionsInterceptions = [OptionsMap, OptionsMap][];
+export type OptionsInterception =
+  | [OptionsMap, OptionsMap]
+  | [OptionsMap, OptionsMap, OptionsMap];
