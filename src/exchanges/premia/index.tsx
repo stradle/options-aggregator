@@ -1,12 +1,10 @@
-import moment  from "moment";
-import premiaPoolAbi from "./premiaPoolAbi.json";
+import { useQuery } from "react-query";
+import moment from "moment";
 import { JsonRpcProvider } from "@ethersproject/providers";
 import { BigNumber, Contract } from "ethers";
-import { fetchEthPrice } from "../../util";
-import { useQuery } from "react-query";
-import { createContext, useContext, useMemo } from "react";
+import {useExpirations, useStrikes} from "../../util";
 import { fixedFromFloat, fixedToNumber } from "../../util/fixedMath";
-import { chain } from "lodash";
+import premiaPoolAbi from "./premiaPoolAbi.json";
 import { OptionsMap, OptionType, ProviderType } from "../../types";
 
 // const getFriday = () => {
@@ -52,17 +50,9 @@ const ethPoolContract = new Contract(
   provider
 );
 
-const convertPrice = ([price, fee]: [price: BigNumber, fee: BigNumber]) => {
-  const fixed = fixedToNumber(price) + fixedToNumber(fee);
+const convertPrice = ([price, fee]: [price: BigNumber, fee: BigNumber]) =>
+  fixedToNumber(price) + fixedToNumber(fee);
 
-  console.log(
-    fixedToNumber(price),
-    fixedToNumber(fee),
-    fixedToNumber(price) + fixedToNumber(fee)
-  );
-
-  return fixed;
-};
 const reqOption = (strike: number, expiration: number, call: boolean) => {
   const expSecs = Math.floor(expiration / 1000);
 
@@ -78,93 +68,54 @@ const reqOption = (strike: number, expiration: number, call: boolean) => {
     .catch(console.error);
 };
 
-const getPrices = async (deribitTerms: string[]): Promise<OptionsMap[]> => {
-  const currentDate = moment(new Date());
-  const expirations = deribitTerms
-    .map(convertTermToTimestamp)
-    .filter(([term, duration]) => {
-      // moment.duration(end.diff(startTime));
+export const usePremiaRates = (
+  deribitRates?: OptionsMap[]
+): [OptionsMap[] | undefined] => {
+  const [expirations] = useExpirations(deribitRates);
+  const {
+    allStrikes = [],
+    callStrikes = [],
+    putStrikes = [],
+    basePrice = 0,
+  } = useStrikes();
+  const toEth = (val: number) => basePrice * val;
 
-      const monthsPathed = moment
-        .duration(moment(duration).diff(currentDate))
-        .asMonths();
+  const fetchPrices = async () => {
+    if (!(callStrikes && putStrikes && allStrikes)) return undefined;
 
-      return monthsPathed <= 3;
-    });
+    const requests = expirations.map(([term, exp]) =>
+      allStrikes.map(async (strike) => ({
+        provider: ProviderType.PREMIA,
+        expiration: exp,
+        term,
+        strike: strike.toString(),
+        options: {
+          [OptionType.CALL]: callStrikes.includes(strike)
+            ? {
+                type: OptionType.CALL,
+                bidPrice: await reqOption(strike, exp, true).then(toEth),
+              }
+            : undefined,
+          [OptionType.PUT]: putStrikes.includes(strike)
+            ? {
+                type: OptionType.PUT,
+                bidPrice: await reqOption(strike, exp, false),
+              }
+            : undefined,
+        },
+      }))
+    );
+    // @ts-ignore
+    return Promise.all(requests.flat());
+  };
 
-  const ethPrice = await fetchEthPrice();
-  // Call : 0.8x spot -> 2x spot
-  // Put : 0.5x spot -> 1.2x spot
-  const roundedBase = Math.floor(ethPrice / 100) * 100;
-  const callStart = Math.ceil((roundedBase * 0.8) / 100) * 100;
-  const callEnd = roundedBase * 1.5;
-  const putStart = roundedBase / 1.5;
-  const putEnd = Math.floor((roundedBase * 1.2) / 100) * 100;
-
-  const calls: number[] = [];
-  const puts: number[] = [];
-  const allStrikes: number[] = [];
-
-  for (let i = callStart; i <= callEnd; i += 100) calls.push(i);
-  for (let i = putStart; i <= putEnd; i += 100) puts.push(i);
-  for (let i = putStart; i <= callEnd; i += 100) allStrikes.push(i);
-
-  const toEth = (val: number) => ethPrice * val;
-
-  const requests = expirations.map(([term, exp]) =>
-    allStrikes.map(async (strike) => ({
-      provider: ProviderType.PREMIA,
-      expiration: exp,
-      term,
-      strike: strike.toString(),
-      options: {
-        [OptionType.CALL]: calls.includes(strike)
-          ? {
-              type: OptionType.CALL,
-              bidPrice: await reqOption(strike, exp, true).then(toEth),
-            }
-          : undefined,
-        [OptionType.PUT]: puts.includes(strike)
-          ? {
-              type: OptionType.PUT,
-              bidPrice: await reqOption(strike, exp, false),
-            }
-          : undefined,
-      },
-    }))
+  const { data } = useQuery(
+    ["premia-prices", expirations.length, allStrikes.length],
+    fetchPrices,
+    {
+      staleTime: 600 * 1000,
+    }
   );
-
   // @ts-ignore
-  const res = await Promise.all(requests.flat());
-
-  console.log(res);
-  // @ts-ignore
-
-  return res;
-};
-
-const PremiaContext = createContext<OptionsMap[] | null>(null);
-export const usePremiaContext = () => {
-  return useContext(PremiaContext);
-};
-
-const fetchPrices = ({ queryKey }: { queryKey: (string | string[])[] }) =>
-  queryKey[1]?.length ? getPrices(queryKey[1] as string[]) : undefined;
-
-export const usePremiaRates = (deribitData: OptionsMap[]) => {
-  const deribitTerms = useMemo(
-    () =>
-      chain(deribitData)
-        .uniqBy("term")
-        .sortBy("expiration")
-        .map("term")
-        .value(),
-    [deribitData?.length]
-  );
-
-  const { data } = useQuery(["premia-prices", deribitTerms], fetchPrices, {
-    staleTime: 60000,
-  });
-
   return [data];
 };

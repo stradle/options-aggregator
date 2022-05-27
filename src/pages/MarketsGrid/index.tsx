@@ -1,12 +1,12 @@
 import DealsTable from "./DealsTable";
-import {BigTable} from "./BigTable";
+import AggregatedTable from "./AggregatedTable";
 
 const MarketsGrid = () => {
   return (
-      <div>
-        <DealsTable />
-          <BigTable />
-      </div>
+    <div>
+      <DealsTable />
+      <AggregatedTable />
+    </div>
   );
 };
 
