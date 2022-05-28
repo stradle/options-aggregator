@@ -12,9 +12,9 @@ const RatesContext = createContext<RatesContextType>({
   PREMIA: undefined,
 });
 
-export const useRateContext = () => useContext(RatesContext);
+export const useRatesContext = () => useContext(RatesContext);
 
-export const RateProvider = ({ children }: { children?: ReactNode }) => {
+export const RatesProvider = ({ children }: { children?: ReactNode }) => {
   const [deribit] = useDeribitRates();
   const [premia] = usePremiaRates(deribit);
   const [lyra] = useLyraRates();

@@ -5,7 +5,7 @@ import { ReactComponent as DeribitLogo } from "../../assets/deribit.svg";
 import { ReactComponent as LyraLogo } from "../../assets/lyra.svg";
 import { ReactComponent as PremiaLogo } from "../../assets/premia.svg";
 import { formatCurrency } from "../../util";
-import { useRateContext } from "../../exchanges/RateProvider";
+import { useRatesContext } from "../../exchanges/RatesProvider";
 import {
   OptionsInterception,
   OptionsMap,
@@ -61,7 +61,7 @@ const StyledTable = styled.table`
 `;
 
 const DealsTable = () => {
-  const rates = useRateContext();
+  const rates = useRatesContext();
 
   const interceptions = useMemo(
     () =>

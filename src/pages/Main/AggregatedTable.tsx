@@ -1,6 +1,6 @@
 import { chain } from "lodash";
 import styled from "styled-components";
-import { useRateContext } from "../../exchanges/RateProvider";
+import { useRatesContext } from "../../exchanges/RatesProvider";
 import { formatCurrency, useExpirations, useStrikes } from "../../util";
 import ProviderIcon from "../../components/ProviderIcon";
 import { OptionsMap, OptionType, ProviderType } from "../../types";
@@ -69,7 +69,7 @@ const OptionsCouple = ({ optionCouple }: { optionCouple: OptionsMap }) => {
 };
 
 const AggregatedTable = () => {
-  const rates = useRateContext();
+  const rates = useRatesContext();
   const { allStrikes = [] } = useStrikes();
 
   const [expirations] = useExpirations(rates.DERIBIT);

@@ -1,7 +1,7 @@
 import { QueryClient, QueryClientProvider } from "react-query";
 import styled from "styled-components";
 import Main from "./pages/Main";
-import { RateProvider } from "./exchanges/RateProvider";
+import { RatesProvider } from "./exchanges/RatesProvider";
 
 const Wrapper = styled.div`
   margin: 10rem;
@@ -11,11 +11,11 @@ const queryClient = new QueryClient();
 function App() {
   return (
     <QueryClientProvider client={queryClient}>
-      <RateProvider>
+      <RatesProvider>
         <Wrapper>
           <Main />
         </Wrapper>
-      </RateProvider>
+      </RatesProvider>
     </QueryClientProvider>
   );
 }
