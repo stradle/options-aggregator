@@ -1,17 +1,17 @@
+import { useMemo } from "react";
 import { maxBy, minBy, sortBy } from "lodash";
 import styled from "styled-components";
 import { ReactComponent as DeribitLogo } from "../../assets/deribit.svg";
 import { ReactComponent as LyraLogo } from "../../assets/lyra.svg";
 import { ReactComponent as PremiaLogo } from "../../assets/premia.svg";
 import { formatCurrency } from "../../util";
+import { useRateContext } from "../../exchanges/RateProvider";
 import {
   OptionsInterception,
   OptionsMap,
   OptionType,
   ProviderType,
 } from "../../types";
-import { useMemo } from "react";
-import { useRateContext } from "../../exchanges/RateProvider";
 
 const StyledDealBuySellItem = styled.div`
   display: flex;
@@ -143,34 +143,29 @@ const DealsTable = () => {
   const sortedDeals = sortBy(deals, ({ amount }) => -amount);
 
   return (
-    <div>
-      <h3>Deals chart</h3>
-      <StyledTable>
-        <thead>
-          <tr>
-            {dealColumns.map((val) => (
-              <td style={{ fontWeight: 600 }} key={val}>
-                {val}
-              </td>
-            ))}
-          </tr>
-        </thead>
-        <tbody>
-          {sortedDeals?.map((deal) => (
-            <tr key={deal.strike + deal.term + deal.type}>
-              <td style={{ fontWeight: 600 }}>
-                {formatCurrency(+deal.strike)}
-              </td>
-              <td style={{ fontWeight: 600 }}>{deal.term}</td>
-              <td>{deal.type}</td>
-              <td>{formatCurrency(deal.amount)}</td>
-              <DealBuySellItem item={deal.buy} />
-              <DealBuySellItem item={deal.sell} />
-            </tr>
+    <StyledTable>
+      <thead>
+        <tr>
+          {dealColumns.map((val) => (
+            <td style={{ fontWeight: 600 }} key={val}>
+              {val}
+            </td>
           ))}
-        </tbody>
-      </StyledTable>
-    </div>
+        </tr>
+      </thead>
+      <tbody>
+        {sortedDeals?.map((deal) => (
+          <tr key={deal.strike + deal.term + deal.type}>
+            <td style={{ fontWeight: 600 }}>{formatCurrency(+deal.strike)}</td>
+            <td style={{ fontWeight: 600 }}>{deal.term}</td>
+            <td>{deal.type}</td>
+            <td>{formatCurrency(deal.amount)}</td>
+            <DealBuySellItem item={deal.buy} />
+            <DealBuySellItem item={deal.sell} />
+          </tr>
+        ))}
+      </tbody>
+    </StyledTable>
   );
 };
 

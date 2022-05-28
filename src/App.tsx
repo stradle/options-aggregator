@@ -1,6 +1,6 @@
-import styled from "styled-components";
 import { QueryClient, QueryClientProvider } from "react-query";
-import MarketsGrid from "./pages/MarketsGrid";
+import styled from "styled-components";
+import Main from "./pages/Main";
 import { RateProvider } from "./exchanges/RateProvider";
 
 const Wrapper = styled.div`
@@ -13,7 +13,7 @@ function App() {
     <QueryClientProvider client={queryClient}>
       <RateProvider>
         <Wrapper>
-          <MarketsGrid />
+          <Main />
         </Wrapper>
       </RateProvider>
     </QueryClientProvider>
