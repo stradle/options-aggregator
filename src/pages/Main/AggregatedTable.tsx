@@ -6,13 +6,12 @@ import ProviderIcon from "../../components/ProviderIcon";
 import { OptionsMap, OptionType, ProviderType } from "../../types";
 
 const StyledTable = styled.table`
-  border-radius: 5px;
   border-collapse: collapse;
 
-  &,
   th,
   td {
     border: 1px gray solid;
+    border-radius: 5px;
   }
 
   thead {

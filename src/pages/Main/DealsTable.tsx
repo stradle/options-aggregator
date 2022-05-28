@@ -58,7 +58,6 @@ const DealBuySellItem = ({ item }: { item: DealPart }) => {
 
 const StyledTable = styled.table`
   border: solid 1px lightgray;
-  border-radius: 5px;
 `;
 
 const DealsTable = () => {

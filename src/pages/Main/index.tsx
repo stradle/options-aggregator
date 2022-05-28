@@ -15,24 +15,34 @@ const Main = () => {
   const [tab, setTab] = useLocalStorage<Tabs>("tab", Tabs.MARKETS);
 
   return (
-    // @ts-ignore
-    <TabContext value={tab}>
-      <Box sx={{ borderBottom: 1, borderColor: "divider" }}>
-        <TabList
-          onChange={(_, val) => setTab(val)}
-          aria-label="lab API tabs example"
-        >
-          <Tab label="Deals chart" value={Tabs.DEALS} />
-          <Tab label="Aggregated rates" value={Tabs.MARKETS} />
-        </TabList>
-      </Box>
-      <TabPanel value={Tabs.DEALS}>
-        <DealsTable />
-      </TabPanel>
-      <TabPanel value={Tabs.MARKETS}>
-        <AggregatedTable />
-      </TabPanel>
-    </TabContext>
+    <Box
+      sx={{
+        flexGrow: 1,
+        bgcolor: "background.paper",
+        display: "flex",
+      }}
+    >
+      {/*@ts-ignore*/}
+      <TabContext value={tab}>
+        <div style={{ display: "flex", flexDirection: "row", width: "100%" }}>
+          <TabList
+            onChange={(_, val) => setTab(val)}
+            aria-label="lab API tabs example"
+            orientation="vertical"
+            sx={{ borderRight: 1, borderColor: "divider" }}
+          >
+            <Tab label="Deals chart" value={Tabs.DEALS} />
+            <Tab label="Aggregated rates" value={Tabs.MARKETS} />
+          </TabList>
+          <TabPanel value={Tabs.DEALS}>
+            <DealsTable />
+          </TabPanel>
+          <TabPanel value={Tabs.MARKETS}>
+            <AggregatedTable />
+          </TabPanel>
+        </div>
+      </TabContext>
+    </Box>
   );
 };
 
