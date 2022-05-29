@@ -1,20 +1,18 @@
 import { chain, groupBy } from "lodash";
 import styled from "styled-components";
+import { Divider } from "@mui/material";
 import { useRatesContext } from "../../exchanges/RatesProvider";
 import { formatCurrency, useExpirations, useStrikes } from "../../util";
 import ProviderIcon from "../../components/ProviderIcon";
-import { OptionsMap, OptionType } from "../../types";
 import { StyledTable } from "./styled";
-import { Paper } from "@mui/material";
+import { OptionsMap, OptionType } from "../../types";
 
 const RowHeader = styled.td`
-  font-weight: 600;
+  font-weight: 600 !important;
+  text-align: center;
 `;
 
-const StyledOptionCouple = styled(Paper).attrs((props) => ({
-  ...props,
-  variant: "outlined",
-}))`
+const StyledOptionCouple = styled.div`
   display: flex;
   align-items: center;
   padding: 1px;
@@ -31,7 +29,7 @@ const StyledOptionValue = styled.div<{ color?: string }>`
 const OptionValue = ({ type, price }: { price?: number; type: OptionType }) =>
   price ? (
     <StyledOptionValue color={type === OptionType.CALL ? "#32C47A" : "#EB5757"}>
-      ${Math.round(price)}
+      {formatCurrency(price)}
     </StyledOptionValue>
   ) : (
     <StyledOptionValue />
@@ -93,6 +91,8 @@ const AggregatedTable = () => {
         <tr>
           <td>Strike/Term</td>
           {expirations.map(([term]) => {
+            const providers = termProviders[term];
+
             return (
               <th style={{ fontWeight: 600 }} key={term}>
                 {term}
@@ -101,10 +101,22 @@ const AggregatedTable = () => {
                     display: "flex",
                   }}
                 >
-                  {termProviders[term]?.map((provider) => (
-                    <div style={{ flex: 1 }}>
-                      <ProviderIcon provider={provider} />
-                    </div>
+                  {providers?.map((provider, index) => (
+                    <>
+                      <div
+                        style={{
+                          flex: 1,
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                        }}
+                      >
+                        <ProviderIcon provider={provider} />
+                      </div>
+                      {index !== providers.length - 1 && (
+                        <Divider orientation="vertical" flexItem />
+                      )}
+                    </>
                   ))}
                 </div>
               </th>
@@ -119,24 +131,10 @@ const AggregatedTable = () => {
             <tr key={strike}>
               <RowHeader key={strike}>{formatCurrency(+strike)}</RowHeader>
               {expirations.map(([term]) => {
-                const deribitCouple = rates.DERIBIT?.find(
-                  (optionMap) =>
-                    optionMap.term === term && optionMap.strike === strike
-                );
-                const lyraCouple = rates.LYRA?.find(
-                  (optionMap) =>
-                    optionMap.term === term && optionMap.strike === strike
-                );
-                const premiaCouple = rates.PREMIA?.find(
-                  (optionMap) =>
-                    optionMap.term === term && optionMap.strike === strike
-                );
-
-                if (!deribitCouple && !lyraCouple && !premiaCouple)
-                  return <td key={term} />;
-
-                const providers = termProviders[term];
                 const termStrikeOptions = allRates[term][strike];
+                const providers = termProviders[term];
+
+                if (!termStrikeOptions.length) return <td key={term} />;
 
                 return (
                   <td key={term}>
@@ -144,14 +142,25 @@ const AggregatedTable = () => {
                       style={{
                         display: "flex",
                         flexDirection: "row",
+                        gap: "3px",
                       }}
                     >
-                      {providers.map((provider) => (
-                        <OptionsCouple
-                          optionCouple={termStrikeOptions.find(
-                            (option) => option.provider === provider
+                      {providers.map((provider, index) => (
+                        <>
+                          <OptionsCouple
+                            key={provider}
+                            optionCouple={termStrikeOptions.find(
+                              (option) => option.provider === provider
+                            )}
+                          />
+                          {index !== providers.length - 1 && (
+                            <Divider
+                              orientation="vertical"
+                              flexItem
+                              variant={"middle"}
+                            />
                           )}
-                        />
+                        </>
                       ))}
                     </div>
                   </td>
