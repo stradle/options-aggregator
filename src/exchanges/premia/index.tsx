@@ -2,7 +2,7 @@ import { useQuery } from "react-query";
 import moment from "moment";
 import { JsonRpcProvider } from "@ethersproject/providers";
 import { BigNumber, Contract } from "ethers";
-import {useExpirations, useStrikes} from "../../util";
+import { useExpirations, useStrikes } from "../../util";
 import { fixedFromFloat, fixedToNumber } from "../../util/fixedMath";
 import premiaPoolAbi from "./premiaPoolAbi.json";
 import { OptionsMap, OptionType, ProviderType } from "../../types";
@@ -93,13 +93,13 @@ export const usePremiaRates = (
           [OptionType.CALL]: callStrikes.includes(strike)
             ? {
                 type: OptionType.CALL,
-                bidPrice: await reqOption(strike, exp, true).then(toEth),
+                askPrice: await reqOption(strike, exp, true).then(toEth),
               }
             : undefined,
           [OptionType.PUT]: putStrikes.includes(strike)
             ? {
                 type: OptionType.PUT,
-                bidPrice: await reqOption(strike, exp, false),
+                askPrice: await reqOption(strike, exp, false),
               }
             : undefined,
         },

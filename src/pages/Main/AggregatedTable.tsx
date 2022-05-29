@@ -1,71 +1,64 @@
-import { chain } from "lodash";
+import { chain, groupBy } from "lodash";
 import styled from "styled-components";
 import { useRatesContext } from "../../exchanges/RatesProvider";
 import { formatCurrency, useExpirations, useStrikes } from "../../util";
 import ProviderIcon from "../../components/ProviderIcon";
-import { OptionsMap, OptionType, ProviderType } from "../../types";
+import { OptionsMap, OptionType } from "../../types";
+import { StyledTable } from "./styled";
+import { Paper } from "@mui/material";
 
-const StyledTable = styled.table`
-  border-collapse: collapse;
-
-  th,
-  td {
-    border: 1px gray solid;
-    border-radius: 5px;
-  }
-
-  thead {
-    text-align: center;
-  }
-`;
 const RowHeader = styled.td`
   font-weight: 600;
 `;
 
-const StyledOptionCouple = styled.div`
+const StyledOptionCouple = styled(Paper).attrs((props) => ({
+  ...props,
+  variant: "outlined",
+}))`
   display: flex;
   align-items: center;
+  padding: 1px;
+  flex: 1;
 `;
 
 const StyledOptionValue = styled.div<{ color?: string }>`
   height: 20px;
   min-width: 40px;
+  text-align: end;
   color: ${({ color }) => color};
 `;
 
 const OptionValue = ({ type, price }: { price?: number; type: OptionType }) =>
   price ? (
-    <StyledOptionValue
-      color={type === OptionType.CALL ? "darkgreen" : "darkred"}
-    >
+    <StyledOptionValue color={type === OptionType.CALL ? "#32C47A" : "#EB5757"}>
       ${Math.round(price)}
     </StyledOptionValue>
   ) : (
     <StyledOptionValue />
   );
 
-const OptionsCouple = ({ optionCouple }: { optionCouple: OptionsMap }) => {
+const OptionsCouple = ({ optionCouple }: { optionCouple?: OptionsMap }) => {
+  if (!optionCouple) return <div style={{ flex: 1 }} />;
   const { [OptionType.CALL]: call, [OptionType.PUT]: put } =
     optionCouple.options;
 
   return (
     <StyledOptionCouple>
-      <ProviderIcon provider={optionCouple.provider} />
-      <div>
-        {
-          <div
-            style={{
-              display: "flex",
-              flexDirection: "column",
-            }}
-          >
-            <OptionValue type={OptionType.CALL} price={call?.bidPrice} />
-            <OptionValue type={OptionType.PUT} price={put?.bidPrice} />
-          </div>
-        }
+      <div
+        style={{
+          display: "flex",
+          flexDirection: "column",
+        }}
+      >
+        <OptionValue type={OptionType.CALL} price={call?.askPrice} />
+        <OptionValue type={OptionType.PUT} price={put?.askPrice} />
       </div>
     </StyledOptionCouple>
   );
+};
+
+type TermStrikesOptions = {
+  [term: string]: { [strike: string]: OptionsMap[] };
 };
 
 const AggregatedTable = () => {
@@ -81,14 +74,42 @@ const AggregatedTable = () => {
     .sortBy((strike) => +strike)
     .value();
 
+  const allRates = chain(rates)
+    .values()
+    .flatten()
+    .groupBy("term")
+    .mapValues((optionsMap: OptionsMap) => groupBy(optionsMap, "strike"))
+    .value() as unknown as TermStrikesOptions;
+
+  const termProviders = chain(allRates)
+    .mapValues((strikeOptions) =>
+      chain(strikeOptions).values().max().map("provider").sort().value()
+    )
+    .value();
+
   return (
     <StyledTable>
-      <thead style={{ fontWeight: 600 }}>
+      <thead>
         <tr>
-          <td />
-          {expirations.map(([term]) => (
-            <td key={term}>{term}</td>
-          ))}
+          <td>Strike/Term</td>
+          {expirations.map(([term]) => {
+            return (
+              <th style={{ fontWeight: 600 }} key={term}>
+                {term}
+                <div
+                  style={{
+                    display: "flex",
+                  }}
+                >
+                  {termProviders[term]?.map((provider) => (
+                    <div style={{ flex: 1 }}>
+                      <ProviderIcon provider={provider} />
+                    </div>
+                  ))}
+                </div>
+              </th>
+            );
+          })}
         </tr>
       </thead>
 
@@ -100,25 +121,22 @@ const AggregatedTable = () => {
               {expirations.map(([term]) => {
                 const deribitCouple = rates.DERIBIT?.find(
                   (optionMap) =>
-                    optionMap.term === term &&
-                    optionMap.strike === strike &&
-                    optionMap.provider === ProviderType.DERIBIT
+                    optionMap.term === term && optionMap.strike === strike
                 );
                 const lyraCouple = rates.LYRA?.find(
                   (optionMap) =>
-                    optionMap.term === term &&
-                    optionMap.strike === strike &&
-                    optionMap.provider === ProviderType.LYRA
+                    optionMap.term === term && optionMap.strike === strike
                 );
                 const premiaCouple = rates.PREMIA?.find(
                   (optionMap) =>
-                    optionMap.term === term &&
-                    optionMap.strike === strike &&
-                    optionMap.provider === ProviderType.PREMIA
+                    optionMap.term === term && optionMap.strike === strike
                 );
 
                 if (!deribitCouple && !lyraCouple && !premiaCouple)
                   return <td key={term} />;
+
+                const providers = termProviders[term];
+                const termStrikeOptions = allRates[term][strike];
 
                 return (
                   <td key={term}>
@@ -126,24 +144,15 @@ const AggregatedTable = () => {
                       style={{
                         display: "flex",
                         flexDirection: "row",
-                        justifyContent: "space-between",
                       }}
                     >
-                      {deribitCouple ? (
-                        <OptionsCouple optionCouple={deribitCouple} />
-                      ) : (
-                        <div />
-                      )}
-                      {lyraCouple ? (
-                        <OptionsCouple optionCouple={lyraCouple} />
-                      ) : (
-                        <div />
-                      )}
-                      {premiaCouple ? (
-                        <OptionsCouple optionCouple={premiaCouple} />
-                      ) : (
-                        <div />
-                      )}
+                      {providers.map((provider) => (
+                        <OptionsCouple
+                          optionCouple={termStrikeOptions.find(
+                            (option) => option.provider === provider
+                          )}
+                        />
+                      ))}
                     </div>
                   </td>
                 );

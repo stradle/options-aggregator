@@ -1,12 +1,13 @@
-import DealsTable from "./DealsTable";
-import AggregatedTable from "./AggregatedTable";
 import { useLocalStorage } from "react-use";
 import Tab from "@mui/material/Tab";
 import TabContext from "@mui/lab/TabContext";
 import TabList from "@mui/lab/TabList";
 import TabPanel from "@mui/lab/TabPanel";
 import { Box, CircularProgress } from "@mui/material";
+import DealsTable from "./DealsTable";
+import AggregatedTable from "./AggregatedTable";
 import { useRatesContext } from "../../exchanges/RatesProvider";
+
 enum Tabs {
   DEALS = "DEALS",
   MARKETS = "MARKETS",
@@ -18,13 +19,7 @@ const Main = () => {
   const showLoader = Object.values(rates).some((rates) => !rates);
 
   return (
-    <Box
-      sx={{
-        flexGrow: 1,
-        bgcolor: "background.paper",
-        display: "flex",
-      }}
-    >
+    <Box>
       <TabContext value={tab}>
         <div style={{ display: "flex", flexDirection: "row", width: "100%" }}>
           <TabList

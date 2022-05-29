@@ -1,24 +1,22 @@
 import { useMemo } from "react";
 import { maxBy, minBy, sortBy } from "lodash";
 import styled from "styled-components";
-import { ReactComponent as DeribitLogo } from "../../assets/deribit.svg";
-import { ReactComponent as LyraLogo } from "../../assets/lyra.svg";
-import { ReactComponent as PremiaLogo } from "../../assets/premia.svg";
-import { formatCurrency } from "../../util";
+import { formatCurrency, useEthPrice } from "../../util";
 import { useRatesContext } from "../../exchanges/RatesProvider";
+import ProviderIcon from "../../components/ProviderIcon";
 import {
   OptionsInterception,
   OptionsMap,
   OptionType,
   ProviderType,
 } from "../../types";
+import { StyledTable } from "./styled";
 
 const StyledDealBuySellItem = styled.div`
   display: flex;
   flex-direction: row;
   align-items: center;
-  justify-content: space-between;
-  gap: 0.5rem;
+  gap: 3px;
 `;
 
 const dealColumns = [
@@ -28,6 +26,8 @@ const dealColumns = [
   "Delta",
   "Buy Price",
   "Sell Price",
+  "Delta/Buy",
+  "Buy/Base",
 ];
 
 const MIN_DIF = 7;
@@ -39,29 +39,18 @@ type Deal = Pick<OptionsMap, "term" | "strike"> & {
   sell: DealPart;
 };
 
-const ProviderIcons = {
-  [ProviderType.DERIBIT]: <DeribitLogo height="15px" width="15px" />,
-  [ProviderType.LYRA]: <LyraLogo height="15px" width="15px" />,
-  [ProviderType.PREMIA]: <PremiaLogo height="15px" width="15px" />,
-};
-
-const DealBuySellItem = ({ item }: { item: DealPart }) => {
-  return (
-    <td>
-      <StyledDealBuySellItem>
-        {formatCurrency(item.price)}
-        {ProviderIcons[item.provider]}
-      </StyledDealBuySellItem>
-    </td>
-  );
-};
-
-const StyledTable = styled.table`
-  border: solid 1px lightgray;
-`;
+const DealBuySellItem = ({ item }: { item: DealPart }) => (
+  <td>
+    <StyledDealBuySellItem>
+      <div>{formatCurrency(item.price)}</div>
+      <ProviderIcon provider={item.provider} />
+    </StyledDealBuySellItem>
+  </td>
+);
 
 const DealsTable = () => {
   const rates = useRatesContext();
+  const basePrice = useEthPrice();
 
   const interceptions = useMemo(
     () =>
@@ -89,20 +78,20 @@ const DealsTable = () => {
   );
 
   const deals = interceptions?.reduce<Deal[]>((acc, interception) => {
-    const maxCall = maxBy(interception, "options.CALL.askPrice");
-    const minCall = minBy(interception, "options.CALL.bidPrice");
-    const maxPut = maxBy(interception, "options.PUT.askPrice");
-    const minPut = minBy(interception, "options.PUT.bidPrice");
+    const maxCall = maxBy(interception, "options.CALL.bidPrice");
+    const minCall = minBy(interception, "options.CALL.askPrice");
+    const maxPut = maxBy(interception, "options.PUT.bidPrice");
+    const minPut = minBy(interception, "options.PUT.askPrice");
     const callDeal =
-      maxCall?.options.CALL?.askPrice &&
-      minCall?.options.CALL?.bidPrice &&
+      maxCall?.options.CALL?.bidPrice &&
+      minCall?.options.CALL?.askPrice &&
       maxCall.provider !== minCall.provider &&
-      maxCall.options.CALL.askPrice - minCall.options.CALL.bidPrice;
+      maxCall.options.CALL.bidPrice - minCall.options.CALL.askPrice;
     const putDeal =
-      maxPut?.options.PUT?.askPrice &&
-      minPut?.options.PUT?.bidPrice &&
+      maxPut?.options.PUT?.bidPrice &&
+      minPut?.options.PUT?.askPrice &&
       maxPut.provider !== minPut.provider &&
-      maxPut.options.PUT.askPrice - minPut.options.PUT.bidPrice;
+      maxPut.options.PUT.bidPrice - minPut.options.PUT.askPrice;
 
     if (callDeal && callDeal > MIN_DIF) {
       acc.push({
@@ -111,11 +100,11 @@ const DealsTable = () => {
         amount: callDeal,
         strike: maxCall.strike,
         buy: {
-          price: minCall?.options.CALL?.bidPrice as number,
+          price: minCall?.options.CALL?.askPrice as number,
           provider: minCall.provider,
         },
         sell: {
-          price: maxCall?.options.CALL?.askPrice as number,
+          price: maxCall?.options.CALL?.bidPrice as number,
           provider: maxCall.provider,
         },
       });
@@ -127,11 +116,11 @@ const DealsTable = () => {
         strike: maxPut.strike,
         amount: putDeal,
         buy: {
-          price: minPut?.options.PUT?.bidPrice as number,
+          price: minPut?.options.PUT?.askPrice as number,
           provider: minPut.provider,
         },
         sell: {
-          price: maxPut?.options.PUT?.askPrice as number,
+          price: maxPut?.options.PUT?.bidPrice as number,
           provider: maxPut.provider,
         },
       });
@@ -142,13 +131,13 @@ const DealsTable = () => {
   const sortedDeals = sortBy(deals, ({ amount }) => -amount);
 
   return (
-    <StyledTable>
+    <StyledTable alignRight>
       <thead>
         <tr>
           {dealColumns.map((val) => (
-            <td style={{ fontWeight: 600 }} key={val}>
+            <th style={{ fontWeight: 600 }} key={val}>
               {val}
-            </td>
+            </th>
           ))}
         </tr>
       </thead>
@@ -157,10 +146,18 @@ const DealsTable = () => {
           <tr key={deal.strike + deal.term + deal.type}>
             <td style={{ fontWeight: 600 }}>{formatCurrency(+deal.strike)}</td>
             <td style={{ fontWeight: 600 }}>{deal.term}</td>
-            <td>{deal.type}</td>
+            <td
+              style={{
+                color: deal.type === OptionType.CALL ? "darkgreen" : "darkred",
+              }}
+            >
+              {deal.type}
+            </td>
             <td>{formatCurrency(deal.amount)}</td>
             <DealBuySellItem item={deal.buy} />
             <DealBuySellItem item={deal.sell} />
+            <td>%{(deal.amount / deal.buy.price).toFixed(2)}</td>
+            <td>%{(deal.buy.price / basePrice).toFixed(2)}</td>
           </tr>
         ))}
       </tbody>

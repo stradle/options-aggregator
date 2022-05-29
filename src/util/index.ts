@@ -64,15 +64,17 @@ export const useExpirations = (deribitRates?: OptionsMap[]) => {
         .uniqBy("term")
         .sortBy("expiration")
         .filter(({ term, expiration }) => {
-          // moment.duration(end.diff(startTime));
-
+          const momentExpiration = moment(expiration);
           const monthsPathed = moment
-            .duration(moment(expiration).diff(currentDate))
+            .duration(momentExpiration.diff(currentDate))
             .asMonths();
 
           return monthsPathed <= 3;
         })
-        .map(({ term, expiration }) => [term, expiration] as [string, number])
+        .map(
+          ({ term, expiration }) =>
+            [term, +moment(expiration).set("hour", 8)] as [string, number]
+        )
         .value(),
     [deribitRates?.length]
   );

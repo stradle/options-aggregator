@@ -38,14 +38,14 @@ const getMarketData = async () => {
             options: {
               [OptionType.CALL]: {
                 type: OptionType.CALL,
-                askPrice: callSellPrice,
-                bidPrice: callBuyPrice,
+                askPrice: callBuyPrice,
+                bidPrice: callSellPrice,
                 midPrice: (callBuyPrice + callSellPrice) / 2,
               },
               [OptionType.PUT]: {
                 type: OptionType.PUT,
-                askPrice: putSellPrice,
-                bidPrice: putBuyPrice,
+                askPrice: putBuyPrice,
+                bidPrice: putSellPrice,
                 midPrice: (putBuyPrice + putSellPrice) / 2,
               },
             },
