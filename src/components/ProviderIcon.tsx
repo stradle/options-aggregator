@@ -9,7 +9,7 @@ const providerIcons = {
   [ProviderType.PREMIA]: PremiaLogo,
 };
 
-const ProviderIcon = ({
+export const ProviderIcon = ({
   provider,
   width = 15,
 }: {
@@ -20,5 +20,3 @@ const ProviderIcon = ({
 
   return <IconComponent width={`${width}px`} />;
 };
-
-export default ProviderIcon;

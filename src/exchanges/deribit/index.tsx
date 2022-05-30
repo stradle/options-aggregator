@@ -1,7 +1,7 @@
 import { createContext, useContext, useEffect, useMemo, useState } from "react";
 import moment from "moment";
 import { pick } from "lodash";
-import { useEthPrice } from "../../util";
+import { useEthPrice } from "../../services/util";
 import { Option, OptionsMap, OptionType, ProviderType } from "../../types";
 
 // const authRequest = {
@@ -14,6 +14,8 @@ import { Option, OptionsMap, OptionType, ProviderType } from "../../types";
 //     client_secret: "yKmqxNMCdCkPzeKVTNeWSPhAyg9dL8zOjMYXGwqcM1c",
 //   },
 // };
+
+// DOCS: https://docs.deribit.com/?javascript#private-get_settlement_history_by_currency
 
 const ethOptions = {
   jsonrpc: "2.0",
@@ -122,8 +124,7 @@ export const useDeribitRates = () => {
         .map((item) => parseDeribitOption(item, ethPrice))
         .reduce<OptionsMap[]>((acc, option) => {
           const found = acc.find(
-            ({ term, strike }) =>
-              option.term === term && option.strike === strike
+            ({ term, strike }) => option.term === term && option.strike === strike
           );
 
           if (found) {
@@ -134,12 +135,7 @@ export const useDeribitRates = () => {
               ...pick(option, ["term", "strike", "expiration"]),
               provider: ProviderType.DERIBIT,
               options: {
-                [option.type]: pick(option, [
-                  "askPrice",
-                  "bidPrice",
-                  "midPrice",
-                  "type",
-                ]),
+                [option.type]: pick(option, ["askPrice", "bidPrice", "midPrice", "type"]),
               },
             });
           }

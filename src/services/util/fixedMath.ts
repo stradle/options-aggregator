@@ -32,8 +32,5 @@ export function fixedToBn(bn64x64: BigNumber, decimals = 18): BigNumber {
 }
 
 export function parseUnderlying(amount: string) {
-  return parseUnits(
-    Number(amount).toFixed(DECIMALS_UNDERLYING),
-    DECIMALS_UNDERLYING
-  );
+  return parseUnits(Number(amount).toFixed(DECIMALS_UNDERLYING), DECIMALS_UNDERLYING);
 }

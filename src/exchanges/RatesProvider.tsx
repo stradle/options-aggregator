@@ -28,7 +28,5 @@ export const RatesProvider = ({ children }: { children?: ReactNode }) => {
     [deribit, lyra, premia]
   );
 
-  return (
-    <RatesContext.Provider value={context}>{children}</RatesContext.Provider>
-  );
+  return <RatesContext.Provider value={context}>{children}</RatesContext.Provider>;
 };

@@ -32,6 +32,4 @@ export type OptionsMap = {
   options: OptionCouple;
 };
 
-export type OptionsInterception =
-  | [OptionsMap, OptionsMap]
-  | [OptionsMap, OptionsMap, OptionsMap];
+export type OptionsInterception = [OptionsMap, OptionsMap] | [OptionsMap, OptionsMap, OptionsMap];

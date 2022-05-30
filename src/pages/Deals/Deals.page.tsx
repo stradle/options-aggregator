@@ -1,16 +1,12 @@
 import { useMemo } from "react";
 import { maxBy, minBy, sortBy } from "lodash";
 import styled from "styled-components";
-import { formatCurrency, useEthPrice } from "../../util";
+
+import { formatCurrency, useEthPrice } from "../../services/util";
 import { useRatesContext } from "../../exchanges/RatesProvider";
-import ProviderIcon from "../../components/ProviderIcon";
-import { ColoredOptionType, StyledTable } from "./styled";
-import {
-  OptionsInterception,
-  OptionsMap,
-  OptionType,
-  ProviderType,
-} from "../../types";
+import { ColoredOptionType, StyledTable, ProviderIcon, Loader } from "../../components";
+import { OptionsInterception, OptionsMap, OptionType, ProviderType } from "../../types";
+import { Box } from "@mui/material";
 
 const StyledDealBuySellItem = styled.div`
   display: flex;
@@ -49,20 +45,19 @@ const DealBuySellItem = ({ item }: { item: DealPart }) => (
   </td>
 );
 
-const DealsTable = () => {
+export const DealsPage = () => {
   const rates = useRatesContext();
   const basePrice = useEthPrice();
+  const showLoader = Object.values(rates).some((rates) => !rates);
 
   const interceptions = useMemo(
     () =>
       rates.DERIBIT?.reduce<OptionsInterception[]>((acc, deribitItem) => {
         const lyraItem = rates.LYRA?.find(
-          ({ term, strike }) =>
-            deribitItem.strike === strike && deribitItem.term === term
+          ({ term, strike }) => deribitItem.strike === strike && deribitItem.term === term
         );
         const premiaItem = rates.PREMIA?.find(
-          ({ term, strike }) =>
-            deribitItem.strike === strike && deribitItem.term === term
+          ({ term, strike }) => deribitItem.strike === strike && deribitItem.term === term
         );
 
         const interception = [deribitItem];
@@ -70,8 +65,7 @@ const DealsTable = () => {
         if (lyraItem) interception.push(lyraItem);
         if (premiaItem) interception.push(premiaItem);
 
-        if (interception.length > 1)
-          acc.push(interception as OptionsInterception);
+        if (interception.length > 1) acc.push(interception as OptionsInterception);
 
         return acc;
       }, []),
@@ -129,43 +123,45 @@ const DealsTable = () => {
 
     return acc;
   }, []);
+
   const sortedDeals = sortBy(deals, ({ amount }) => -amount);
 
+  if (showLoader) {
+    return <Loader />;
+  }
+
   return (
-    <StyledTable alignRight>
-      <thead>
-        <tr>
-          {dealColumns.map((val) => (
-            <th style={{ fontWeight: 600 }} key={val}>
-              {val}
-            </th>
-          ))}
-        </tr>
-      </thead>
-      <tbody>
-        {sortedDeals?.map((deal) => (
-          <tr key={deal.strike + deal.term + deal.type}>
-            <th style={{ fontWeight: 600 }}>{formatCurrency(+deal.strike)}</th>
-            <td style={{ fontWeight: 600 }}>{deal.term}</td>
-            <td
-              style={{
-                color: deal.type === OptionType.CALL ? "darkgreen" : "darkred",
-              }}
-            >
-              <ColoredOptionType type={deal.type}>
-                {deal.type}
-              </ColoredOptionType>
-            </td>
-            <td>{formatCurrency(deal.amount)}</td>
-            <DealBuySellItem item={deal.buy} />
-            <DealBuySellItem item={deal.sell} />
-            <td>%{(deal.amount / deal.buy.price).toFixed(2)}</td>
-            <td>%{(deal.buy.price / basePrice).toFixed(2)}</td>
+    <Box sx={{ padding: "60px 0px" }}>
+      <StyledTable alignRight>
+        <thead>
+          <tr>
+            {dealColumns.map((val) => (
+              <th style={{ fontWeight: 600 }} key={val}>
+                {val}
+              </th>
+            ))}
           </tr>
-        ))}
-      </tbody>
-    </StyledTable>
+        </thead>
+        <tbody>
+          {sortedDeals?.map((deal) => (
+            <tr key={deal.strike + deal.term + deal.type}>
+              <th style={{ fontWeight: 600 }}>{formatCurrency(+deal.strike)}</th>
+              <td style={{ fontWeight: 600 }}>{deal.term}</td>
+              <td
+                style={{
+                  color: deal.type === OptionType.CALL ? "darkgreen" : "darkred",
+                }}>
+                <ColoredOptionType type={deal.type}>{deal.type}</ColoredOptionType>
+              </td>
+              <td>{formatCurrency(deal.amount)}</td>
+              <DealBuySellItem item={deal.buy} />
+              <DealBuySellItem item={deal.sell} />
+              <td>%{(deal.amount / deal.buy.price).toFixed(2)}</td>
+              <td>%{(deal.buy.price / basePrice).toFixed(2)}</td>
+            </tr>
+          ))}
+        </tbody>
+      </StyledTable>
+    </Box>
   );
 };
-
-export default DealsTable;

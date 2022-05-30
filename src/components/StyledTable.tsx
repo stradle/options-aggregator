@@ -1,6 +1,7 @@
 import styled from "styled-components";
-import { OptionTypeColors } from "../../util/constants";
-import { OptionType } from "../../types";
+
+import { OptionTypeColors } from "../services/util/constants";
+import { OptionType } from "../types";
 
 export const StyledTable = styled.table<{ alignRight?: boolean }>`
   border-collapse: collapse;

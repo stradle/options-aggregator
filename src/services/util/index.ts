@@ -2,7 +2,7 @@ import { useQuery } from "react-query";
 import { useMemo } from "react";
 import moment from "moment";
 import { chain } from "lodash";
-import { OptionsMap } from "../types";
+import { OptionsMap } from "../../types";
 
 export const formatCurrency = (val: number) =>
   new Intl.NumberFormat("en-IN", {
@@ -13,9 +13,7 @@ export const formatCurrency = (val: number) =>
 // new Intl.NumberFormat("en-IN", { maximumFractionDigits: 2 }).format(val);
 
 export const fetchEthPrice = (): Promise<number> =>
-  fetch(
-    "https://api.coingecko.com/api/v3/simple/price?ids=ethereum&vs_currencies=usd"
-  )
+  fetch("https://api.coingecko.com/api/v3/simple/price?ids=ethereum&vs_currencies=usd")
     .then((response) => response.json())
     .then(({ ethereum }) => ethereum.usd);
 
@@ -67,15 +65,12 @@ export const useExpirations = (deribitRates?: OptionsMap[]) => {
         .sortBy("expiration")
         .filter(({ term, expiration }) => {
           const momentExpiration = moment(expiration);
-          const monthsPathed = moment
-            .duration(momentExpiration.diff(currentDate))
-            .asMonths();
+          const monthsPathed = moment.duration(momentExpiration.diff(currentDate)).asMonths();
 
           return monthsPathed <= 3;
         })
         .map(
-          ({ term, expiration }) =>
-            [term, +moment(expiration).set("hour", 8)] as [string, number]
+          ({ term, expiration }) => [term, +moment(expiration).set("hour", 8)] as [string, number]
         )
         .value(),
     [deribitRates?.length]

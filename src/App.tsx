@@ -1,12 +1,15 @@
 import { QueryClient, QueryClientProvider } from "react-query";
 import styled from "styled-components";
 import { CssBaseline } from "@mui/material";
-import Main from "./pages/Main";
+
+import { RootRoutes } from "./pages/Root";
 import { RatesProvider } from "./exchanges/RatesProvider";
 
-const Wrapper = styled.div`
-  margin: 10rem;
+const Layout = styled.div`
+  max-width: 1120px;
+  margin: 0 auto;
 `;
+
 const queryClient = new QueryClient();
 
 function App() {
@@ -14,9 +17,9 @@ function App() {
     <QueryClientProvider client={queryClient}>
       <RatesProvider>
         <CssBaseline enableColorScheme />
-        <Wrapper>
-          <Main />
-        </Wrapper>
+        <Layout>
+          <RootRoutes />
+        </Layout>
       </RatesProvider>
     </QueryClientProvider>
   );

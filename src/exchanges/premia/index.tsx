@@ -2,8 +2,8 @@ import { useQuery } from "react-query";
 import moment from "moment";
 import { JsonRpcProvider } from "@ethersproject/providers";
 import { BigNumber, Contract } from "ethers";
-import { useExpirations, useStrikes } from "../../util";
-import { fixedFromFloat, fixedToNumber } from "../../util/fixedMath";
+import { useExpirations, useStrikes } from "../../services/util";
+import { fixedFromFloat, fixedToNumber } from "../../services/util/fixedMath";
 import premiaPoolAbi from "./premiaPoolAbi.json";
 import { OptionsMap, OptionType, ProviderType } from "../../types";
 
@@ -63,16 +63,9 @@ const reqOption = (strike: number, expiration: number, call: boolean) => {
     .catch(console.error);
 };
 
-export const usePremiaRates = (
-  deribitRates?: OptionsMap[]
-): [OptionsMap[] | undefined] => {
+export const usePremiaRates = (deribitRates?: OptionsMap[]): [OptionsMap[] | undefined] => {
   const [expirations] = useExpirations(deribitRates);
-  const {
-    allStrikes = [],
-    callStrikes = [],
-    putStrikes = [],
-    basePrice = 0,
-  } = useStrikes();
+  const { allStrikes = [], callStrikes = [], putStrikes = [], basePrice = 0 } = useStrikes();
   const toEth = (val: number) => basePrice * val;
 
   const fetchPrices = async () => {
@@ -104,13 +97,9 @@ export const usePremiaRates = (
     return Promise.all(requests.flat());
   };
 
-  const { data } = useQuery(
-    ["premia-prices", expirations.length, allStrikes.length],
-    fetchPrices,
-    {
-      staleTime: 600 * 1000,
-    }
-  );
+  const { data } = useQuery(["premia-prices", expirations.length, allStrikes.length], fetchPrices, {
+    staleTime: 600 * 1000,
+  });
   // @ts-ignore
   return [data];
 };
