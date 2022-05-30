@@ -4,13 +4,8 @@ import { Divider } from "@mui/material";
 import { useRatesContext } from "../../exchanges/RatesProvider";
 import { formatCurrency, useExpirations, useStrikes } from "../../util";
 import ProviderIcon from "../../components/ProviderIcon";
-import { StyledTable } from "./styled";
-import { OptionsMap, OptionType } from "../../types";
-
-const RowHeader = styled.td`
-  font-weight: 600 !important;
-  text-align: center;
-`;
+import { ColoredOptionType, StyledTable } from "./styled";
+import { Option, OptionsMap, OptionType } from "../../types";
 
 const StyledOptionCouple = styled.div`
   display: flex;
@@ -18,18 +13,16 @@ const StyledOptionCouple = styled.div`
   padding: 1px;
   flex: 1;
 `;
-
-const StyledOptionValue = styled.div<{ color?: string }>`
+const StyledOptionValue = styled(ColoredOptionType)`
   height: 20px;
   min-width: 40px;
   text-align: end;
   color: ${({ color }) => color};
 `;
-
-const OptionValue = ({ type, price }: { price?: number; type: OptionType }) =>
-  price ? (
-    <StyledOptionValue color={type === OptionType.CALL ? "#32C47A" : "#EB5757"}>
-      {formatCurrency(price)}
+const OptionValue = ({ option }: { option?: Option }) =>
+  option?.askPrice ? (
+    <StyledOptionValue type={option.type}>
+      {formatCurrency(option.askPrice)}
     </StyledOptionValue>
   ) : (
     <StyledOptionValue />
@@ -48,8 +41,8 @@ const OptionsCouple = ({ optionCouple }: { optionCouple?: OptionsMap }) => {
           flexDirection: "column",
         }}
       >
-        <OptionValue type={OptionType.CALL} price={call?.askPrice} />
-        <OptionValue type={OptionType.PUT} price={put?.askPrice} />
+        <OptionValue option={call} />
+        <OptionValue option={put} />
       </div>
     </StyledOptionCouple>
   );
@@ -89,7 +82,10 @@ const AggregatedTable = () => {
     <StyledTable>
       <thead>
         <tr>
-          <td>Strike/Term</td>
+          <th style={{ display: "flex", flexDirection: "column" }} key={1}>
+            <ColoredOptionType type={OptionType.CALL}>CALL</ColoredOptionType>
+            <ColoredOptionType type={OptionType.PUT}>PUT</ColoredOptionType>
+          </th>
           {expirations.map(([term]) => {
             const providers = termProviders[term];
 
@@ -129,7 +125,7 @@ const AggregatedTable = () => {
         {deribitStrikes.map((strike) => {
           return (
             <tr key={strike}>
-              <RowHeader key={strike}>{formatCurrency(+strike)}</RowHeader>
+              <th key={strike}>{formatCurrency(+strike)}</th>
               {expirations.map(([term]) => {
                 const termStrikeOptions = allRates[term][strike];
                 const providers = termProviders[term];

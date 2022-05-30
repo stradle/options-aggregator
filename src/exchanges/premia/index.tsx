@@ -39,11 +39,6 @@ const provider = new JsonRpcProvider(
 //   return lastDay.subtract(sub, "days");
 // };
 
-const convertTermToTimestamp = (term: string): [string, number] => [
-  term,
-  +moment(term, "DDMMMYY").set("hour", 8).set("minutes", 0),
-];
-
 const ethPoolContract = new Contract(
   "0xE5DbC4EDf467B609A063c7ea7fAb976C6b9BAa1a",
   premiaPoolAbi,

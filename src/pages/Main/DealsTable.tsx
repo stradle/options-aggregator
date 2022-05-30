@@ -4,18 +4,19 @@ import styled from "styled-components";
 import { formatCurrency, useEthPrice } from "../../util";
 import { useRatesContext } from "../../exchanges/RatesProvider";
 import ProviderIcon from "../../components/ProviderIcon";
+import { ColoredOptionType, StyledTable } from "./styled";
 import {
   OptionsInterception,
   OptionsMap,
   OptionType,
   ProviderType,
 } from "../../types";
-import { StyledTable } from "./styled";
 
 const StyledDealBuySellItem = styled.div`
   display: flex;
   flex-direction: row;
   align-items: center;
+  justify-content: end;
   gap: 3px;
 `;
 
@@ -144,14 +145,16 @@ const DealsTable = () => {
       <tbody>
         {sortedDeals?.map((deal) => (
           <tr key={deal.strike + deal.term + deal.type}>
-            <td style={{ fontWeight: 600 }}>{formatCurrency(+deal.strike)}</td>
+            <th style={{ fontWeight: 600 }}>{formatCurrency(+deal.strike)}</th>
             <td style={{ fontWeight: 600 }}>{deal.term}</td>
             <td
               style={{
                 color: deal.type === OptionType.CALL ? "darkgreen" : "darkred",
               }}
             >
-              {deal.type}
+              <ColoredOptionType type={deal.type}>
+                {deal.type}
+              </ColoredOptionType>
             </td>
             <td>{formatCurrency(deal.amount)}</td>
             <DealBuySellItem item={deal.buy} />
