@@ -104,14 +104,13 @@ export const NavigationPanel: React.FC = () => {
   }
 
   return (
-    <AppBar position="static">
+    <AppBar position="static" sx={{ backgroundColor: "#293846" }}>
       <Container
         maxWidth="xl"
         sx={{
           maxHeight: "50px",
           display: "flex",
           alignItems: "center",
-          backgroundColor: "#293846",
         }}>
         <Toolbar disableGutters>
           <AddchartIcon onClick={() => navigateRoot()} sx={{ cursor: "pointer" }} />
