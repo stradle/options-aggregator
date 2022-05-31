@@ -82,7 +82,7 @@ export const AggregatedRatesPage = () => {
   }
 
   return (
-    <Box sx={{ padding: "60px 0px" }}>
+    <Box>
       <StyledTable>
         <thead>
           <tr>

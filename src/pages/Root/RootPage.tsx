@@ -3,13 +3,14 @@ import { BrowserRouter as Router, Route, Routes, Navigate } from "react-router-d
 import { DealsPage } from "../Deals";
 import { AggregatedRatesPage } from "../AggregatedRates";
 import { routes } from "../../services";
-import { Layout, SideMenu } from "../../components";
+import { Layout, SideMenu, BasePriceWidget } from "../../components";
 
 export const RootRoutes: React.FC = () => {
   return (
     <Router>
       <Layout>
         <SideMenu />
+        <BasePriceWidget />
 
         <Routes>
           <Route path={routes.root} element={<Navigate to={routes.deals} />} />

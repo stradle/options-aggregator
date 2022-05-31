@@ -7,16 +7,17 @@ export const StyledTable = styled.table<{ alignRight?: boolean }>`
   border-collapse: collapse;
   border-radius: 5px;
   border-style: hidden; /* hide standard table (collapsed) border */
-  box-shadow: 0 0 0 1px #e8edf3; /* this draws the table border  */
+  box-shadow: 0px 3px 3px -2px rgb(0 0 0 / 20%), 0px 3px 4px 0px rgb(0 0 0 / 14%),
+    0px 1px 8px 0px rgb(0 0 0 / 12%); /* this draws the table border  */
 
   thead {
     tr {
       background-color: #ffffff !important;
     }
   }
-  tr:nth-child(even) {
-    background-color: #ffffff;
-  }
+  //tr:nth-child(even) {
+  //  background-color: #ffffff;
+  //}
   tr:nth-child(odd) {
     background-color: #f2f6fb;
   }

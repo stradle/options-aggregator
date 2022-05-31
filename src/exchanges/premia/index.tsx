@@ -1,5 +1,4 @@
 import { useQuery } from "react-query";
-import moment from "moment";
 import { JsonRpcProvider } from "@ethersproject/providers";
 import { BigNumber, Contract } from "ethers";
 import { useExpirations, useStrikes } from "../../services/util";

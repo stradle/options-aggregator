@@ -131,7 +131,7 @@ export const DealsPage = () => {
   }
 
   return (
-    <Box sx={{ padding: "60px 0px" }}>
+    <Box>
       <StyledTable alignRight>
         <thead>
           <tr>
