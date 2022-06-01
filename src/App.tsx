@@ -1,17 +1,22 @@
 import { QueryClient, QueryClientProvider } from "react-query";
-import { CssBaseline } from "@mui/material";
+import { ThemeProvider, CssBaseline } from "@mui/material";
 
 import { RootRoutes } from "./pages/Root";
 import { RatesProvider } from "./exchanges/RatesProvider";
+import { useTheme } from "./services";
 
 const queryClient = new QueryClient();
 
 function App() {
+  const theme = useTheme();
+
   return (
     <QueryClientProvider client={queryClient}>
       <RatesProvider>
-        <CssBaseline enableColorScheme />
-        <RootRoutes />
+        <ThemeProvider theme={theme}>
+          <CssBaseline enableColorScheme />
+          <RootRoutes />
+        </ThemeProvider>
       </RatesProvider>
     </QueryClientProvider>
   );

@@ -12,14 +12,26 @@ export const StyledTable = styled.table<{ alignRight?: boolean }>`
 
   thead {
     tr {
-      background-color: #ffffff !important;
+      // background-color: #ffffff !important;
+      background-color: #5c6f73 !important;
     }
   }
+
+  // tbody {
+  //   tr {
+  //     background-color: #5c6f73 !important;
+  //   }
+  // }
+
   //tr:nth-child(even) {
   //  background-color: #ffffff;
   //}
-  tr:nth-child(odd) {
-    background-color: #f2f6fb;
+  // tr:nth-child(odd) {
+  // background-color: #f2f6fb;
+  // }
+
+  tr {
+    background-color: #5c6f73 !important;
   }
 
   th {

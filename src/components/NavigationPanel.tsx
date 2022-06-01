@@ -13,8 +13,15 @@ import {
 } from "@mui/material";
 import MenuIcon from "@mui/icons-material/Menu";
 import AddchartIcon from "@mui/icons-material/Addchart";
+import Tabs from "@mui/material/Tabs";
+import Tab from "@mui/material/Tab";
 
 import { routes, useNavigationOptions } from "../services";
+
+interface LinkTabProps {
+  label?: string;
+  href?: string;
+}
 
 const MobileNavigation: React.FC = () => {
   const [anchorElNav, setAnchorElNav] = useState<null | HTMLElement>(null);
@@ -74,24 +81,55 @@ const MobileNavigation: React.FC = () => {
   );
 };
 
+// const DesktopNavigation: React.FC = () => {
+//   const navigate = useNavigate();
+//   const { navigationOptions } = useNavigationOptions();
+
+// function handleMenuNavigation(path: string): void {
+//   navigate(path);
+// }
+
+//   return (
+//     <Box sx={{ flexGrow: 1, display: { xs: "none", md: "flex" } }}>
+//       {navigationOptions.map(({ text, path }) => (
+//         <Button
+//           key={text}
+//           onClick={() => handleMenuNavigation(path)}
+//           sx={{ my: 2, color: "white", display: "block" }}>
+//           {text}
+//         </Button>
+//       ))}
+//     </Box>
+//   );
+// };
+
 const DesktopNavigation: React.FC = () => {
+  const [value, setValue] = React.useState(0);
   const navigate = useNavigate();
-  const { navigationOptions } = useNavigationOptions();
+
+  const handleChange = (event: React.SyntheticEvent, newValue: number) => {
+    setValue(newValue);
+  };
 
   function handleMenuNavigation(path: string): void {
     navigate(path);
   }
 
   return (
-    <Box sx={{ flexGrow: 1, display: { xs: "none", md: "flex" } }}>
-      {navigationOptions.map(({ text, path }) => (
-        <Button
-          key={text}
-          onClick={() => handleMenuNavigation(path)}
-          sx={{ my: 2, color: "white", display: "block" }}>
-          {text}
-        </Button>
-      ))}
+    <Box sx={{ width: "100%" }}>
+      <Tabs
+        textColor="primary"
+        indicatorColor="primary"
+        value={value}
+        onChange={handleChange}
+        aria-label="nav tabs example">
+        <Tab component="a" label="Deals" onClick={() => handleMenuNavigation(routes.deals)} />
+        <Tab
+          component="a"
+          label="Aggregated Rates"
+          onClick={() => handleMenuNavigation(routes.aggregatedRates)}
+        />
+      </Tabs>
     </Box>
   );
 };
@@ -104,7 +142,7 @@ export const NavigationPanel: React.FC = () => {
   }
 
   return (
-    <AppBar position="static" sx={{ backgroundColor: "#293846" }}>
+    <AppBar position="static">
       <Container
         maxWidth="xl"
         sx={{
@@ -128,6 +166,7 @@ export const NavigationPanel: React.FC = () => {
               color: "inherit",
               textDecoration: "none",
               paddingLeft: ".3rem",
+              minWidth: "100px",
             }}>
             Stradle
           </Typography>
