@@ -117,7 +117,7 @@ const DesktopNavigation: React.FC = () => {
         value={value}
         onChange={handleChange}
         aria-label="nav tabs example">
-        <Tab component="a" label="DealsChart" onClick={() => handleMenuNavigation(routes.deals)} />
+        <Tab component="a" label="Deals Chart" onClick={() => handleMenuNavigation(routes.dealsChart)} />
         <Tab
           component="a"
           label="Aggregated Rates"

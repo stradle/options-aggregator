@@ -9,6 +9,6 @@ export const STRIKE_CUTOFF = 1.6;
 
 export const routes = {
   root: "/",
-  deals: "deals-chart",
+  dealsChart: "deals-chart",
   aggregatedRates: "aggregated-rates",
 };

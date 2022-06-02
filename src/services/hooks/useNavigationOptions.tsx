@@ -17,9 +17,9 @@ export default (): { navigationOptions: NavigationOption[] } => {
   const navigationOptions = [
     {
       text: "Deals Chart",
-      path: routes.deals,
+      path: routes.dealsChart,
       icon: <StarBorderPurple500Icon />,
-      isActive: navigationService.matchRoutePath(location.pathname, routes.deals),
+      isActive: navigationService.matchRoutePath(location.pathname, routes.dealsChart),
     },
     {
       text: "Aggregated Rates",
