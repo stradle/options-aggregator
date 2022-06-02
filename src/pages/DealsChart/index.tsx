@@ -1,12 +1,13 @@
 import { useMemo } from "react";
 import { maxBy, minBy, sortBy } from "lodash";
 import styled from "styled-components";
+import { Box } from "@mui/material";
 
 import { formatCurrency, useEthPrice } from "../../services/util";
 import { useRatesContext } from "../../exchanges/RatesProvider";
 import { ColoredOptionType, StyledTable, ProviderIcon, Loader } from "../../components";
 import { OptionsInterception, OptionsMap, OptionType, ProviderType } from "../../types";
-import { Box } from "@mui/material";
+import { StyledProviderLink } from "../styled";
 
 const StyledDealBuySellItem = styled.div`
   display: flex;
@@ -14,6 +15,8 @@ const StyledDealBuySellItem = styled.div`
   align-items: center;
   justify-content: end;
   gap: 3px;
+  color: white;
+  font-size: 16px;
 `;
 
 const dealColumns = [
@@ -39,10 +42,12 @@ type Deal = Pick<OptionsMap, "term" | "strike"> & {
 
 const DealBuySellItem = ({ item }: { item: DealPart }) => (
   <td>
-    <StyledDealBuySellItem>
-      <div>{formatCurrency(item.price)}</div>
-      <ProviderIcon provider={item.provider} />
-    </StyledDealBuySellItem>
+    <StyledProviderLink provider={item.provider}>
+      <StyledDealBuySellItem>
+        <div>{formatCurrency(item.price)}</div>
+        <ProviderIcon provider={item.provider} />
+      </StyledDealBuySellItem>
+    </StyledProviderLink>
   </td>
 );
 
@@ -137,7 +142,7 @@ const DealsChart = () => {
   return (
     <Box>
       {sortedDeals.length > 0 ? (
-        <StyledTable alignRight>
+        <StyledTable>
           <thead>
             <tr>
               {dealColumns.map((val) => (
@@ -171,8 +176,8 @@ const DealsChart = () => {
         <h4>
           {`Currently there are no deals exceeding ${formatCurrency(PROFIT_THRESHOLD, 2)} delta
           profit threshold`}
-          <br/>
-          <br/>
+          <br />
+          <br />
           Come back later
         </h4>
       )}

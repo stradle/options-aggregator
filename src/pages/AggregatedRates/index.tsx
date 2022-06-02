@@ -6,15 +6,9 @@ import { useRatesContext } from "../../exchanges/RatesProvider";
 import { formatCurrency, useExpirations, useStrikes } from "../../services/util";
 import { ColoredOptionType, StyledTable, Loader, ProviderIcon } from "../../components";
 import { Option, OptionsMap, OptionType } from "../../types";
+import { StyledProviderLink } from "../styled";
 
-const StyledOptionCouple = styled.div`
-  display: flex;
-  align-items: center;
-  padding: 1px;
-  flex: 1;
-`;
-
-const StyledOptionValue = styled(ColoredOptionType)`
+const StyledOptionType = styled(ColoredOptionType)`
   height: 20px;
   min-width: 40px;
   text-align: end;
@@ -23,17 +17,16 @@ const StyledOptionValue = styled(ColoredOptionType)`
 
 const OptionValue = ({ option }: { option?: Option }) =>
   option?.askPrice ? (
-    <StyledOptionValue type={option.type}>{formatCurrency(option.askPrice)}</StyledOptionValue>
+    <StyledOptionType type={option.type}>{formatCurrency(option.askPrice)}</StyledOptionType>
   ) : (
-    <StyledOptionValue />
+    <StyledOptionType />
   );
 
-const OptionsCouple = ({ optionCouple }: { optionCouple?: OptionsMap }) => {
-  if (!optionCouple) return <div style={{ flex: 1 }} />;
+const OptionsCouple = ({ optionCouple }: { optionCouple: OptionsMap }) => {
   const { [OptionType.CALL]: call, [OptionType.PUT]: put } = optionCouple.options;
 
   return (
-    <StyledOptionCouple>
+    <StyledProviderLink provider={optionCouple.provider}>
       <div
         style={{
           display: "flex",
@@ -42,13 +35,18 @@ const OptionsCouple = ({ optionCouple }: { optionCouple?: OptionsMap }) => {
         <OptionValue option={call} />
         <OptionValue option={put} />
       </div>
-    </StyledOptionCouple>
+    </StyledProviderLink>
   );
 };
 
 type TermStrikesOptions = {
   [term: string]: { [strike: string]: OptionsMap[] };
 };
+
+const StyledCell = styled.div`
+  display: flex;
+  gap: 3px;
+`;
 
 const AggregatedRates = () => {
   const rates = useRatesContext();
@@ -96,13 +94,11 @@ const AggregatedRates = () => {
               return (
                 <th key={term}>
                   {term}
-                  <div
-                    style={{
-                      display: "flex",
-                    }}>
+                  <StyledCell>
                     {providers?.map((provider, index) => (
                       <>
-                        <div
+                        <StyledProviderLink
+                          provider={provider}
                           style={{
                             flex: 1,
                             display: "flex",
@@ -110,13 +106,13 @@ const AggregatedRates = () => {
                             justifyContent: "center",
                           }}>
                           <ProviderIcon provider={provider} />
-                        </div>
+                        </StyledProviderLink>
                         {index !== providers.length - 1 && (
                           <Divider orientation="vertical" flexItem />
                         )}
                       </>
                     ))}
-                  </div>
+                  </StyledCell>
                 </th>
               );
             })}
@@ -136,26 +132,26 @@ const AggregatedRates = () => {
 
                   return (
                     <td key={term}>
-                      <div
-                        style={{
-                          display: "flex",
-                          flexDirection: "row",
-                          gap: "3px",
-                        }}>
-                        {providers.map((provider, index) => (
-                          <>
-                            <OptionsCouple
-                              key={provider}
-                              optionCouple={termStrikeOptions.find(
-                                (option) => option.provider === provider
+                      <StyledCell>
+                        {providers.map((provider, index) => {
+                          const optionCouple = termStrikeOptions.find(
+                            (option) => option.provider === provider
+                          );
+
+                          return (
+                            <>
+                              {optionCouple ? (
+                                <OptionsCouple key={provider} optionCouple={optionCouple} />
+                              ) : (
+                                <div style={{ flex: 1 }} />
                               )}
-                            />
-                            {index !== providers.length - 1 && (
-                              <Divider orientation="vertical" flexItem variant={"middle"} />
-                            )}
-                          </>
-                        ))}
-                      </div>
+                              {index !== providers.length - 1 && (
+                                <Divider orientation="vertical" flexItem variant={"middle"} />
+                              )}
+                            </>
+                          );
+                        })}
+                      </StyledCell>
                     </td>
                   );
                 })}

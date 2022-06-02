@@ -14,15 +14,16 @@ export const StyledTable = styled.table<{ alignRight?: boolean }>`
   th {
     font-weight: 600 !important;
     text-align: center;
+    cursor: default;
   }
 
   td {
     font-weight: 400;
+    text-align: ${({ alignRight }) => (alignRight ? "right" : "center")};
   }
 
   th,
   td {
-    ${({ alignRight }) => alignRight && "text-align: right;"}
     padding: 4px;
     border: 1px solid rgba(255, 255, 255, 0.088);
   }
