@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { matchPath, useLocation, useNavigate, Link } from "react-router-dom";
 import {
   AppBar,
   Box,
@@ -97,32 +97,30 @@ const MobileNavigation: React.FC = () => {
 //   );
 // };
 
-const DesktopNavigation: React.FC = () => {
-  const [value, setValue] = React.useState(0);
-  const navigate = useNavigate();
+function useRouteMatch(patterns: readonly string[]) {
+  const { pathname } = useLocation();
 
-  const handleChange = (event: React.SyntheticEvent, newValue: number) => {
-    setValue(newValue);
-  };
-
-  function handleMenuNavigation(path: string): void {
-    navigate(path);
+  for (let i = 0; i < patterns.length; i += 1) {
+    const pattern = patterns[i];
+    const possibleMatch = matchPath(pattern, pathname);
+    if (possibleMatch !== null) {
+      return possibleMatch;
+    }
   }
 
+  return null;
+}
+
+const DesktopNavigation: React.FC = () => {
+  const { navigationOptions } = useNavigationOptions();
+  const routeMatch = useRouteMatch(navigationOptions.map(({ path }) => path));
+  const currentTab = routeMatch?.pattern?.path;
   return (
     <Box sx={{ width: "100%" }}>
-      <Tabs
-        textColor="primary"
-        indicatorColor="primary"
-        value={value}
-        onChange={handleChange}
-        aria-label="nav tabs example">
-        <Tab component="a" label="Deals Chart" onClick={() => handleMenuNavigation(routes.dealsChart)} />
-        <Tab
-          component="a"
-          label="Aggregated Rates"
-          onClick={() => handleMenuNavigation(routes.aggregatedRates)}
-        />
+      <Tabs value={currentTab} aria-label="nav tabs example">
+        {navigationOptions.map((option) => (
+          <Tab label={option.text} value={option.path} to={option.path} component={Link} />
+        ))}
       </Tabs>
     </Box>
   );

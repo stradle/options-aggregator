@@ -12,7 +12,6 @@ const StyledOptionType = styled(ColoredOptionType)`
   height: 20px;
   min-width: 40px;
   text-align: end;
-  color: ${({ color }) => color};
 `;
 
 const OptionValue = ({ option }: { option?: Option }) =>
