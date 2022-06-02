@@ -13,7 +13,7 @@ const AppRouter = () => {
         <BasePriceWidget />
 
         <Routes>
-          <Route path={routes.root} element={<Navigate to={routes.dealsChart} />} />
+          <Route path={routes.root} element={<Navigate to={routes.aggregatedRates} />} />
 
           <Route path={routes.dealsChart} element={<DealsChart />} />
 
