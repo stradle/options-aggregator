@@ -1,21 +1,37 @@
 import { QueryClient, QueryClientProvider } from "react-query";
-import { ThemeProvider, CssBaseline } from "@mui/material";
-
-import { RootRoutes } from "./pages/Root";
+import { ThemeProvider, CssBaseline, createTheme } from "@mui/material";
 import { RatesProvider } from "./exchanges/RatesProvider";
-import { useTheme } from "./services";
+import AppRouter from "./pages/AppRouter";
 
 const queryClient = new QueryClient();
 
-function App() {
-  const theme = useTheme();
+const darkTheme = createTheme({
+  palette: {
+    mode: "dark",
+    // primary: {
+    //   main: "#fff",
+    //   light: "#92AFB1",
+    // },
+    // secondary: {
+    //   main: "#63f3dc",
+    // },
+    // background: {
+    //   paper: "#1A3B49",
+    //   default: "#7b8a95",
+    // },
+    // text: {
+    //   primary: "#fff",
+    // },
+  },
+});
 
+function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <RatesProvider>
-        <ThemeProvider theme={theme}>
+        <ThemeProvider theme={darkTheme}>
           <CssBaseline enableColorScheme />
-          <RootRoutes />
+          <AppRouter />
         </ThemeProvider>
       </RatesProvider>
     </QueryClientProvider>

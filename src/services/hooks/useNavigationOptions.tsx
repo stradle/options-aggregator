@@ -1,9 +1,8 @@
 import { useLocation } from "react-router-dom";
 import StarBorderPurple500Icon from "@mui/icons-material/StarBorderPurple500";
 import BrokenImageIcon from "@mui/icons-material/BrokenImage";
-
 import { navigationService } from "../navigation";
-import { routes } from "../routes";
+import { routes } from "../util/constants";
 
 export interface NavigationOption {
   text: string;
@@ -12,12 +11,12 @@ export interface NavigationOption {
   isActive: boolean;
 }
 
-export function useNavigationOptions(): { navigationOptions: NavigationOption[] } {
+export default (): { navigationOptions: NavigationOption[] } => {
   const location = useLocation();
 
   const navigationOptions = [
     {
-      text: "Deals",
+      text: "Deals Chart",
       path: routes.deals,
       icon: <StarBorderPurple500Icon />,
       isActive: navigationService.matchRoutePath(location.pathname, routes.deals),
@@ -33,4 +32,4 @@ export function useNavigationOptions(): { navigationOptions: NavigationOption[] 
   return {
     navigationOptions,
   };
-}
+};

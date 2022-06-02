@@ -50,7 +50,7 @@ type TermStrikesOptions = {
   [term: string]: { [strike: string]: OptionsMap[] };
 };
 
-export const AggregatedRatesPage = () => {
+const AggregatedRates = () => {
   const rates = useRatesContext();
   const { allStrikes = [] } = useStrikes();
   const showLoader = Object.values(rates).some((rates) => !rates);
@@ -86,7 +86,7 @@ export const AggregatedRatesPage = () => {
       <StyledTable>
         <thead>
           <tr>
-            <th style={{ display: "flex", flexDirection: "column" }} key={1}>
+            <th key={1}>
               <ColoredOptionType type={OptionType.CALL}>CALL</ColoredOptionType>
               <ColoredOptionType type={OptionType.PUT}>PUT</ColoredOptionType>
             </th>
@@ -94,7 +94,7 @@ export const AggregatedRatesPage = () => {
               const providers = termProviders[term];
 
               return (
-                <th style={{ fontWeight: 600 }} key={term}>
+                <th key={term}>
                   {term}
                   <div
                     style={{
@@ -167,3 +167,5 @@ export const AggregatedRatesPage = () => {
     </Box>
   );
 };
+
+export default AggregatedRates;

@@ -3,25 +3,19 @@ import { useNavigate } from "react-router-dom";
 import {
   AppBar,
   Box,
-  Button,
   Container,
   IconButton,
   Menu,
   MenuItem,
   Toolbar,
   Typography,
+  Tabs,
+  Tab,
 } from "@mui/material";
 import MenuIcon from "@mui/icons-material/Menu";
 import AddchartIcon from "@mui/icons-material/Addchart";
-import Tabs from "@mui/material/Tabs";
-import Tab from "@mui/material/Tab";
-
-import { routes, useNavigationOptions } from "../services";
-
-interface LinkTabProps {
-  label?: string;
-  href?: string;
-}
+import useNavigationOptions from "../services/hooks/useNavigationOptions";
+import { routes } from "../services/util/constants";
 
 const MobileNavigation: React.FC = () => {
   const [anchorElNav, setAnchorElNav] = useState<null | HTMLElement>(null);
@@ -123,7 +117,7 @@ const DesktopNavigation: React.FC = () => {
         value={value}
         onChange={handleChange}
         aria-label="nav tabs example">
-        <Tab component="a" label="Deals" onClick={() => handleMenuNavigation(routes.deals)} />
+        <Tab component="a" label="DealsChart" onClick={() => handleMenuNavigation(routes.deals)} />
         <Tab
           component="a"
           label="Aggregated Rates"

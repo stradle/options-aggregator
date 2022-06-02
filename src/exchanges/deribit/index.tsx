@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import moment from "moment";
 import { pick } from "lodash";
 import { useEthPrice } from "../../services/util";
@@ -27,11 +27,6 @@ const ethOptions = {
   },
 };
 
-const WebSocketContext = createContext<OptionsMap[] | null>(null);
-
-export const useDeribitContext = () => {
-  return useContext(WebSocketContext);
-};
 //     ask_price: null,
 //     base_currency: "ETH",
 //     bid_price: 0.001,

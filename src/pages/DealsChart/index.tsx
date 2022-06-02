@@ -27,7 +27,8 @@ const dealColumns = [
   "Buy/Base",
 ];
 
-const MIN_DIF = 7;
+const PROFIT_THRESHOLD = 3;
+
 type DealPart = { price: number; provider: ProviderType };
 type Deal = Pick<OptionsMap, "term" | "strike"> & {
   amount: number;
@@ -45,7 +46,7 @@ const DealBuySellItem = ({ item }: { item: DealPart }) => (
   </td>
 );
 
-export const DealsPage = () => {
+const DealsChart = () => {
   const rates = useRatesContext();
   const basePrice = useEthPrice();
   const showLoader = Object.values(rates).some((rates) => !rates);
@@ -88,7 +89,7 @@ export const DealsPage = () => {
       maxPut.provider !== minPut.provider &&
       maxPut.options.PUT.bidPrice - minPut.options.PUT.askPrice;
 
-    if (callDeal && callDeal > MIN_DIF) {
+    if (callDeal && callDeal > PROFIT_THRESHOLD) {
       acc.push({
         type: OptionType.CALL,
         term: maxCall.term,
@@ -104,7 +105,7 @@ export const DealsPage = () => {
         },
       });
     }
-    if (putDeal && putDeal > MIN_DIF) {
+    if (putDeal && putDeal > PROFIT_THRESHOLD) {
       acc.push({
         type: OptionType.PUT,
         term: maxPut.term,
@@ -130,38 +131,50 @@ export const DealsPage = () => {
     return <Loader />;
   }
 
+  // cut too long array
+  if (sortedDeals.length > 20) sortedDeals.length = 20;
+
   return (
     <Box>
-      <StyledTable alignRight>
-        <thead>
-          <tr>
-            {dealColumns.map((val) => (
-              <th style={{ fontWeight: 600 }} key={val}>
-                {val}
-              </th>
-            ))}
-          </tr>
-        </thead>
-        <tbody>
-          {sortedDeals?.map((deal) => (
-            <tr key={deal.strike + deal.term + deal.type}>
-              <th style={{ fontWeight: 600 }}>{formatCurrency(+deal.strike)}</th>
-              <td style={{ fontWeight: 600 }}>{deal.term}</td>
-              <td
-                style={{
-                  color: deal.type === OptionType.CALL ? "darkgreen" : "darkred",
-                }}>
-                <ColoredOptionType type={deal.type}>{deal.type}</ColoredOptionType>
-              </td>
-              <td>{formatCurrency(deal.amount)}</td>
-              <DealBuySellItem item={deal.buy} />
-              <DealBuySellItem item={deal.sell} />
-              <td>%{(deal.amount / deal.buy.price).toFixed(2)}</td>
-              <td>%{(deal.buy.price / basePrice).toFixed(2)}</td>
+      {sortedDeals.length > 0 ? (
+        <StyledTable alignRight>
+          <thead>
+            <tr>
+              {dealColumns.map((val) => (
+                <th style={{ fontWeight: 600 }} key={val}>
+                  {val}
+                </th>
+              ))}
             </tr>
-          ))}
-        </tbody>
-      </StyledTable>
+          </thead>
+          <tbody>
+            {sortedDeals?.map((deal) => (
+              <tr key={deal.strike + deal.term + deal.type}>
+                <th>{formatCurrency(+deal.strike)}</th>
+                <th>{deal.term}</th>
+                <td
+                  style={{
+                    color: deal.type === OptionType.CALL ? "darkgreen" : "darkred",
+                  }}>
+                  <ColoredOptionType type={deal.type}>{deal.type}</ColoredOptionType>
+                </td>
+                <td>{formatCurrency(deal.amount)}</td>
+                <DealBuySellItem item={deal.buy} />
+                <DealBuySellItem item={deal.sell} />
+                <td>%{(deal.amount / deal.buy.price).toFixed(2)}</td>
+                <td>%{(deal.buy.price / basePrice).toFixed(2)}</td>
+              </tr>
+            ))}
+          </tbody>
+        </StyledTable>
+      ) : (
+        <h4>
+          {`Currently there are no deals exceeding ${formatCurrency(PROFIT_THRESHOLD, 2)} delta
+          profit threshold`}
+        </h4>
+      )}
     </Box>
   );
 };
+
+export default DealsChart;

@@ -12,7 +12,7 @@ export const Loader: React.FC = () => {
   return (
     <LoaderBase>
       <CircularProgress />
-      Aggregating data...
+        <h4>Aggregating data...</h4>
     </LoaderBase>
   );
 };

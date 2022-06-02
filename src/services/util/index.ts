@@ -2,13 +2,14 @@ import { useQuery } from "react-query";
 import { useMemo } from "react";
 import moment from "moment";
 import { chain } from "lodash";
+import { STRIKE_CUTOFF } from "./constants";
 import { OptionsMap } from "../../types";
 
-export const formatCurrency = (val: number) =>
+export const formatCurrency = (val: number, maximumFractionDigits = 0) =>
   new Intl.NumberFormat("en-IN", {
     style: "currency",
     currency: "USD",
-    maximumFractionDigits: 0,
+    maximumFractionDigits,
   }).format(val);
 // new Intl.NumberFormat("en-IN", { maximumFractionDigits: 2 }).format(val);
 
@@ -39,8 +40,8 @@ export const useStrikes = (): Strikes => {
 
     const roundedBase = Math.floor(basePrice / 100) * 100;
     const callStart = Math.ceil((roundedBase * 0.8) / 100) * 100;
-    const callEnd = roundedBase * 2;
-    const putStart = Math.ceil(roundedBase / 2 / 100) * 100;
+    const callEnd = roundedBase * STRIKE_CUTOFF;
+    const putStart = Math.ceil(roundedBase / STRIKE_CUTOFF / 100) * 100;
     const putEnd = Math.floor((roundedBase * 1.2) / 100) * 100;
 
     const callStrikes: number[] = [];
