@@ -1,7 +1,7 @@
 import { BrowserRouter as Router, Route, Routes, Navigate } from "react-router-dom";
 import DealsChart from "./DealsChart";
 import AggregatedRates from "./AggregatedRates";
-import { Layout, NavigationPanel, BasePriceWidget } from "../components";
+import { Layout, NavigationPanel } from "../components";
 import { routes } from "../services/util/constants";
 
 const AppRouter = () => {
@@ -10,8 +10,6 @@ const AppRouter = () => {
       <NavigationPanel />
 
       <Layout>
-        <BasePriceWidget />
-
         <Routes>
           <Route path={routes.root} element={<Navigate to={routes.aggregatedRates} />} />
 

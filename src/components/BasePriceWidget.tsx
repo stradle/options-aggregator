@@ -15,6 +15,7 @@ const BasePriceWidget = () => {
         padding: "0 0.5rem",
         gap: "0.5rem",
         width: "fit-content",
+        cursor: "default",
       }}>
       <img width={"48px"} height={"48px"} src={EthIcon} alt={"ETH icon"} />
       <h4>{formatCurrency(ethPrice)}</h4>

@@ -1,27 +1,45 @@
-import { chain, groupBy } from "lodash";
+import { chain, filter, groupBy, minBy } from "lodash";
 import styled from "styled-components";
-import { Box, Divider } from "@mui/material";
+import { Box, Divider, FormControlLabel, Switch } from "@mui/material";
 
 import { useRatesContext } from "../../exchanges/RatesProvider";
 import { formatCurrency, useExpirations, useStrikes } from "../../services/util";
-import { ColoredOptionType, StyledTable, Loader, ProviderIcon } from "../../components";
+import {
+  ColoredOptionType,
+  StyledTable,
+  Loader,
+  ProviderIcon,
+  BasePriceWidget,
+} from "../../components";
 import { Option, OptionsMap, OptionType } from "../../types";
 import { StyledProviderLink } from "../styled";
+import { useState } from "react";
 
-const StyledOptionType = styled(ColoredOptionType)`
+const StyledOptionType = styled(ColoredOptionType)<{ highlight?: boolean }>`
   height: 20px;
-  min-width: 40px;
+  //min-width: 40px;
   text-align: end;
+  border-radius: 4px;
+  width: fit-content;
+  ${({ highlight }) => highlight && "background-color: rgba(144,202,249,0.1)"}
 `;
 
-const OptionValue = ({ option }: { option?: Option }) =>
+const OptionValue = ({ option, highlight }: { option?: Option; highlight?: boolean }) =>
   option?.askPrice ? (
-    <StyledOptionType type={option.type}>{formatCurrency(option.askPrice)}</StyledOptionType>
+    <StyledOptionType highlight={highlight} type={option.type}>
+      {formatCurrency(option.askPrice)}
+    </StyledOptionType>
   ) : (
     <StyledOptionType />
   );
 
-const OptionsCouple = ({ optionCouple }: { optionCouple: OptionsMap }) => {
+const OptionsCouple = ({
+  optionCouple,
+  markCheap,
+}: {
+  optionCouple: OptionsMap;
+  markCheap: { call: boolean; put: boolean };
+}) => {
   const { [OptionType.CALL]: call, [OptionType.PUT]: put } = optionCouple.options;
 
   return (
@@ -30,9 +48,11 @@ const OptionsCouple = ({ optionCouple }: { optionCouple: OptionsMap }) => {
         style={{
           display: "flex",
           flexDirection: "column",
+          minWidth: "40px",
+          alignItems: "end",
         }}>
-        <OptionValue option={call} />
-        <OptionValue option={put} />
+        <OptionValue highlight={markCheap.call} option={call} />
+        <OptionValue highlight={markCheap.put} option={put} />
       </div>
     </StyledProviderLink>
   );
@@ -48,6 +68,7 @@ const StyledCell = styled.div`
 `;
 
 const AggregatedRates = () => {
+  const [highlight, setHighlight] = useState(false);
   const rates = useRatesContext();
   const { allStrikes = [] } = useStrikes();
   const showLoader = Object.values(rates).some((rates) => !rates);
@@ -79,7 +100,13 @@ const AggregatedRates = () => {
   }
 
   return (
-    <Box>
+    <Box sx={{ display: "flex", flexDirection: "column", gap: "10px" }}>
+      <div style={{ display: "flex", justifyContent: "space-around" }}></div>
+      <BasePriceWidget />
+      <FormControlLabel
+        control={<Switch checked={highlight} onChange={(e) => setHighlight(e.target.checked)} />}
+        label="Highlight cheapest"
+      />
       <StyledTable>
         <thead>
           <tr>
@@ -127,6 +154,15 @@ const AggregatedRates = () => {
                   const termStrikeOptions = allRates[term][strike];
                   const providers = termProviders[term];
 
+                  const cheapestCallProvider =
+                    highlight &&
+                    filter(termStrikeOptions, "options.CALL.askPrice").length > 1 &&
+                    minBy(termStrikeOptions, "options.CALL.askPrice")?.provider;
+                  const cheapestPutProvider =
+                    highlight &&
+                    filter(termStrikeOptions, "options.PUT.askPrice").length > 1 &&
+                    minBy(termStrikeOptions, "options.PUT.askPrice")?.provider;
+
                   if (!termStrikeOptions.length) return <td key={term} />;
 
                   return (
@@ -136,11 +172,19 @@ const AggregatedRates = () => {
                           const optionCouple = termStrikeOptions.find(
                             (option) => option.provider === provider
                           );
+                          const markCheap = {
+                            call: cheapestCallProvider === provider,
+                            put: cheapestPutProvider === provider,
+                          };
 
                           return (
                             <>
                               {optionCouple ? (
-                                <OptionsCouple key={provider} optionCouple={optionCouple} />
+                                <OptionsCouple
+                                  markCheap={markCheap}
+                                  key={provider}
+                                  optionCouple={optionCouple}
+                                />
                               ) : (
                                 <div style={{ flex: 1 }} />
                               )}
