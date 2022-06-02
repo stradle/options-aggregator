@@ -171,6 +171,9 @@ const DealsChart = () => {
         <h4>
           {`Currently there are no deals exceeding ${formatCurrency(PROFIT_THRESHOLD, 2)} delta
           profit threshold`}
+          <br/>
+          <br/>
+          Come back later
         </h4>
       )}
     </Box>
