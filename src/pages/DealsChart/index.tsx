@@ -1,13 +1,21 @@
 import { useMemo } from "react";
-import { maxBy, minBy, sortBy } from "lodash";
+import { capitalize, maxBy, minBy, sortBy } from "lodash";
 import styled from "styled-components";
-import { Box } from "@mui/material";
+import { Autocomplete, Box, Chip, TextField } from "@mui/material";
+import { useLocalStorage } from "react-use";
 
 import { formatCurrency, useEthPrice } from "../../services/util";
 import { useRatesContext } from "../../exchanges/RatesProvider";
-import { ColoredOptionType, StyledTable, ProviderIcon, Loader } from "../../components";
-import { OptionsInterception, OptionsMap, OptionType, ProviderType } from "../../types";
-import { StyledProviderLink } from "../styled";
+import {
+  ColoredOptionType,
+  StyledTable,
+  ProviderIcon,
+  Loader,
+  BasePriceWidget,
+} from "../../components";
+import { OptionsMap, OptionType, ProviderType } from "../../types";
+import { PageWrapper, StyledProviderLink } from "../styled";
+import { useRatesData } from "../../services/hooks";
 
 const StyledDealBuySellItem = styled.div`
   display: flex;
@@ -51,86 +59,84 @@ const DealBuySellItem = ({ item }: { item: DealPart }) => (
   </td>
 );
 
+const useDeals = (providers?: ProviderType[]) => {
+  const { allRates } = useRatesData();
+
+  const deals = useMemo(() => {
+    const res: Deal[] = [];
+
+    Object.values(allRates).forEach((strike) =>
+      Object.values(strike).forEach((interception) => {
+        const providerFiltered = providers
+          ? interception.filter((option) => option && providers.includes(option.provider))
+          : interception;
+        if (providerFiltered?.length < 2) return;
+
+        const maxCall = maxBy(providerFiltered, "options.CALL.bidPrice");
+        const minCall = minBy(providerFiltered, "options.CALL.askPrice");
+        const maxPut = maxBy(providerFiltered, "options.PUT.bidPrice");
+        const minPut = minBy(providerFiltered, "options.PUT.askPrice");
+        const callDeal =
+          maxCall?.options.CALL?.bidPrice &&
+          minCall?.options.CALL?.askPrice &&
+          maxCall.provider !== minCall.provider &&
+          maxCall.options.CALL.bidPrice - minCall.options.CALL.askPrice;
+        const putDeal =
+          maxPut?.options.PUT?.bidPrice &&
+          minPut?.options.PUT?.askPrice &&
+          maxPut.provider !== minPut.provider &&
+          maxPut.options.PUT.bidPrice - minPut.options.PUT.askPrice;
+
+        if (callDeal && callDeal > PROFIT_THRESHOLD) {
+          res.push({
+            type: OptionType.CALL,
+            term: maxCall.term,
+            amount: callDeal,
+            strike: maxCall.strike,
+            buy: {
+              price: minCall?.options.CALL?.askPrice as number,
+              provider: minCall.provider,
+            },
+            sell: {
+              price: maxCall?.options.CALL?.bidPrice as number,
+              provider: maxCall.provider,
+            },
+          });
+        }
+        if (putDeal && putDeal > PROFIT_THRESHOLD) {
+          res.push({
+            type: OptionType.PUT,
+            term: maxPut.term,
+            strike: maxPut.strike,
+            amount: putDeal,
+            buy: {
+              price: minPut?.options.PUT?.askPrice as number,
+              provider: minPut.provider,
+            },
+            sell: {
+              price: maxPut?.options.PUT?.bidPrice as number,
+              provider: maxPut.provider,
+            },
+          });
+        }
+      })
+    );
+
+    return sortBy(res, ({ amount }) => -amount);
+  }, [allRates, providers]);
+
+  return [deals];
+};
+
 const DealsChart = () => {
   const rates = useRatesContext();
   const basePrice = useEthPrice();
   const showLoader = Object.values(rates).some((rates) => !rates);
-
-  const interceptions = useMemo(
-    () =>
-      rates.DERIBIT?.reduce<OptionsInterception[]>((acc, deribitItem) => {
-        const lyraItem = rates.LYRA?.find(
-          ({ term, strike }) => deribitItem.strike === strike && deribitItem.term === term
-        );
-        const premiaItem = rates.PREMIA?.find(
-          ({ term, strike }) => deribitItem.strike === strike && deribitItem.term === term
-        );
-
-        const interception = [deribitItem];
-
-        if (lyraItem) interception.push(lyraItem);
-        if (premiaItem) interception.push(premiaItem);
-
-        if (interception.length > 1) acc.push(interception as OptionsInterception);
-
-        return acc;
-      }, []),
-    [rates]
+  const [selectedProviders = Object.values(ProviderType), setSelectedProviders] = useLocalStorage(
+    "deals-providers",
+    Object.values(ProviderType)
   );
-
-  const deals = interceptions?.reduce<Deal[]>((acc, interception) => {
-    const maxCall = maxBy(interception, "options.CALL.bidPrice");
-    const minCall = minBy(interception, "options.CALL.askPrice");
-    const maxPut = maxBy(interception, "options.PUT.bidPrice");
-    const minPut = minBy(interception, "options.PUT.askPrice");
-    const callDeal =
-      maxCall?.options.CALL?.bidPrice &&
-      minCall?.options.CALL?.askPrice &&
-      maxCall.provider !== minCall.provider &&
-      maxCall.options.CALL.bidPrice - minCall.options.CALL.askPrice;
-    const putDeal =
-      maxPut?.options.PUT?.bidPrice &&
-      minPut?.options.PUT?.askPrice &&
-      maxPut.provider !== minPut.provider &&
-      maxPut.options.PUT.bidPrice - minPut.options.PUT.askPrice;
-
-    if (callDeal && callDeal > PROFIT_THRESHOLD) {
-      acc.push({
-        type: OptionType.CALL,
-        term: maxCall.term,
-        amount: callDeal,
-        strike: maxCall.strike,
-        buy: {
-          price: minCall?.options.CALL?.askPrice as number,
-          provider: minCall.provider,
-        },
-        sell: {
-          price: maxCall?.options.CALL?.bidPrice as number,
-          provider: maxCall.provider,
-        },
-      });
-    }
-    if (putDeal && putDeal > PROFIT_THRESHOLD) {
-      acc.push({
-        type: OptionType.PUT,
-        term: maxPut.term,
-        strike: maxPut.strike,
-        amount: putDeal,
-        buy: {
-          price: minPut?.options.PUT?.askPrice as number,
-          provider: minPut.provider,
-        },
-        sell: {
-          price: maxPut?.options.PUT?.bidPrice as number,
-          provider: maxPut.provider,
-        },
-      });
-    }
-
-    return acc;
-  }, []);
-
-  const sortedDeals = sortBy(deals, ({ amount }) => -amount);
+  const [sortedDeals] = useDeals(selectedProviders);
 
   if (showLoader) {
     return <Loader />;
@@ -140,7 +146,34 @@ const DealsChart = () => {
   if (sortedDeals.length > 20) sortedDeals.length = 20;
 
   return (
-    <Box>
+    <PageWrapper>
+      <BasePriceWidget />
+      <Autocomplete
+        multiple
+        disableClearable
+        filterSelectedOptions
+        options={Object.values(ProviderType)}
+        getOptionLabel={(option) => capitalize(option)}
+        renderOption={(props, option) => (
+          <Box component="li" sx={{ "& > svg": { mr: 2, flexShrink: 0 } }} {...props}>
+            <ProviderIcon marginLeft={5} provider={option} />
+            {capitalize(option)}
+          </Box>
+        )}
+        renderInput={(params) => <TextField {...params} label="Markets" />}
+        renderTags={(tagValue, getTagProps) =>
+          tagValue.map((option, index) => (
+            <Chip
+              icon={<ProviderIcon marginLeft={5} provider={option} />}
+              label={capitalize(option)}
+              {...getTagProps({ index })}
+              disabled={selectedProviders?.length === 2}
+            />
+          ))
+        }
+        onChange={(e, value) => setSelectedProviders(value)}
+        value={selectedProviders}
+      />
       {sortedDeals.length > 0 ? (
         <StyledTable>
           <thead>
@@ -181,7 +214,7 @@ const DealsChart = () => {
           Come back later
         </h4>
       )}
-    </Box>
+    </PageWrapper>
   );
 };
 

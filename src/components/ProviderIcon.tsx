@@ -12,11 +12,13 @@ const providerIcons = {
 export const ProviderIcon = ({
   provider,
   width = 15,
+  marginLeft = 0,
 }: {
   provider: ProviderType;
   width?: number;
+  marginLeft?: number;
 }) => {
   const IconComponent = providerIcons[provider];
 
-  return <IconComponent width={`${width}px`} />;
+  return <IconComponent style={{ marginLeft: `${marginLeft}px` }} width={`${width}px`} />;
 };

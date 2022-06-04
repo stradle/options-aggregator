@@ -12,6 +12,7 @@ const RatesContext = createContext<RatesContextType>({
   PREMIA: undefined,
 });
 
+// TODO: check if returns new reference which causes obsolete rerenders
 export const useRatesContext = () => useContext(RatesContext);
 
 export const RatesProvider = ({ children }: { children?: ReactNode }) => {

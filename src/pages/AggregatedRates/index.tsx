@@ -1,6 +1,7 @@
-import { chain, filter, groupBy, minBy } from "lodash";
+import { filter, minBy } from "lodash";
 import styled from "styled-components";
-import { Box, Divider, FormControlLabel, Switch } from "@mui/material";
+import { Divider, FormControlLabel, Switch } from "@mui/material";
+import { useState } from "react";
 
 import { useRatesContext } from "../../exchanges/RatesProvider";
 import { formatCurrency, useExpirations, useStrikes } from "../../services/util";
@@ -12,8 +13,8 @@ import {
   BasePriceWidget,
 } from "../../components";
 import { Option, OptionsMap, OptionType } from "../../types";
-import { StyledProviderLink } from "../styled";
-import { useState } from "react";
+import { PageWrapper, StyledProviderLink } from "../styled";
+import { useRatesData } from "../../services/hooks";
 
 const StyledOptionType = styled(ColoredOptionType)<{ highlight?: boolean }>`
   height: 20px;
@@ -58,10 +59,6 @@ const OptionsCouple = ({
   );
 };
 
-type TermStrikesOptions = {
-  [term: string]: { [strike: string]: OptionsMap[] };
-};
-
 const StyledCell = styled.div`
   display: flex;
   gap: 3px;
@@ -74,34 +71,14 @@ const AggregatedRates = () => {
   const showLoader = Object.values(rates).some((rates) => !rates);
 
   const [expirations] = useExpirations(rates.DERIBIT);
-
-  const deribitStrikes = chain(rates.DERIBIT)
-    .map("strike")
-    .uniq()
-    .filter((val) => allStrikes.includes(+val))
-    .sortBy((strike) => +strike)
-    .value();
-
-  const allRates = chain(rates)
-    .values()
-    .flatten()
-    .groupBy("term")
-    .mapValues((optionsMap: OptionsMap) => groupBy(optionsMap, "strike"))
-    .value() as unknown as TermStrikesOptions;
-
-  const termProviders = chain(allRates)
-    .mapValues((strikeOptions) =>
-      chain(strikeOptions).values().max().map("provider").sort().value()
-    )
-    .value();
+  const { allRates, termProviders } = useRatesData();
 
   if (showLoader) {
     return <Loader />;
   }
 
   return (
-    <Box sx={{ display: "flex", flexDirection: "column", gap: "10px" }}>
-      <div style={{ display: "flex", justifyContent: "space-around" }}></div>
+    <PageWrapper>
       <BasePriceWidget />
       <FormControlLabel
         control={<Switch checked={highlight} onChange={(e) => setHighlight(e.target.checked)} />}
@@ -146,7 +123,7 @@ const AggregatedRates = () => {
         </thead>
 
         <tbody>
-          {deribitStrikes.map((strike) => {
+          {allStrikes.map((strike) => {
             return (
               <tr key={strike}>
                 <th key={strike}>{formatCurrency(+strike)}</th>
@@ -203,7 +180,7 @@ const AggregatedRates = () => {
           })}
         </tbody>
       </StyledTable>
-    </Box>
+    </PageWrapper>
   );
 };
 

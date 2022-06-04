@@ -1,7 +1,7 @@
-import { ProviderType } from "../types";
 import styled from "styled-components";
-import { Button } from "@mui/material";
+import { Box, Button } from "@mui/material";
 import { getUrlByProvider } from "../services/util/constants";
+import { ProviderType } from "../types";
 
 type StyledProviderLinkProps = { provider: ProviderType };
 
@@ -14,4 +14,12 @@ export const StyledProviderLink = styled(Button).attrs<StyledProviderLinkProps>(
   padding: 2px;
   flex: 1;
   min-width: 0px;
+`;
+
+export const PageWrapper = styled(Box)`
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  margin-top: 1rem;
+  gap: 1rem;
 `;
