@@ -34,7 +34,7 @@ const dealColumns = [
   "Delta",
   "Buy Price",
   "Sell Price",
-  "Delta/Buy",
+  "Discount",
   "Buy/Base",
 ];
 
@@ -199,8 +199,8 @@ const DealsChart = () => {
                 <td>{formatCurrency(deal.amount)}</td>
                 <DealBuySellItem item={deal.buy} />
                 <DealBuySellItem item={deal.sell} />
-                <td>%{(deal.amount / deal.buy.price).toFixed(2)}</td>
-                <td>%{(deal.buy.price / basePrice).toFixed(2)}</td>
+                <td>%{((deal.amount / deal.sell.price) * 100).toFixed(2)}</td>
+                <td>%{((deal.buy.price / basePrice) * 100).toFixed(2)}</td>
               </tr>
             ))}
           </tbody>
