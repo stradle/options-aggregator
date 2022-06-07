@@ -56,7 +56,7 @@ export const useStrikes = (): Strikes => {
   }, [basePrice]);
 };
 
-export const useExpirations = (deribitRates?: OptionsMap[]) => {
+export const useExpirations = (deribitRates?: OptionsMap[], minDays = 0, maxMonths = 3) => {
   const currentDate = moment(new Date());
 
   const deribitTerms = useMemo<[string, number][]>(
@@ -66,9 +66,11 @@ export const useExpirations = (deribitRates?: OptionsMap[]) => {
         .sortBy("expiration")
         .filter(({ term, expiration }) => {
           const momentExpiration = moment(expiration);
-          const monthsPathed = moment.duration(momentExpiration.diff(currentDate)).asMonths();
+          const duration = moment.duration(momentExpiration.diff(currentDate));
+          const monthsPassed = duration.asMonths();
+          const daysPassed = duration.asDays();
 
-          return monthsPathed <= 3;
+          return monthsPassed <= maxMonths && daysPassed > minDays;
         })
         .map(
           ({ term, expiration }) => [term, +moment(expiration).set("hour", 8)] as [string, number]

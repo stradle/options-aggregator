@@ -115,11 +115,18 @@ const DesktopNavigation: React.FC = () => {
   const { navigationOptions } = useNavigationOptions();
   const routeMatch = useRouteMatch(navigationOptions.map(({ path }) => path));
   const currentTab = routeMatch?.pattern?.path;
+
   return (
     <Box sx={{ width: "100%" }}>
       <Tabs value={currentTab} aria-label="nav tabs example">
         {navigationOptions.map((option) => (
-          <Tab label={option.text} value={option.path} to={option.path} component={Link} />
+          <Tab
+            key={option.path}
+            label={option.text}
+            value={option.path}
+            to={option.path}
+            component={Link}
+          />
         ))}
       </Tabs>
     </Box>

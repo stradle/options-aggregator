@@ -2,6 +2,7 @@ export enum ProviderType {
   LYRA = "LYRA",
   DERIBIT = "DERIBIT",
   PREMIA = "PREMIA",
+  HEGIC = "HEGIC",
 }
 
 export enum OptionType {

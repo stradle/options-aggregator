@@ -1,20 +1,15 @@
 import { useQuery } from "react-query";
-import { JsonRpcProvider } from "@ethersproject/providers";
 import { BigNumber, Contract } from "ethers";
 import { useExpirations, useStrikes } from "../../services/util";
 import { fixedFromFloat, fixedToNumber } from "../../services/util/fixedMath";
 import premiaPoolAbi from "./premiaPoolAbi.json";
+import { arbitrumProvider } from "../providers";
 import { OptionsMap, OptionType, ProviderType } from "../../types";
 
 // const getFriday = () => {
 //   return moment().isoWeekday(5).utc().set("hour", 8).set("minutes", 0);
 // };
 
-const provider = new JsonRpcProvider(
-  // { url: "https://rpc.ankr.com/arbitrum" },
-  { url: "https://arb1.arbitrum.io/rpc " },
-  42161
-);
 // function quote(
 //     address feePayer,
 //     uint64 maturity,
@@ -41,13 +36,13 @@ const provider = new JsonRpcProvider(
 const ethPoolContract = new Contract(
   "0xE5DbC4EDf467B609A063c7ea7fAb976C6b9BAa1a",
   premiaPoolAbi,
-  provider
+  arbitrumProvider
 );
 
 const convertPrice = ([price, fee]: [price: BigNumber, fee: BigNumber]) =>
   fixedToNumber(price) + fixedToNumber(fee);
 
-const reqOption = (strike: number, expiration: number, call: boolean) => {
+const reqOption = async (strike: number, expiration: number, call: boolean) => {
   const expSecs = Math.floor(expiration / 1000);
 
   return ethPoolContract

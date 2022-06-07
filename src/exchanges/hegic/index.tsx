@@ -1,65 +1,92 @@
-import Lyra from "@lyrafinance/lyra-js";
-import { BigNumber } from "ethers";
-import moment from "moment";
+import { BigNumber, Contract } from "ethers";
 import { useQuery } from "react-query";
+import moment from "moment";
+import { formatUnits } from "ethers/lib/utils";
+import { useEthPrice, useExpirations } from "../../services/util";
+import { arbitrumProvider } from "../providers";
+import hegicAbi from "./abi.json";
+import contracts from "./contracts";
 import { OptionsMap, OptionType, ProviderType } from "../../types";
 
-const lyra = new Lyra(undefined, true);
+const getContractName = (offset: number, type: OptionType) => {
+  let contractName = "HegicStrategy";
 
-const formatWei = (val: BigNumber) => val.div(BigNumber.from(10).pow(18)).toString();
+  contractName += `OTM_${type}_${offset}`;
+  contractName += "_ETH";
 
-const getMarketData = async () => {
-  const market = await lyra.market("eth");
-  const options = await Promise.all(
-    market.liveBoards().map(async (board) => {
-      const expiration = board.expiryTimestamp * 1000;
-      const term = moment(expiration).format("DDMMMYY").toUpperCase();
-
-      return Promise.all(
-        board.strikes().map<Promise<OptionsMap>>(async (strike) => {
-          const strikePrice = formatWei(strike.strikePrice);
-          const one = BigNumber.from(10).pow(18);
-
-          const quotes = await Promise.all([
-            strike.quote(true, true, one),
-            strike.quote(true, false, one),
-            strike.quote(false, true, one),
-            strike.quote(false, false, one),
-          ]);
-          const [callBuyPrice, callSellPrice, putBuyPrice, putSellPrice] = quotes.map((quote) =>
-            parseFloat(formatWei(quote.pricePerOption))
-          );
-
-          return {
-            strike: strikePrice,
-            term,
-            expiration,
-            provider: ProviderType.LYRA,
-            options: {
-              [OptionType.CALL]: {
-                type: OptionType.CALL,
-                askPrice: callBuyPrice,
-                bidPrice: callSellPrice,
-                midPrice: (callBuyPrice + callSellPrice) / 2,
-              },
-              [OptionType.PUT]: {
-                type: OptionType.PUT,
-                askPrice: putBuyPrice,
-                bidPrice: putSellPrice,
-                midPrice: (putBuyPrice + putSellPrice) / 2,
-              },
-            },
-          };
-        })
-      );
-    })
-  );
-
-  return options.flat();
+  return contractName;
 };
 
-export const useLyraRates = () => {
-  const { data } = useQuery("lyra", getMarketData, { refetchInterval: 30000 });
+const getContractByStrike = (offset: number, type: OptionType) => {
+  const contractName = getContractName(offset, type);
+  const contractAddress = contracts[contractName];
 
+  if (!contractAddress) debugger;
+  return new Contract(contractAddress, hegicAbi, arbitrumProvider);
+};
+
+const currentDate = moment();
+
+const reqOption = async (offset: number, strike: number, expiration: number, type: OptionType) => {
+  // const expSecs = Math.floor(expiration / 1000);
+  const left = moment.duration(moment(expiration).diff(currentDate)).asSeconds().toFixed(0);
+  console.log(left);
+  const contract = getContractByStrike(offset, type);
+  const res = await contract
+    .calculatePremium(left, (1e18).toString(), strike * 1e8)
+    // usdc 6 decimals
+    .then(({ premium }: { premium: BigNumber }) => formatUnits(premium, "mwei"))
+    .catch(console.error);
+
+  return res;
+};
+
+const getRoundedStrikeByEth = (eth: number) => (offset: number) => {
+  return [offset, Math.round(((offset / 100) * eth) / 100) * 100];
+};
+
+export const useHegicRates = (deribitRates?: OptionsMap[]): [OptionsMap[] | undefined] => {
+  const ethPrice = useEthPrice();
+  const [expirations] = useExpirations(deribitRates, 3, 2.5);
+  const getRoundedStrike = getRoundedStrikeByEth(ethPrice);
+
+  const callOffsets = [110, 120, 130].map(getRoundedStrike);
+  const putOffsets = [90, 80, 70].map(getRoundedStrike);
+
+  const fetchPrices = async () => {
+    const requests = expirations.map(([term, exp]) => [
+      ...callOffsets.map(async ([offset, strike]) => ({
+        provider: ProviderType.HEGIC,
+        expiration: exp,
+        term,
+        strike: strike.toString(),
+        options: {
+          [OptionType.CALL]: {
+            type: OptionType.CALL,
+            askPrice: await reqOption(offset, strike, exp, OptionType.CALL),
+          },
+        },
+      })),
+      ...putOffsets.map(async ([offset, strike]) => ({
+        provider: ProviderType.HEGIC,
+        expiration: exp,
+        term,
+        strike: strike.toString(),
+        options: {
+          [OptionType.PUT]: {
+            type: OptionType.PUT,
+            askPrice: await reqOption(offset, strike, exp, OptionType.PUT),
+          },
+        },
+      })),
+    ]);
+    // @ts-ignore
+    return Promise.all(requests.flat());
+  };
+
+  const { data } = useQuery(["hegic-prices", expirations.length], fetchPrices, {
+    staleTime: 600 * 1000,
+  });
+  // @ts-ignore
   return [data];
 };

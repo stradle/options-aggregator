@@ -5,7 +5,7 @@ export const OptionTypeColors = {
   [OptionType.PUT]: "#EB5757",
 };
 
-export const STRIKE_CUTOFF = 1.6;
+export const STRIKE_CUTOFF = 1.5;
 
 export const routes = {
   root: "/",
@@ -18,8 +18,10 @@ export const getUrlByProvider = (provider: ProviderType) => {
     case ProviderType.LYRA:
       return "https://avalon.app.lyra.finance/trade/eth";
     case ProviderType.DERIBIT:
-      return "https://www.deribit.com/options/ETH";
+      return "https://deribit.com/options/ETH";
     case ProviderType.PREMIA:
       return "https://app.premia.finance/options/WETH-DAI";
+    case ProviderType.HEGIC:
+      return "https://hegic.co/app.html#/arbitrum/options/buy-otm";
   }
 };

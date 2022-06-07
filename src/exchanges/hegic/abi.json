@@ -1,0 +1,217 @@
+[
+  {
+    "inputs": [
+      { "internalType": "contract IHegicOperationalTreasury", "name": "_pool", "type": "address" },
+      {
+        "internalType": "contract AggregatorV3Interface",
+        "name": "_priceProvider",
+        "type": "address"
+      },
+      { "internalType": "contract IPremiumCalculator", "name": "_pricer", "type": "address" },
+      { "internalType": "uint8", "name": "_spotDecimals", "type": "uint8" },
+      { "internalType": "uint256", "name": "limit", "type": "uint256" }
+    ],
+    "stateMutability": "nonpayable",
+    "type": "constructor"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      { "indexed": true, "internalType": "uint256", "name": "id", "type": "uint256" },
+      { "indexed": false, "internalType": "uint256", "name": "amount", "type": "uint256" },
+      { "indexed": false, "internalType": "uint256", "name": "premium", "type": "uint256" },
+      { "indexed": false, "internalType": "uint256", "name": "strike", "type": "uint256" },
+      { "indexed": false, "internalType": "uint32", "name": "expiration", "type": "uint32" }
+    ],
+    "name": "Acquired",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      { "indexed": true, "internalType": "uint256", "name": "id", "type": "uint256" },
+      { "indexed": false, "internalType": "uint256", "name": "amount", "type": "uint256" },
+      { "indexed": false, "internalType": "uint256", "name": "premium", "type": "uint256" },
+      { "indexed": false, "internalType": "uint256", "name": "atmStrike", "type": "uint256" },
+      { "indexed": false, "internalType": "uint256", "name": "otmStrike", "type": "uint256" },
+      { "indexed": false, "internalType": "uint32", "name": "expiration", "type": "uint32" }
+    ],
+    "name": "AcquiredSpread",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      { "indexed": true, "internalType": "uint256", "name": "id", "type": "uint256" },
+      { "indexed": false, "internalType": "uint256", "name": "amount", "type": "uint256" },
+      { "indexed": false, "internalType": "uint256", "name": "premium", "type": "uint256" },
+      { "indexed": false, "internalType": "uint256", "name": "callStrike", "type": "uint256" },
+      { "indexed": false, "internalType": "uint256", "name": "putStrike", "type": "uint256" },
+      { "indexed": false, "internalType": "uint32", "name": "expiration", "type": "uint32" }
+    ],
+    "name": "AcquiredStrangle",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      { "indexed": true, "internalType": "address", "name": "previousOwner", "type": "address" },
+      { "indexed": true, "internalType": "address", "name": "newOwner", "type": "address" }
+    ],
+    "name": "OwnershipTransferred",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [{ "indexed": false, "internalType": "uint256", "name": "limit", "type": "uint256" }],
+    "name": "SetLimit",
+    "type": "event"
+  },
+  {
+    "inputs": [
+      { "internalType": "address", "name": "holder", "type": "address" },
+      { "internalType": "uint32", "name": "period", "type": "uint32" },
+      { "internalType": "uint128", "name": "amount", "type": "uint128" },
+      { "internalType": "uint256", "name": "strike", "type": "uint256" }
+    ],
+    "name": "buy",
+    "outputs": [{ "internalType": "uint256", "name": "id", "type": "uint256" }],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      { "internalType": "uint32", "name": "period", "type": "uint32" },
+      { "internalType": "uint256", "name": "amount", "type": "uint256" },
+      { "internalType": "uint256", "name": "strike", "type": "uint256" }
+    ],
+    "name": "calculatePremium",
+    "outputs": [
+      { "internalType": "uint256", "name": "premium", "type": "uint256" },
+      { "internalType": "uint256", "name": "available", "type": "uint256" }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "collateralizationRatio",
+    "outputs": [{ "internalType": "uint8", "name": "", "type": "uint8" }],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [{ "internalType": "uint256", "name": "optionID", "type": "uint256" }],
+    "name": "exercise",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "getLockedByStrategy",
+    "outputs": [{ "internalType": "uint256", "name": "amount", "type": "uint256" }],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "k",
+    "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "lockedLimit",
+    "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "owner",
+    "outputs": [{ "internalType": "address", "name": "", "type": "address" }],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "pool",
+    "outputs": [
+      { "internalType": "contract IHegicOperationalTreasury", "name": "", "type": "address" }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "priceProvider",
+    "outputs": [
+      { "internalType": "contract AggregatorV3Interface", "name": "", "type": "address" }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "pricer",
+    "outputs": [{ "internalType": "contract IPremiumCalculator", "name": "", "type": "address" }],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [{ "internalType": "uint256", "name": "optionID", "type": "uint256" }],
+    "name": "profitOf",
+    "outputs": [{ "internalType": "uint256", "name": "amount", "type": "uint256" }],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "renounceOwnership",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [{ "internalType": "uint256", "name": "value", "type": "uint256" }],
+    "name": "setK",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [{ "internalType": "uint256", "name": "value", "type": "uint256" }],
+    "name": "setLimit",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      { "internalType": "contract IPremiumCalculator", "name": "value", "type": "address" }
+    ],
+    "name": "setPricer",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }],
+    "name": "strategyData",
+    "outputs": [
+      { "internalType": "uint128", "name": "amount", "type": "uint128" },
+      { "internalType": "uint128", "name": "strike", "type": "uint128" }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [{ "internalType": "address", "name": "newOwner", "type": "address" }],
+    "name": "transferOwnership",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  }
+]
