@@ -2,14 +2,17 @@ import Lyra from "@lyrafinance/lyra-js";
 import { BigNumber } from "ethers";
 import moment from "moment";
 import { useQuery } from "react-query";
-import { OptionsMap, OptionType, ProviderType } from "../../types";
+import { useAppContext } from "../../context/AppContext";
+import { OptionsMap, OptionType, ProviderType, Underlying } from "../../types";
+
+type QueryArgs = [string, Underlying];
 
 const lyra = new Lyra(undefined, true);
-
 const formatWei = (val: BigNumber) => val.div(BigNumber.from(10).pow(18)).toString();
 
-const getMarketData = async () => {
-  const market = await lyra.market("eth");
+const getMarketData = async ({ queryKey }: { queryKey: QueryArgs }) => {
+  const [, underlying] = queryKey;
+  const market = await lyra.market(underlying.toLowerCase());
   const options = await Promise.all(
     market.liveBoards().map(async (board) => {
       const expiration = board.expiryTimestamp * 1000;
@@ -59,7 +62,10 @@ const getMarketData = async () => {
 };
 
 export const useLyraRates = () => {
-  const { data } = useQuery("lyra", getMarketData, { refetchInterval: 30000 });
+  const { underlying } = useAppContext();
+  const { data } = useQuery(["lyra", underlying] as QueryArgs, getMarketData, {
+    refetchInterval: 30000,
+  });
 
   return [data];
 };

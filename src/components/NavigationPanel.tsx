@@ -133,7 +133,7 @@ const DesktopNavigation: React.FC = () => {
   );
 };
 
-export const NavigationPanel: React.FC = () => {
+const NavigationPanel: React.FC = () => {
   const navigate = useNavigate();
 
   function navigateRoot(): void {
@@ -178,3 +178,5 @@ export const NavigationPanel: React.FC = () => {
     </AppBar>
   );
 };
+
+export default NavigationPanel;

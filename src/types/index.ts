@@ -33,4 +33,7 @@ export type OptionsMap = {
   options: OptionCouple;
 };
 
-export type OptionsInterception = [OptionsMap, OptionsMap] | [OptionsMap, OptionsMap, OptionsMap];
+export enum Underlying {
+  ETH = "ETH",
+  BTC = "BTC",
+}

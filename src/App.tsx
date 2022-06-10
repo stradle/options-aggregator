@@ -1,7 +1,8 @@
 import { QueryClient, QueryClientProvider } from "react-query";
 import { ThemeProvider, CssBaseline, createTheme } from "@mui/material";
-import { RatesProvider } from "./exchanges/RatesProvider";
+import { RatesProvider } from "./providers/RatesProvider";
 import AppRouter from "./pages/AppRouter";
+import AppContextProvider from "./context/AppContext";
 
 const queryClient = new QueryClient();
 
@@ -28,12 +29,14 @@ const darkTheme = createTheme({
 function App() {
   return (
     <QueryClientProvider client={queryClient}>
-      <RatesProvider>
-        <ThemeProvider theme={darkTheme}>
-          <CssBaseline enableColorScheme />
-          <AppRouter />
-        </ThemeProvider>
-      </RatesProvider>
+      <AppContextProvider>
+        <RatesProvider>
+          <ThemeProvider theme={darkTheme}>
+            <CssBaseline enableColorScheme />
+            <AppRouter />
+          </ThemeProvider>
+        </RatesProvider>
+      </AppContextProvider>
     </QueryClientProvider>
   );
 }

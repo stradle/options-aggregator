@@ -1,15 +1,15 @@
 import { useMemo } from "react";
 import { chain, groupBy } from "lodash";
-import { useRatesContext } from "../../exchanges/RatesProvider";
-import { OptionsMap, ProviderType } from "../../types";
+import { useRatesContext } from "../../providers/RatesProvider";
+import { OptionsMap } from "../../types";
+import { useAppContext } from "../../context/AppContext";
 
 type TermStrikesOptions = {
   [term: string]: { [strike: string]: OptionsMap[] };
 };
 
-const sortedProviders = Object.values(ProviderType);
-
 export const useRatesData = () => {
+  const { providers } = useAppContext();
   const rates = useRatesContext();
   const allRates = useMemo(
     () =>
@@ -27,10 +27,10 @@ export const useRatesData = () => {
         .mapValues((strikeOptions) => {
           const termProviders = chain(strikeOptions).values().max().map("provider").value();
 
-          return sortedProviders.filter((provider) => termProviders.includes(provider));
+          return providers.filter((provider) => termProviders.includes(provider));
         })
         .value(),
-    [allRates]
+    [allRates, providers]
   );
 
   return { allRates, termProviders };

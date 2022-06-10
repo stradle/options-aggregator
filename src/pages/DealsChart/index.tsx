@@ -1,21 +1,12 @@
 import { useMemo } from "react";
-import { capitalize, maxBy, minBy, sortBy } from "lodash";
+import { maxBy, minBy, sortBy } from "lodash";
 import styled from "styled-components";
-import { Autocomplete, Box, Chip, TextField } from "@mui/material";
-import { useLocalStorage } from "react-use";
-
 import { formatCurrency, useEthPrice } from "../../services/util";
-import { useRatesContext } from "../../exchanges/RatesProvider";
-import {
-  ColoredOptionType,
-  StyledTable,
-  ProviderIcon,
-  Loader,
-  BasePriceWidget,
-} from "../../components";
-import { OptionsMap, OptionType, ProviderType } from "../../types";
-import { PageWrapper, StyledProviderLink } from "../styled";
 import { useRatesData } from "../../services/hooks";
+import { useAppContext } from "../../context/AppContext";
+import { ColoredOptionType, StyledTable, ProviderIcon } from "../../components";
+import { PageWrapper, StyledProviderLink } from "../styled";
+import { OptionsMap, OptionType, ProviderType } from "../../types";
 
 const StyledDealBuySellItem = styled.div`
   display: flex;
@@ -59,8 +50,9 @@ const DealBuySellItem = ({ item }: { item: DealPart }) => (
   </td>
 );
 
-const useDeals = (providers?: ProviderType[]) => {
+const useDeals = () => {
   const { allRates } = useRatesData();
+  const { providers } = useAppContext();
 
   const deals = useMemo(() => {
     const res: Deal[] = [];
@@ -129,51 +121,14 @@ const useDeals = (providers?: ProviderType[]) => {
 };
 
 const DealsChart = () => {
-  const rates = useRatesContext();
   const basePrice = useEthPrice();
-  const showLoader = Object.values(rates).some((rates) => !rates);
-  const [selectedProviders = Object.values(ProviderType), setSelectedProviders] = useLocalStorage(
-    "deals-providers",
-    Object.values(ProviderType)
-  );
-  const [sortedDeals] = useDeals(selectedProviders);
-
-  if (showLoader) {
-    return <Loader />;
-  }
+  const [sortedDeals] = useDeals();
 
   // cut too long array
   if (sortedDeals.length > 20) sortedDeals.length = 20;
 
   return (
     <PageWrapper>
-      <BasePriceWidget />
-      <Autocomplete
-        multiple
-        disableClearable
-        filterSelectedOptions
-        options={Object.values(ProviderType)}
-        getOptionLabel={(option) => capitalize(option)}
-        renderOption={(props, option) => (
-          <Box component="li" sx={{ "& > svg": { mr: 2, flexShrink: 0 } }} {...props}>
-            <ProviderIcon marginLeft={5} provider={option} />
-            {capitalize(option)}
-          </Box>
-        )}
-        renderInput={(params) => <TextField {...params} label="Markets" />}
-        renderTags={(tagValue, getTagProps) =>
-          tagValue.map((option, index) => (
-            <Chip
-              icon={<ProviderIcon marginLeft={5} provider={option} />}
-              label={capitalize(option)}
-              {...getTagProps({ index })}
-              disabled={selectedProviders?.length === 2}
-            />
-          ))
-        }
-        onChange={(e, value) => setSelectedProviders(value)}
-        value={selectedProviders}
-      />
       {sortedDeals.length > 0 ? (
         <StyledTable>
           <thead>

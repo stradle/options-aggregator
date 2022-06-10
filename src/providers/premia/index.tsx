@@ -61,7 +61,6 @@ export const usePremiaRates = (deribitRates?: OptionsMap[]): [OptionsMap[] | und
   const [expirations] = useExpirations(deribitRates);
   const { allStrikes = [], callStrikes = [], putStrikes = [], basePrice = 0 } = useStrikes();
   const toEth = (val: number) => basePrice * val;
-
   const fetchPrices = async () => {
     if (!(callStrikes && putStrikes && allStrikes)) return undefined;
 
@@ -91,7 +90,7 @@ export const usePremiaRates = (deribitRates?: OptionsMap[]): [OptionsMap[] | und
     return Promise.all(requests.flat());
   };
 
-  const { data } = useQuery(["premia-prices", expirations.length, allStrikes.length], fetchPrices, {
+  const { data } = useQuery(["premia-prices", expirations], fetchPrices, {
     staleTime: 600 * 1000,
   });
   // @ts-ignore

@@ -12,13 +12,14 @@ const BasePriceWidget = () => {
         display: "flex",
         flexDirection: "row",
         alignItems: "center",
-        padding: "0 0.5rem",
         gap: "0.5rem",
         width: "fit-content",
         cursor: "default",
+        padding: "6px",
+        fontWeight: 600,
       }}>
-      <img width={"48px"} height={"48px"} src={EthIcon} alt={"ETH icon"} />
-      <h4>{formatCurrency(ethPrice)}</h4>
+      <img width={"32px"} src={EthIcon} alt={"ETH icon"} />
+      {formatCurrency(ethPrice)}
     </Paper>
   );
 };

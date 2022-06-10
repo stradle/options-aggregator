@@ -28,9 +28,7 @@ const getContractByStrike = (offset: number, type: OptionType) => {
 const currentDate = moment();
 
 const reqOption = async (offset: number, strike: number, expiration: number, type: OptionType) => {
-  // const expSecs = Math.floor(expiration / 1000);
   const left = moment.duration(moment(expiration).diff(currentDate)).asSeconds().toFixed(0);
-  console.log(left);
   const contract = getContractByStrike(offset, type);
   const res = await contract
     .calculatePremium(left, (1e18).toString(), strike * 1e8)
@@ -45,7 +43,7 @@ const getRoundedStrikeByEth = (eth: number) => (offset: number) => {
   return [offset, Math.round(((offset / 100) * eth) / 100) * 100];
 };
 
-export const useHegicRates = (deribitRates?: OptionsMap[]): [OptionsMap[] | undefined] => {
+export const useHegicRates = (deribitRates: OptionsMap[]): [OptionsMap[] | undefined] => {
   const ethPrice = useEthPrice();
   const [expirations] = useExpirations(deribitRates, 3, 2.5);
   const getRoundedStrike = getRoundedStrikeByEth(ethPrice);

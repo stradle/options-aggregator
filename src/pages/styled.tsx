@@ -21,5 +21,4 @@ export const PageWrapper = styled(Box)`
   flex-direction: column;
   align-items: flex-start;
   margin-top: 1rem;
-  gap: 1rem;
 `;

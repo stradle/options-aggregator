@@ -2,8 +2,8 @@ import { createContext, ReactNode, useContext, useMemo } from "react";
 import { useDeribitRates } from "./deribit";
 import { useLyraRates } from "./lyra";
 import { usePremiaRates } from "./premia";
-import { OptionsMap, ProviderType } from "../types";
 import { useHegicRates } from "./hegic";
+import { OptionsMap, ProviderType } from "../types";
 
 type RatesContextType = Record<ProviderType, OptionsMap[] | undefined>;
 
