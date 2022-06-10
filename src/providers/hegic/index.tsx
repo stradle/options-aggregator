@@ -45,7 +45,7 @@ const getRoundedStrikeByEth = (eth: number) => (offset: number) => {
 
 export const useHegicRates = (deribitRates: OptionsMap[]): [OptionsMap[] | undefined] => {
   const ethPrice = useEthPrice();
-  const [expirations] = useExpirations(deribitRates, 3, 2.5);
+  const [expirations] = useExpirations(deribitRates, 7, 2.5);
   const getRoundedStrike = getRoundedStrikeByEth(ethPrice);
 
   const callOffsets = [110, 120, 130].map(getRoundedStrike);
