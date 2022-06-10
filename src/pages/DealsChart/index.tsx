@@ -121,7 +121,7 @@ const useDeals = () => {
 };
 
 const DealsChart = () => {
-  const basePrice = useEthPrice();
+  const { price } = useEthPrice();
   const [sortedDeals] = useDeals();
 
   // cut too long array
@@ -145,17 +145,16 @@ const DealsChart = () => {
               <tr key={deal.strike + deal.term + deal.type}>
                 <th>{formatCurrency(+deal.strike)}</th>
                 <th>{deal.term}</th>
-                <td
-                  style={{
-                    color: deal.type === OptionType.CALL ? "darkgreen" : "darkred",
-                  }}>
-                  <ColoredOptionType type={deal.type}>{deal.type}</ColoredOptionType>
+                <td>
+                  <ColoredOptionType style={{ fontWeight: 500 }} type={deal.type}>
+                    {deal.type}
+                  </ColoredOptionType>
                 </td>
                 <td>{formatCurrency(deal.amount)}</td>
                 <DealBuySellItem item={deal.buy} />
                 <DealBuySellItem item={deal.sell} />
-                <td>%{((deal.amount / deal.sell.price) * 100).toFixed(2)}</td>
-                <td>%{((deal.buy.price / basePrice) * 100).toFixed(2)}</td>
+                <td>{((deal.amount / deal.sell.price) * 100).toFixed(2)}%</td>
+                <td>{((deal.buy.price / price) * 100).toFixed(2)}%</td>
               </tr>
             ))}
           </tbody>

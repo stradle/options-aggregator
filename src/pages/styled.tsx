@@ -22,3 +22,10 @@ export const PageWrapper = styled(Box)`
   align-items: flex-start;
   margin-top: 1rem;
 `;
+
+export const ConfigSection = styled.div`
+  display: flex;
+  flex-direction: row;
+  gap: 1rem;
+  align-items: center;
+`;

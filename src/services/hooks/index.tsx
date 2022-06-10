@@ -8,7 +8,7 @@ type TermStrikesOptions = {
   [term: string]: { [strike: string]: OptionsMap[] };
 };
 
-export const useRatesData = () => {
+export const useRatesData = (filterSell = false) => {
   const { providers } = useAppContext();
   const rates = useRatesContext();
   const allRates = useMemo(
@@ -16,10 +16,15 @@ export const useRatesData = () => {
       chain(rates)
         .values()
         .flatten()
+        // @ts-ignore
+        .filter((optionsMap: OptionsMap) =>
+          filterSell ? Object.values(optionsMap.options).some((option) => option?.bidPrice) : true
+        )
         .groupBy("term")
         .mapValues((optionsMap: OptionsMap) => groupBy(optionsMap, "strike"))
+
         .value() as unknown as TermStrikesOptions,
-    [rates]
+    [rates, filterSell]
   );
   const termProviders = useMemo(
     () =>

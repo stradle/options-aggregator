@@ -13,15 +13,21 @@ export const formatCurrency = (val: number, maximumFractionDigits = 0) =>
   }).format(val);
 // new Intl.NumberFormat("en-IN", { maximumFractionDigits: 2 }).format(val);
 
-export const fetchEthPrice = (): Promise<number> =>
-  fetch("https://api.coingecko.com/api/v3/simple/price?ids=ethereum&vs_currencies=usd")
+type UnderlyingResult = { price: number; change: number };
+export const fetchEthPrice = (): Promise<UnderlyingResult> =>
+  fetch(
+    "https://api.coingecko.com/api/v3/simple/price?ids=ethereum&vs_currencies=usd&include_24hr_change=true"
+  )
     .then((response) => response.json())
-    .then(({ ethereum }) => ethereum.usd);
+    .then(({ ethereum }) => ({
+      price: ethereum.usd,
+      change: ethereum.usd_24h_change,
+    }));
 
 export const useEthPrice = () => {
-  const { data: ethPrice = 0 } = useQuery("eth-price", fetchEthPrice);
+  const { data = { price: 0, change: 0 } } = useQuery("eth-price", fetchEthPrice);
 
-  return ethPrice;
+  return data;
 };
 
 type Strikes = {
@@ -32,7 +38,7 @@ type Strikes = {
 };
 
 export const useStrikes = (): Strikes => {
-  const basePrice = useEthPrice();
+  const { price: basePrice } = useEthPrice();
   // Call : 0.8x spot -> 2x spot
   // Put : 0.5x spot -> 1.2x spot
   return useMemo(() => {

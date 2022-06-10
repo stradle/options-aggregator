@@ -1,20 +1,10 @@
 import styled from "styled-components";
 import { Outlet } from "react-router-dom";
-import {
-  Autocomplete,
-  Box,
-  Button,
-  ButtonGroup,
-  Chip,
-  FormControl,
-  InputLabel,
-  MenuItem,
-  Select,
-  TextField,
-} from "@mui/material";
+import { Autocomplete, Box, Button, ButtonGroup, Chip, TextField, Tooltip } from "@mui/material";
 import { BasePriceWidget, Loader, ProviderIcon } from "../components";
 import { useAppContext } from "../context/AppContext";
 import { useRatesContext } from "../providers/RatesProvider";
+import { ConfigSection } from "./styled";
 import { Underlying, ProviderType } from "../types";
 
 const LayoutBase = styled.div`
@@ -26,27 +16,25 @@ const LayoutBase = styled.div`
   padding: 1rem;
 `;
 
-const Config = styled.div`
-  display: flex;
-  flex-direction: row;
-  gap: 1rem;
-  align-items: center;
-`;
-
 const AssetSelector = () => {
   const { underlying, setUnderlying } = useAppContext();
 
   return (
     <ButtonGroup variant="outlined">
-      {Object.values(Underlying).map((asset) => (
-        <Button
-          key={asset}
-          variant={asset === underlying ? "contained" : undefined}
-          disabled={asset === Underlying.BTC}
-          onClick={() => setUnderlying(asset)}>
-          {asset}
-        </Button>
-      ))}
+      {Object.values(Underlying).map((asset) =>
+        asset === Underlying.BTC ? (
+          <Tooltip arrow title="Coming soon">
+            <Button key={asset}>{asset}</Button>
+          </Tooltip>
+        ) : (
+          <Button
+            key={asset}
+            variant={asset === underlying ? "contained" : undefined}
+            onClick={() => setUnderlying(asset)}>
+            {asset}
+          </Button>
+        )
+      )}
     </ButtonGroup>
   );
 };
@@ -90,11 +78,11 @@ const Layout = () => {
 
   return (
     <LayoutBase>
-      <Config>
+      <ConfigSection>
         <BasePriceWidget />
         <AssetSelector />
         <ProviderSelector />
-      </Config>
+      </ConfigSection>
 
       {showLoader ? <Loader /> : <Outlet />}
     </LayoutBase>

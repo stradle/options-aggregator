@@ -111,12 +111,12 @@ const useDeribitData = () => {
 
 export const useDeribitRates = () => {
   const [data] = useDeribitData();
-  const ethPrice = useEthPrice();
+  const { price } = useEthPrice();
   const optionsMap = useMemo(
     () =>
       data
         .filter(({ mid_price, ask_price, bid_price }) => ask_price && bid_price)
-        .map((item) => parseDeribitOption(item, ethPrice))
+        .map((item) => parseDeribitOption(item, price))
         .reduce<OptionsMap[]>((acc, option) => {
           const found = acc.find(
             ({ term, strike }) => option.term === term && option.strike === strike
@@ -137,7 +137,7 @@ export const useDeribitRates = () => {
 
           return acc;
         }, []),
-    [data, ethPrice]
+    [data, price]
   );
 
   return [optionsMap];

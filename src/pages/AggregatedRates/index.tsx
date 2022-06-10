@@ -1,13 +1,18 @@
-import { filter, minBy } from "lodash";
+import { filter, maxBy, minBy } from "lodash";
 import styled from "styled-components";
-import { Divider, FormControlLabel, Switch } from "@mui/material";
-import { useState } from "react";
+import { useLocalStorage } from "react-use";
+import { Button, ButtonGroup, Divider, FormControlLabel, Switch } from "@mui/material";
 import { useRatesData } from "../../services/hooks";
 import { formatCurrency, useExpirations, useStrikes } from "../../services/util";
 import { useRatesContext } from "../../providers/RatesProvider";
-import { ColoredOptionType, StyledTable, ProviderIcon } from "../../components";
-import { PageWrapper, StyledProviderLink } from "../styled";
+import { ColoredOptionType, ProviderIcon, StyledTable } from "../../components";
+import { ConfigSection, PageWrapper, StyledProviderLink } from "../styled";
 import { Option, OptionsMap, OptionType } from "../../types";
+
+enum DealModes {
+  BUY = "Buy",
+  SELL = "Sell",
+}
 
 const StyledOptionType = styled(ColoredOptionType)<{ highlight?: boolean }>`
   height: 20px;
@@ -22,19 +27,36 @@ const StyledOptionType = styled(ColoredOptionType)<{ highlight?: boolean }>`
      background-color: rgba(144,202,249,0.1)
   `}
 `;
+const DealsFields = {
+  [DealModes.BUY]: "askPrice",
+  [DealModes.SELL]: "bidPrice",
+};
 
-const OptionValue = ({ option, highlight }: { option?: Option; highlight?: boolean }) => (
+const OptionValue = ({
+  option,
+  highlight,
+  dealMode,
+}: {
+  option?: Option;
+  highlight?: boolean;
+  dealMode: DealModes;
+}) => (
   <StyledOptionType highlight={highlight} type={option?.type}>
-    {option?.askPrice && formatCurrency(option.askPrice)}
+    {
+      // @ts-ignore
+      option?.askPrice && formatCurrency(option[DealsFields[dealMode]])
+    }
   </StyledOptionType>
 );
 
 const OptionsCouple = ({
   optionCouple,
   markCheap,
+  dealMode,
 }: {
   optionCouple: OptionsMap;
   markCheap: { call: boolean; put: boolean };
+  dealMode: DealModes;
 }) => {
   const { [OptionType.CALL]: call, [OptionType.PUT]: put } = optionCouple.options;
 
@@ -47,8 +69,8 @@ const OptionsCouple = ({
           minWidth: "40px",
           alignItems: "end",
         }}>
-        <OptionValue highlight={markCheap.call} option={call} />
-        <OptionValue highlight={markCheap.put} option={put} />
+        <OptionValue dealMode={dealMode} highlight={markCheap.call} option={call} />
+        <OptionValue dealMode={dealMode} highlight={markCheap.put} option={put} />
       </div>
     </StyledProviderLink>
   );
@@ -59,20 +81,60 @@ const StyledCell = styled.div`
   gap: 3px;
 `;
 
+const buyAskOptions = Object.values(DealModes);
+
+const DealModeSelector = ({
+  value,
+  setValue,
+}: {
+  value: string;
+  setValue: (value: DealModes) => void;
+}) => {
+  return (
+    <ButtonGroup variant="outlined">
+      {buyAskOptions.map((asset) => (
+        <Button
+          key={asset}
+          variant={asset === value ? "contained" : undefined}
+          onClick={() => setValue(asset)}>
+          {asset}
+        </Button>
+      ))}
+    </ButtonGroup>
+  );
+};
+
+const compare = (options: OptionsMap[], type: OptionType, mode: DealModes) => {
+  const field = DealsFields[mode];
+  const compareFunc = mode === DealModes.BUY ? minBy : maxBy;
+
+  return (
+    filter(options, `options.${type}.${field}`).length > 1 &&
+    compareFunc(options, `options.${type}.${field}`)?.provider
+  );
+};
+
 const AggregatedRates = () => {
-  const [highlight, setHighlight] = useState(false);
+  const [highlight, setHighlight] = useLocalStorage("highlight", false);
+  const [dealMode = DealModes.BUY, setDealMode] = useLocalStorage("ask-bid", DealModes.BUY);
   const rates = useRatesContext();
   const { allStrikes = [] } = useStrikes();
 
   const [expirations] = useExpirations(rates.DERIBIT);
-  const { allRates, termProviders } = useRatesData();
+  const { allRates, termProviders } = useRatesData(dealMode === DealModes.SELL);
 
   return (
-    <PageWrapper>
-      <FormControlLabel
-        control={<Switch checked={highlight} onChange={(e) => setHighlight(e.target.checked)} />}
-        label="Highlight cheapest"
-      />
+    <PageWrapper gap={"10px"}>
+      <ConfigSection>
+        <DealModeSelector value={dealMode} setValue={setDealMode} />
+        <FormControlLabel
+          control={<Switch checked={highlight} onChange={(e) => setHighlight(e.target.checked)} />}
+          label="Best value"
+          sx={{
+            userSelect: "none",
+          }}
+        />
+      </ConfigSection>
       <StyledTable>
         <thead>
           <tr>
@@ -121,13 +183,9 @@ const AggregatedRates = () => {
                   const providers = termProviders[term];
 
                   const cheapestCallProvider =
-                    highlight &&
-                    filter(termStrikeOptions, "options.CALL.askPrice").length > 1 &&
-                    minBy(termStrikeOptions, "options.CALL.askPrice")?.provider;
+                    highlight && compare(termStrikeOptions, OptionType.CALL, dealMode);
                   const cheapestPutProvider =
-                    highlight &&
-                    filter(termStrikeOptions, "options.PUT.askPrice").length > 1 &&
-                    minBy(termStrikeOptions, "options.PUT.askPrice")?.provider;
+                    highlight && compare(termStrikeOptions, OptionType.PUT, dealMode);
 
                   if (!termStrikeOptions?.length) return <td key={term} />;
 
@@ -147,8 +205,9 @@ const AggregatedRates = () => {
                             <>
                               {optionCouple ? (
                                 <OptionsCouple
-                                  markCheap={markCheap}
                                   key={provider}
+                                  markCheap={markCheap}
+                                  dealMode={dealMode}
                                   optionCouple={optionCouple}
                                 />
                               ) : (
