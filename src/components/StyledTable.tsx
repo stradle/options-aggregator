@@ -25,7 +25,7 @@ export const StyledTable = styled.table<{ alignRight?: boolean }>`
   th,
   td {
     padding: 4px;
-    border: 1px solid rgba(255, 255, 255, 0.088);
+    border: 1px solid rgba(255, 255, 255, 0.12);
   }
 `;
 
