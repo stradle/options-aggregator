@@ -19,7 +19,7 @@ const getMarketData = async ({ queryKey }: { queryKey: QueryArgs }) => {
       const term = moment(expiration).format("DDMMMYY").toUpperCase();
 
       return Promise.all(
-        board.strikes().map<Promise<OptionsMap>>(async (strike) => {
+        board.strikes().map<Promise<OptionsMap | undefined>>(async (strike) => {
           const strikePrice = formatWei(strike.strikePrice);
           const one = BigNumber.from(10).pow(18);
 
@@ -32,6 +32,8 @@ const getMarketData = async ({ queryKey }: { queryKey: QueryArgs }) => {
           const [callBuyPrice, callSellPrice, putBuyPrice, putSellPrice] = quotes.map((quote) =>
             parseFloat(formatWei(quote.pricePerOption))
           );
+
+          if ([callBuyPrice, callSellPrice, putBuyPrice, putSellPrice].every((val) => !val)) return;
 
           return {
             strike: strikePrice,
@@ -58,7 +60,7 @@ const getMarketData = async ({ queryKey }: { queryKey: QueryArgs }) => {
     })
   );
 
-  return options.flat();
+  return options.flat().filter(Boolean) as OptionsMap[];
 };
 
 export const useLyraRates = () => {
