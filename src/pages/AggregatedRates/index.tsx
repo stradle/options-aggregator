@@ -1,32 +1,53 @@
 import { filter, maxBy, minBy } from "lodash";
-import styled from "styled-components";
 import { useLocalStorage } from "react-use";
-import { Button, ButtonGroup, Divider, FormControlLabel, Switch } from "@mui/material";
+import {
+  alpha,
+  Button,
+  ButtonGroup,
+  Divider,
+  FormControlLabel,
+  styled,
+  Switch,
+  Typography,
+} from "@mui/material";
 import { useRatesData } from "../../services/hooks";
 import { formatCurrency, useExpirations, useStrikes } from "../../services/util";
 import { useRatesContext } from "../../providers/RatesProvider";
+import useOptionPopover from "./useOptionPopover";
 import { ColoredOptionType, ProviderIcon, StyledTable } from "../../components";
 import { ConfigSection, PageWrapper, StyledProviderLink } from "../styled";
 import { Option, OptionsMap, OptionType } from "../../types";
+import { OptionTypeColors } from "../../services/util/constants";
 
 enum DealModes {
   BUY = "Buy",
   SELL = "Sell",
 }
 
-const StyledOptionType = styled(ColoredOptionType)<{ highlight?: boolean }>`
-  height: 20px;
-  line-height: 20px;
-  text-align: end;
-  border-radius: 4px;
-  width: fit-content;
-  ${({ highlight }) =>
-    highlight &&
-    `    
-     border: 1px solid rgba(255, 255, 255, 0.088);
-     background-color: rgba(144,202,249,0.1)
-  `}
-`;
+const StyledOptionType = styled(ColoredOptionType)<{ highlight?: boolean; type?: OptionType }>(
+  ({ highlight, theme, type }) => ({
+    color: OptionTypeColors[type ?? OptionType.CALL],
+    height: "20px",
+    lineHeight: "20px",
+    textAlign: "end",
+    borderRadius: "4px",
+    width: "fit-content",
+    border: highlight ? "1px solid" : "",
+    borderColor: theme.palette.divider,
+    backgroundColor: highlight
+      ? alpha(theme.palette.text.primary, theme.palette.action.focusOpacity)
+      : "",
+  })
+);
+const StyledCell = styled("div")({
+  display: "flex",
+  gap: "3px",
+});
+
+const TableHeader = ({ text }: { text: string }) => {
+  return <Typography fontWeight={500}>{text}</Typography>;
+};
+
 const DealsFields = {
   [DealModes.BUY]: "askPrice",
   [DealModes.SELL]: "bidPrice",
@@ -53,15 +74,17 @@ const OptionsCouple = ({
   optionCouple,
   markCheap,
   dealMode,
+  onClick,
 }: {
   optionCouple: OptionsMap;
   markCheap: { call: boolean; put: boolean };
   dealMode: DealModes;
+  onClick: (event: React.MouseEvent, option: OptionsMap) => void;
 }) => {
   const { [OptionType.CALL]: call, [OptionType.PUT]: put } = optionCouple.options;
 
   return (
-    <StyledProviderLink provider={optionCouple.provider}>
+    <StyledProviderLink onClick={(event) => onClick(event, optionCouple)}>
       <div
         style={{
           display: "flex",
@@ -75,11 +98,6 @@ const OptionsCouple = ({
     </StyledProviderLink>
   );
 };
-
-const StyledCell = styled.div`
-  display: flex;
-  gap: 3px;
-`;
 
 const buyAskOptions = Object.values(DealModes);
 
@@ -123,8 +141,11 @@ const AggregatedRates = () => {
   const [expirations] = useExpirations(rates.DERIBIT);
   const { allRates, termProviders } = useRatesData(dealMode === DealModes.SELL);
 
+  const { handleOpen, OptionPopover } = useOptionPopover();
+
   return (
     <PageWrapper gap={"10px"}>
+      {OptionPopover}
       <ConfigSection>
         <DealModeSelector value={dealMode} setValue={setDealMode} />
         <FormControlLabel
@@ -147,20 +168,16 @@ const AggregatedRates = () => {
 
               return (
                 <th key={term}>
-                  {term}
+                  <TableHeader text={term} />
                   <StyledCell>
                     {providers?.map((provider, index) => (
                       <>
-                        <StyledProviderLink
-                          provider={provider}
+                        <div
                           style={{
                             flex: 1,
-                            display: "flex",
-                            alignItems: "center",
-                            justifyContent: "center",
                           }}>
                           <ProviderIcon provider={provider} />
-                        </StyledProviderLink>
+                        </div>
                         {index !== providers.length - 1 && (
                           <Divider orientation="vertical" flexItem />
                         )}
@@ -177,7 +194,9 @@ const AggregatedRates = () => {
           {allStrikes.map((strike) => {
             return (
               <tr key={strike}>
-                <th key={strike}>{formatCurrency(+strike)}</th>
+                <th key={strike}>
+                  <TableHeader text={formatCurrency(+strike)} />
+                </th>
                 {expirations.map(([term]) => {
                   const termStrikeOptions = allRates[term][strike];
                   const providers = termProviders[term];
@@ -209,12 +228,13 @@ const AggregatedRates = () => {
                                   markCheap={markCheap}
                                   dealMode={dealMode}
                                   optionCouple={optionCouple}
+                                  onClick={handleOpen}
                                 />
                               ) : (
                                 <div style={{ flex: 1 }} />
                               )}
                               {index !== providers.length - 1 && (
-                                <Divider orientation="vertical" flexItem variant={"middle"} />
+                                <Divider orientation="vertical" flexItem variant="middle" />
                               )}
                             </>
                           );

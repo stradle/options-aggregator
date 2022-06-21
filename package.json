@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
-    "@lyrafinance/lyra-js": "^0.0.11",
+    "@lyrafinance/lyra-js": "^0.0.14",
     "@mui/icons-material": "^5.8.0",
     "@mui/material": "^5.8.1",
     "@mui/styled-engine": "npm:@mui/styled-engine-sc@latest",

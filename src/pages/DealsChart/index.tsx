@@ -1,22 +1,22 @@
 import { useMemo } from "react";
 import { maxBy, minBy, sortBy } from "lodash";
-import styled from "styled-components";
+import { styled } from "@mui/material";
+import moment from "moment";
 import { formatCurrency, useEthPrice } from "../../services/util";
 import { useRatesData } from "../../services/hooks";
 import { useAppContext } from "../../context/AppContext";
 import { ColoredOptionType, StyledTable, ProviderIcon } from "../../components";
-import { PageWrapper, StyledProviderLink } from "../styled";
+import { PageWrapper } from "../styled";
 import { OptionsMap, OptionType, ProviderType } from "../../types";
 
-const StyledDealBuySellItem = styled.div`
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  justify-content: end;
-  gap: 3px;
-  color: white;
-  font-size: 16px;
-`;
+const StyledDealBuySellItem = styled("div")({
+  fontSize: "inherit",
+  display: "flex",
+  flexDirection: "row",
+  alignItems: "center",
+  justifyContent: "end",
+  gap: "3px",
+});
 
 const dealColumns = [
   "Strike",
@@ -26,7 +26,7 @@ const dealColumns = [
   "Buy Price",
   "Sell Price",
   "Discount",
-  "Buy/Base",
+  "APY",
 ];
 
 const PROFIT_THRESHOLD = 3;
@@ -34,6 +34,7 @@ const PROFIT_THRESHOLD = 3;
 type DealPart = { price: number; provider: ProviderType };
 type Deal = Pick<OptionsMap, "term" | "strike"> & {
   amount: number;
+  expiration: number;
   type: OptionType;
   buy: DealPart;
   sell: DealPart;
@@ -41,12 +42,10 @@ type Deal = Pick<OptionsMap, "term" | "strike"> & {
 
 const DealBuySellItem = ({ item }: { item: DealPart }) => (
   <td>
-    <StyledProviderLink provider={item.provider}>
-      <StyledDealBuySellItem>
-        <div>{formatCurrency(item.price)}</div>
-        <ProviderIcon provider={item.provider} />
-      </StyledDealBuySellItem>
-    </StyledProviderLink>
+    <StyledDealBuySellItem>
+      <div>{formatCurrency(item.price)}</div>
+      <ProviderIcon provider={item.provider} />
+    </StyledDealBuySellItem>
   </td>
 );
 
@@ -83,8 +82,9 @@ const useDeals = () => {
           res.push({
             type: OptionType.CALL,
             term: maxCall.term,
-            amount: callDeal,
             strike: maxCall.strike,
+            expiration: maxCall.expiration,
+            amount: callDeal,
             buy: {
               price: minCall?.options.CALL?.askPrice as number,
               provider: minCall.provider,
@@ -100,6 +100,7 @@ const useDeals = () => {
             type: OptionType.PUT,
             term: maxPut.term,
             strike: maxPut.strike,
+            expiration: maxPut.expiration,
             amount: putDeal,
             buy: {
               price: minPut?.options.PUT?.askPrice as number,
@@ -141,22 +142,25 @@ const DealsChart = () => {
             </tr>
           </thead>
           <tbody>
-            {sortedDeals?.map((deal) => (
-              <tr key={deal.strike + deal.term + deal.type}>
-                <th>{formatCurrency(+deal.strike)}</th>
-                <th>{deal.term}</th>
-                <td>
-                  <ColoredOptionType style={{ fontWeight: 500 }} type={deal.type}>
-                    {deal.type}
-                  </ColoredOptionType>
-                </td>
-                <td>{formatCurrency(deal.amount)}</td>
-                <DealBuySellItem item={deal.buy} />
-                <DealBuySellItem item={deal.sell} />
-                <td>{((deal.amount / deal.sell.price) * 100).toFixed(2)}%</td>
-                <td>{((deal.buy.price / price) * 100).toFixed(2)}%</td>
-              </tr>
-            ))}
+            {sortedDeals?.map((deal) => {
+              const momentExp = moment(deal?.expiration);
+              const duration = moment.duration(momentExp.diff(moment())).asYears();
+
+              return (
+                <tr key={deal.strike + deal.term + deal.type}>
+                  <th>{formatCurrency(+deal.strike)}</th>
+                  <th>{deal.term}</th>
+                  <td>
+                    <ColoredOptionType type={deal.type}>{deal.type}</ColoredOptionType>
+                  </td>
+                  <td>{formatCurrency(deal.amount)}</td>
+                  <DealBuySellItem item={deal.buy} />
+                  <DealBuySellItem item={deal.sell} />
+                  <td>{((deal.amount / deal.sell.price) * 100).toFixed(2)}%</td>
+                  <td>{((deal.amount / price / duration) * 100).toFixed(2)}%</td>
+                </tr>
+              );
+            })}
           </tbody>
         </StyledTable>
       ) : (

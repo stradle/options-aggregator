@@ -1,44 +1,57 @@
+import { useMemo, useState } from "react";
 import { QueryClient, QueryClientProvider } from "react-query";
 import { ThemeProvider, CssBaseline, createTheme } from "@mui/material";
+import { lime } from "@mui/material/colors";
 import { RatesProvider } from "./providers/RatesProvider";
 import AppRouter from "./pages/AppRouter";
 import AppContextProvider from "./context/AppContext";
+import { ColorModeContext } from "./context/ColorModeContext";
+import { useLocalStorage } from "react-use";
+// import amber from '@mui/material/colors/amber';
+
+type ColorTheme = "light" | "dark";
 
 const queryClient = new QueryClient();
 
-const darkTheme = createTheme({
-  palette: {
-    mode: "dark",
-    // primary: {
-    //   main: "#fff",
-    //   light: "#92AFB1",
-    // },
-    // secondary: {
-    //   main: "#63f3dc",
-    // },
-    // background: {
-    //   paper: "#1A3B49",
-    //   default: "#7b8a95",
-    // },
-    // text: {
-    //   primary: "#fff",
-    // },
-  },
-});
+const getTheme = (theme: ColorTheme) =>
+  createTheme({
+    palette: {
+      mode: theme,
+      // primary: {
+      //   ...lime,
+      // secondaryText: "rgba(255,255,255,0.7)",
+      // positiveText: "rgba(255,255,255,0.7)",
+      // negativeText: "rgba(255,255,255,0.7)",
+      // },
+    },
+  });
 
-function App() {
+const App = () => {
+  const [mode = "light", setMode] = useLocalStorage<ColorTheme>("light");
+  const colorModeContext = useMemo(
+    () => ({
+      toggleColorMode: () => {
+        setMode(mode === "light" ? "dark" : "light");
+      },
+    }),
+    [mode]
+  );
+  const theme = useMemo(() => getTheme(mode), [mode]);
+
   return (
     <QueryClientProvider client={queryClient}>
       <AppContextProvider>
         <RatesProvider>
-          <ThemeProvider theme={darkTheme}>
-            <CssBaseline enableColorScheme />
-            <AppRouter />
+          <ThemeProvider theme={theme}>
+            <ColorModeContext.Provider value={colorModeContext}>
+              <CssBaseline enableColorScheme />
+              <AppRouter />
+            </ColorModeContext.Provider>
           </ThemeProvider>
         </RatesProvider>
       </AppContextProvider>
     </QueryClientProvider>
   );
-}
+};
 
 export default App;

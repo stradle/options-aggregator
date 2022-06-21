@@ -13,14 +13,20 @@ const providerIcons = {
 
 export const ProviderIcon = ({
   provider,
-  width = 15,
+  height = 15,
   marginLeft = 0,
 }: {
   provider: ProviderType;
-  width?: number;
+  height?: number;
   marginLeft?: number;
 }) => {
   const IconComponent = providerIcons[provider];
 
-  return <IconComponent style={{ marginLeft: `${marginLeft}px` }} width={`${width}px`} />;
+  return (
+    <IconComponent
+      style={{ marginLeft: `${marginLeft}px` }}
+      width={`${height}px`}
+      height={`${height}px`}
+    />
+  );
 };

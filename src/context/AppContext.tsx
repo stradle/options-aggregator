@@ -1,4 +1,4 @@
-import { createContext, ReactNode, useContext, useMemo } from "react";
+import { createContext, ReactNode, useContext, useMemo, useState } from "react";
 import { useLocalStorage } from "react-use";
 import { Underlying, ProviderType } from "../types";
 
@@ -7,6 +7,8 @@ type AppContextType = {
   setUnderlying: (val: Underlying) => void;
   providers: ProviderType[];
   setProviders: (val: ProviderType[]) => void;
+  interestRate: number;
+  setInterestRate: (val: number) => void;
 };
 
 const AppContext = createContext<AppContextType>({
@@ -14,6 +16,8 @@ const AppContext = createContext<AppContextType>({
   setUnderlying: () => {},
   providers: Object.values(ProviderType),
   setProviders: () => {},
+  interestRate: 0,
+  setInterestRate: () => {},
 });
 
 export const useAppContext = () => {
@@ -21,6 +25,7 @@ export const useAppContext = () => {
 };
 
 const AppContextProvider = ({ children }: { children?: ReactNode }) => {
+  const [interestRate, setInterestRate] = useState(0.05);
   const [underlying = Underlying.ETH, setUnderlying] = useLocalStorage<Underlying>(
     "underlying",
     Underlying.ETH
@@ -31,7 +36,7 @@ const AppContextProvider = ({ children }: { children?: ReactNode }) => {
   );
 
   const context = useMemo(
-    () => ({ underlying, setUnderlying, providers, setProviders }),
+    () => ({ underlying, setUnderlying, providers, setProviders, interestRate, setInterestRate }),
     [underlying, providers]
   );
 

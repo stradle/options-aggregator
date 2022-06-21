@@ -11,18 +11,18 @@ export interface NavigationOption {
   isActive: boolean;
 }
 
-export default (): { navigationOptions: NavigationOption[] } => {
+const useNavigationOptions = (): { navigationOptions: NavigationOption[] } => {
   const location = useLocation();
 
   const navigationOptions = [
     {
-      text: "Deals Chart",
+      text: "Deals chart",
       path: routes.dealsChart,
       icon: <StarBorderPurple500Icon />,
       isActive: navigationService.matchRoutePath(location.pathname, routes.dealsChart),
     },
     {
-      text: "Aggregated Rates",
+      text: "Aggregated rates",
       path: routes.aggregatedRates,
       icon: <BrokenImageIcon />,
       isActive: navigationService.matchRoutePath(location.pathname, routes.aggregatedRates),
@@ -33,3 +33,5 @@ export default (): { navigationOptions: NavigationOption[] } => {
     navigationOptions,
   };
 };
+
+export default useNavigationOptions;

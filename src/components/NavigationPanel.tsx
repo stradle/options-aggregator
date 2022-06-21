@@ -16,6 +16,7 @@ import MenuIcon from "@mui/icons-material/Menu";
 import AddchartIcon from "@mui/icons-material/Addchart";
 import useNavigationOptions from "../services/hooks/useNavigationOptions";
 import { routes } from "../services/util/constants";
+import ColorModeSwitcher from "./ColorModeSwitcher";
 
 const MobileNavigation: React.FC = () => {
   const [anchorElNav, setAnchorElNav] = useState<null | HTMLElement>(null);
@@ -70,32 +71,13 @@ const MobileNavigation: React.FC = () => {
             <Typography textAlign="center">{text}</Typography>
           </MenuItem>
         ))}
+        <MenuItem>
+          <ColorModeSwitcher />
+        </MenuItem>
       </Menu>
     </Box>
   );
 };
-
-// const DesktopNavigation: React.FC = () => {
-//   const navigate = useNavigate();
-//   const { navigationOptions } = useNavigationOptions();
-
-// function handleMenuNavigation(path: string): void {
-//   navigate(path);
-// }
-
-//   return (
-//     <Box sx={{ flexGrow: 1, display: { xs: "none", md: "flex" } }}>
-//       {navigationOptions.map(({ text, path }) => (
-//         <Button
-//           key={text}
-//           onClick={() => handleMenuNavigation(path)}
-//           sx={{ my: 2, color: "white", display: "block" }}>
-//           {text}
-//         </Button>
-//       ))}
-//     </Box>
-//   );
-// };
 
 function useRouteMatch(patterns: readonly string[]) {
   const { pathname } = useLocation();
@@ -117,8 +99,16 @@ const DesktopNavigation: React.FC = () => {
   const currentTab = routeMatch?.pattern?.path;
 
   return (
-    <Box sx={{ width: "100%" }}>
-      <Tabs value={currentTab} aria-label="nav tabs example">
+    <Box
+      sx={{
+        width: "100%",
+        display: {
+          xs: "none",
+          md: "flex",
+          justifyContent: "space-between",
+        },
+      }}>
+      <Tabs value={currentTab} textColor="inherit" aria-label="nav tabs example">
         {navigationOptions.map((option) => (
           <Tab
             key={option.path}
@@ -126,9 +116,11 @@ const DesktopNavigation: React.FC = () => {
             value={option.path}
             to={option.path}
             component={Link}
+            sx={{ textTransform: "none" }}
           />
         ))}
       </Tabs>
+      <ColorModeSwitcher />
     </Box>
   );
 };
@@ -141,7 +133,7 @@ const NavigationPanel: React.FC = () => {
   }
 
   return (
-    <AppBar position="static">
+    <AppBar position="static" color="inherit">
       <Container
         maxWidth="xl"
         sx={{
@@ -149,30 +141,38 @@ const NavigationPanel: React.FC = () => {
           display: "flex",
           alignItems: "center",
         }}>
-        <Toolbar disableGutters>
-          <AddchartIcon onClick={() => navigateRoot()} sx={{ cursor: "pointer" }} />
-
-          <Typography
-            variant="h6"
-            noWrap
-            component="a"
-            href={routes.root}
-            sx={{
-              mr: 2,
-              display: { xs: "none", md: "flex" },
-              fontFamily: "monospace",
-              fontWeight: 700,
-              color: "inherit",
-              textDecoration: "none",
-              paddingLeft: ".3rem",
-              minWidth: "100px",
+        <Toolbar disableGutters sx={{ padding: "0 200px", width: "100%" }}>
+          <div
+            style={{
+              width: "100%",
+              display: "flex",
+              flexDirection: "row",
+              alignItems: "center",
             }}>
-            Stradle
-          </Typography>
-
-          <DesktopNavigation />
-
-          <MobileNavigation />
+            <AddchartIcon
+              sx={{ color: "primary.main", cursor: "pointer" }}
+              onClick={() => navigateRoot()}
+            />
+            <Typography
+              variant="h6"
+              noWrap
+              component="a"
+              href={routes.root}
+              sx={{
+                mr: 2,
+                display: { xs: "none", md: "flex" },
+                fontFamily: "monospace",
+                fontWeight: 700,
+                color: "inherit",
+                textDecoration: "none",
+                paddingLeft: ".3rem",
+                minWidth: "100px",
+              }}>
+              Stradle
+            </Typography>
+            <DesktopNavigation />
+            <MobileNavigation />
+          </div>
         </Toolbar>
       </Container>
     </AppBar>
