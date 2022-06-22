@@ -18,16 +18,7 @@ const StyledDealBuySellItem = styled("div")({
   gap: "3px",
 });
 
-const dealColumns = [
-  "Strike",
-  "Term",
-  "Type",
-  "Delta",
-  "Buy Price",
-  "Sell Price",
-  "Discount",
-  "APY",
-];
+const dealColumns = ["Strike", "Term", "Type", "Delta", "Buy", "Sell", "Discount", "APY"];
 
 const PROFIT_THRESHOLD = 3;
 
@@ -43,7 +34,7 @@ type Deal = Pick<OptionsMap, "term" | "strike"> & {
 const DealBuySellItem = ({ item }: { item: DealPart }) => (
   <td>
     <StyledDealBuySellItem>
-      <div>{formatCurrency(item.price)}</div>
+      <div>{formatCurrency(item.price, 2)}</div>
       <ProviderIcon provider={item.provider} />
     </StyledDealBuySellItem>
   </td>
@@ -153,7 +144,7 @@ const DealsChart = () => {
                   <td>
                     <ColoredOptionType type={deal.type}>{deal.type}</ColoredOptionType>
                   </td>
-                  <td>{formatCurrency(deal.amount)}</td>
+                  <td>{formatCurrency(deal.amount, 2)}</td>
                   <DealBuySellItem item={deal.buy} />
                   <DealBuySellItem item={deal.sell} />
                   <td>{((deal.amount / deal.sell.price) * 100).toFixed(2)}%</td>
