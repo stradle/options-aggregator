@@ -1891,10 +1891,10 @@
   resolved "https://registry.npmjs.org/@leichtgewicht/ip-codec/-/ip-codec-2.0.4.tgz"
   integrity sha512-Hcv+nVC0kZnQ3tD9GVu5xSMR4VVYOteQIr/hwFPVEvPdlXqgGEuRjiheChHgdM+JyqdgNcmzZOX/tnl0JOiI7A==
 
-"@lyrafinance/lyra-js@^0.0.14":
-  version "0.0.14"
-  resolved "https://registry.yarnpkg.com/@lyrafinance/lyra-js/-/lyra-js-0.0.14.tgz#550bf9d8543bd526c2cb9d170773738d279db007"
-  integrity sha512-BwiV7ExVrao7L5HcSoSswJ9pUPatzuZKRtaLTv5D6lVk4STwbYh/ul8zxbAR3fxa/MlsEjcdTu5+oz0Xcm+/Qw==
+"@lyrafinance/lyra-js@^0.0.15":
+  version "0.0.15"
+  resolved "https://registry.yarnpkg.com/@lyrafinance/lyra-js/-/lyra-js-0.0.15.tgz#410898d6c7da427937c868d7d7fcafb8f16b2141"
+  integrity sha512-vUqf39LHwnBzITDXRtoIHgvO1wouMZSnm7Q8LQGeLEF9l/6l7EJgo/Sc1D7LXN9ztWC2qg+7UpnNeQpTcQIQug==
   dependencies:
     "@ethersproject/address" "^5.6.0"
     "@ethersproject/bignumber" "^5.6.0"
