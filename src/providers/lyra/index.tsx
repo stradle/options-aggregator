@@ -7,7 +7,7 @@ import { OptionsMap, OptionType, ProviderType, Underlying } from "../../types";
 
 type QueryArgs = [string, Underlying];
 
-const lyra = new Lyra(undefined, true);
+const lyra = new Lyra();
 const formatWei = (val: BigNumber) => val.div(BigNumber.from(10).pow(18)).toString();
 
 const getMarketData = async ({ queryKey }: { queryKey: QueryArgs }) => {
