@@ -71,9 +71,6 @@ const MobileNavigation: React.FC = () => {
             <Typography textAlign="center">{text}</Typography>
           </MenuItem>
         ))}
-        <MenuItem>
-          <ColorModeSwitcher />
-        </MenuItem>
       </Menu>
     </Box>
   );
@@ -116,11 +113,10 @@ const DesktopNavigation: React.FC = () => {
             value={option.path}
             to={option.path}
             component={Link}
-            sx={{ textTransform: "none" }}
+            sx={{ textTransform: "none", fontSize: "1rem" }}
           />
         ))}
       </Tabs>
-      <ColorModeSwitcher />
     </Box>
   );
 };
@@ -141,7 +137,7 @@ const NavigationPanel: React.FC = () => {
           display: "flex",
           alignItems: "center",
         }}>
-        <Toolbar disableGutters sx={{ padding: "0 200px", width: "100%" }}>
+        <Toolbar disableGutters sx={{ padding: { xs: 0, md: "0 200px" }, width: "100%" }}>
           <div
             style={{
               width: "100%",
@@ -171,8 +167,10 @@ const NavigationPanel: React.FC = () => {
               Stradle
             </Typography>
             <DesktopNavigation />
-            <MobileNavigation />
           </div>
+          <ColorModeSwitcher />
+
+          <MobileNavigation />
         </Toolbar>
       </Container>
     </AppBar>
