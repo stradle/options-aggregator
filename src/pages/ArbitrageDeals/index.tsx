@@ -112,7 +112,7 @@ const useDeals = () => {
   return [deals];
 };
 
-const DealsChart = () => {
+const ArbitrageDeals = () => {
   const { price } = useEthPrice();
   const [sortedDeals] = useDeals();
 
@@ -167,4 +167,4 @@ const DealsChart = () => {
   );
 };
 
-export default DealsChart;
+export default ArbitrageDeals;

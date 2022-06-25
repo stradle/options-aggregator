@@ -16,10 +16,10 @@ const useNavigationOptions = (): { navigationOptions: NavigationOption[] } => {
 
   const navigationOptions = [
     {
-      text: "Deals chart",
-      path: routes.dealsChart,
+      text: "Arbitrage deals",
+      path: routes.arbitrageDeals,
       icon: <StarBorderPurple500Icon />,
-      isActive: navigationService.matchRoutePath(location.pathname, routes.dealsChart),
+      isActive: navigationService.matchRoutePath(location.pathname, routes.arbitrageDeals),
     },
     {
       text: "Aggregated rates",
