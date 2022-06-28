@@ -15,9 +15,9 @@ import { formatCurrency, useExpirations, useStrikes } from "../../services/util"
 import { useRatesContext } from "../../providers/RatesProvider";
 import useOptionPopover from "./useOptionPopover";
 import { ColoredOptionType, ProviderIcon, StyledTable } from "../../components";
+import { OptionTypeColors } from "../../services/util/constants";
 import { ConfigSection, PageWrapper, StyledProviderLink } from "../styled";
 import { Option, OptionsMap, OptionType } from "../../types";
-import { OptionTypeColors } from "../../services/util/constants";
 
 enum DealModes {
   BUY = "Buy",
@@ -138,7 +138,7 @@ const AggregatedRates = () => {
   const rates = useRatesContext();
   const { allStrikes = [] } = useStrikes();
 
-  const [expirations] = useExpirations(rates.DERIBIT);
+  const [expirations] = useExpirations(rates.LYRA);
   const { allRates, termProviders } = useRatesData(dealMode === DealModes.SELL);
 
   const { handleOpen, OptionPopover } = useOptionPopover();

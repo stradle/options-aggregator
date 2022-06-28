@@ -11,7 +11,6 @@ export const formatCurrency = (val: number, maximumFractionDigits = 0) =>
     currency: "USD",
     maximumFractionDigits,
   }).format(val);
-// new Intl.NumberFormat("en-IN", { maximumFractionDigits: 2 }).format(val);
 
 type UnderlyingResult = { price: number; change: number };
 export const fetchEthPrice = (): Promise<UnderlyingResult> =>
@@ -45,10 +44,10 @@ export const useStrikes = (): Strikes => {
     if (!basePrice) return {};
 
     const roundedBase = Math.floor(basePrice / 100) * 100;
-    const callStart = Math.ceil((roundedBase * 0.8) / 100) * 100;
+    const callStart = Math.ceil((roundedBase * 0.9) / 100) * 100;
     const callEnd = roundedBase * STRIKE_CUTOFF;
     const putStart = Math.ceil(roundedBase / STRIKE_CUTOFF / 100) * 100;
-    const putEnd = Math.floor((roundedBase * 1.2) / 100) * 100;
+    const putEnd = Math.floor((roundedBase * 1.1) / 100) * 100;
 
     const callStrikes: number[] = [];
     const putStrikes: number[] = [];

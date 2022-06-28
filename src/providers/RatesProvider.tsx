@@ -19,9 +19,9 @@ export const useRatesContext = () => useContext(RatesContext);
 
 export const RatesProvider = ({ children }: { children?: ReactNode }) => {
   const [deribit] = useDeribitRates();
-  const [premia] = usePremiaRates(deribit);
-  const [hegic] = useHegicRates(deribit);
-  const [lyra] = useLyraRates();
+    const [lyra] = useLyraRates();
+    const [premia] = usePremiaRates(lyra);
+    const [hegic] = useHegicRates(lyra);
 
   const context = useMemo(
     () => ({

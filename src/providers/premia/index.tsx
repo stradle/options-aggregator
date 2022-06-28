@@ -57,8 +57,8 @@ const reqOption = async (strike: number, expiration: number, call: boolean) => {
     .catch(console.error);
 };
 
-export const usePremiaRates = (deribitRates?: OptionsMap[]): [OptionsMap[] | undefined] => {
-  const [expirations] = useExpirations(deribitRates, 1);
+export const usePremiaRates = (lyraRates?: OptionsMap[]): [OptionsMap[] | undefined] => {
+  const [expirations] = useExpirations(lyraRates, 1);
   const { allStrikes = [], callStrikes = [], putStrikes = [], basePrice = 0 } = useStrikes();
   const toEth = (val: number) => basePrice * val;
   const fetchPrices = async () => {

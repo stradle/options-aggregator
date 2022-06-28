@@ -10,14 +10,19 @@ type QueryArgs = [string, Underlying];
 const lyra = new Lyra();
 const formatWei = (val: BigNumber) => val.div(BigNumber.from(10).pow(18)).toString();
 
+const getExpirationTerm = (expiration: number) => {
+  const term = moment(expiration).format("DDMMMYY").toUpperCase();
+
+  return term.startsWith("0") ? term.slice(1) : term;
+};
+
 const getMarketData = async ({ queryKey }: { queryKey: QueryArgs }) => {
   const [, underlying] = queryKey;
   const market = await lyra.market(underlying.toLowerCase());
   // const rate = market.__marketData.marketParameters.greekCacheParams.rateAndCarry ?? 5;
   const options = market.liveBoards().map((board) => {
     const expiration = board.expiryTimestamp * 1000;
-    const momentExp = moment(expiration);
-    const term = momentExp.format("DDMMMYY").toUpperCase();
+    const term = getExpirationTerm(expiration);
 
     return board.strikes().map<Promise<OptionsMap | undefined>>(async (strike) => {
       const strikePrice = formatWei(strike.strikePrice);
@@ -32,7 +37,6 @@ const getMarketData = async ({ queryKey }: { queryKey: QueryArgs }) => {
       const [callBuyPrice, callSellPrice, putBuyPrice, putSellPrice] = quotes.map((quote) =>
         parseFloat(formatWei(quote.pricePerOption))
       );
-
       if ([callBuyPrice, callSellPrice, putBuyPrice, putSellPrice].every((val) => !val)) return;
 
       return {
