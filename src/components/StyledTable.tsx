@@ -6,24 +6,22 @@ export const StyledTable = styled("table")(({ theme }) => ({
   borderCollapse: "collapse",
   borderRadius: "5px",
   borderStyle: "hidden",
-  boxShadow: theme.shadows[3],
-  transition: theme.transitions.create("box-shadow"),
-  backgroundImage: "linear-gradient(rgba(255, 255, 255, 0.09), rgba(255, 255, 255, 0.09))",
   cursor: "default",
   fontWeight: 500,
+  width: "100%",
 
   th: {
     textAlign: "center",
+  },
+
+  td: {
+    textAlign: "right",
   },
 
   "th,td": {
     padding: "4px",
     border: "1px solid",
     borderColor: theme.palette.divider,
-  },
-
-  td: {
-    textAlign: "right",
   },
 }));
 

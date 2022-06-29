@@ -6,6 +6,7 @@ import {
   ButtonGroup,
   Divider,
   FormControlLabel,
+  Paper,
   styled,
   Switch,
   Typography,
@@ -144,7 +145,7 @@ const AggregatedRates = () => {
   const { handleOpen, OptionPopover } = useOptionPopover();
 
   return (
-    <PageWrapper gap={"10px"}>
+    <PageWrapper gap={"10px"} width={"100%"}>
       {OptionPopover}
       <ConfigSection>
         <DealModeSelector value={dealMode} setValue={setDealMode} />
@@ -156,98 +157,100 @@ const AggregatedRates = () => {
           }}
         />
       </ConfigSection>
-      <StyledTable>
-        <thead>
-          <tr>
-            <th key={1}>
-              <ColoredOptionType type={OptionType.CALL}>CALL</ColoredOptionType>
-              <ColoredOptionType type={OptionType.PUT}>PUT</ColoredOptionType>
-            </th>
-            {expirations.map(([term]) => {
-              const providers = termProviders[term];
+      <Paper sx={{ width: "100%", mb: 2 }}>
+        <StyledTable>
+          <thead>
+            <tr>
+              <th key={1}>
+                <ColoredOptionType type={OptionType.CALL}>CALL</ColoredOptionType>
+                <ColoredOptionType type={OptionType.PUT}>PUT</ColoredOptionType>
+              </th>
+              {expirations.map(([term]) => {
+                const providers = termProviders[term];
 
+                return (
+                  <th key={term}>
+                    <TableHeader text={term} />
+                    <StyledCell>
+                      {providers?.map((provider, index) => (
+                        <>
+                          <div
+                            style={{
+                              flex: 1,
+                            }}>
+                            <ProviderIcon provider={provider} />
+                          </div>
+                          {index !== providers.length - 1 && (
+                            <Divider orientation="vertical" flexItem />
+                          )}
+                        </>
+                      ))}
+                    </StyledCell>
+                  </th>
+                );
+              })}
+            </tr>
+          </thead>
+
+          <tbody>
+            {allStrikes.map((strike) => {
               return (
-                <th key={term}>
-                  <TableHeader text={term} />
-                  <StyledCell>
-                    {providers?.map((provider, index) => (
-                      <>
-                        <div
-                          style={{
-                            flex: 1,
-                          }}>
-                          <ProviderIcon provider={provider} />
-                        </div>
-                        {index !== providers.length - 1 && (
-                          <Divider orientation="vertical" flexItem />
-                        )}
-                      </>
-                    ))}
-                  </StyledCell>
-                </th>
+                <tr key={strike}>
+                  <th key={strike}>
+                    <TableHeader text={formatCurrency(+strike)} />
+                  </th>
+                  {expirations.map(([term]) => {
+                    const termStrikeOptions = allRates[term][strike];
+                    const providers = termProviders[term];
+
+                    const cheapestCallProvider =
+                      highlight && compare(termStrikeOptions, OptionType.CALL, dealMode);
+                    const cheapestPutProvider =
+                      highlight && compare(termStrikeOptions, OptionType.PUT, dealMode);
+
+                    if (!termStrikeOptions?.length) return <td key={term} />;
+
+                    return (
+                      <td key={term}>
+                        <StyledCell>
+                          {providers.map((provider, index) => {
+                            const optionCouple = termStrikeOptions.find(
+                              (option) => option.provider === provider
+                            );
+                            const markCheap = {
+                              call: cheapestCallProvider === provider,
+                              put: cheapestPutProvider === provider,
+                            };
+
+                            return (
+                              <>
+                                {optionCouple ? (
+                                  <OptionsCouple
+                                    key={provider}
+                                    markCheap={markCheap}
+                                    dealMode={dealMode}
+                                    optionCouple={optionCouple}
+                                    onClick={handleOpen}
+                                  />
+                                ) : (
+                                  <div style={{ flex: 1 }} />
+                                )}
+                                {index !== providers.length - 1 && (
+                                  <Divider orientation="vertical" flexItem variant="middle" />
+                                )}
+                              </>
+                            );
+                          })}
+                        </StyledCell>
+                      </td>
+                    );
+                  })}
+                </tr>
               );
             })}
-          </tr>
-        </thead>
-
-        <tbody>
-          {allStrikes.map((strike) => {
-            return (
-              <tr key={strike}>
-                <th key={strike}>
-                  <TableHeader text={formatCurrency(+strike)} />
-                </th>
-                {expirations.map(([term]) => {
-                  const termStrikeOptions = allRates[term][strike];
-                  const providers = termProviders[term];
-
-                  const cheapestCallProvider =
-                    highlight && compare(termStrikeOptions, OptionType.CALL, dealMode);
-                  const cheapestPutProvider =
-                    highlight && compare(termStrikeOptions, OptionType.PUT, dealMode);
-
-                  if (!termStrikeOptions?.length) return <td key={term} />;
-
-                  return (
-                    <td key={term}>
-                      <StyledCell>
-                        {providers.map((provider, index) => {
-                          const optionCouple = termStrikeOptions.find(
-                            (option) => option.provider === provider
-                          );
-                          const markCheap = {
-                            call: cheapestCallProvider === provider,
-                            put: cheapestPutProvider === provider,
-                          };
-
-                          return (
-                            <>
-                              {optionCouple ? (
-                                <OptionsCouple
-                                  key={provider}
-                                  markCheap={markCheap}
-                                  dealMode={dealMode}
-                                  optionCouple={optionCouple}
-                                  onClick={handleOpen}
-                                />
-                              ) : (
-                                <div style={{ flex: 1 }} />
-                              )}
-                              {index !== providers.length - 1 && (
-                                <Divider orientation="vertical" flexItem variant="middle" />
-                              )}
-                            </>
-                          );
-                        })}
-                      </StyledCell>
-                    </td>
-                  );
-                })}
-              </tr>
-            );
-          })}
-        </tbody>
-      </StyledTable>
+          </tbody>
+        </StyledTable>
+      </Paper>
     </PageWrapper>
   );
 };
