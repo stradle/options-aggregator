@@ -1,44 +1,15 @@
 import { useMemo } from "react";
-import { maxBy, minBy, sortBy } from "lodash";
-import { styled } from "@mui/material";
+import { maxBy, minBy } from "lodash";
 import moment from "moment";
 import { formatCurrency, useEthPrice } from "../../services/util";
 import { useRatesData } from "../../services/hooks";
 import { useAppContext } from "../../context/AppContext";
-import { ColoredOptionType, StyledTable, ProviderIcon } from "../../components";
+import ArbitrageTable from "./ArbitrageTable";
 import { PageWrapper } from "../styled";
-import { OptionsMap, OptionType, ProviderType } from "../../types";
+import { Deal, OptionType } from "../../types";
 
-const StyledDealBuySellItem = styled("div")({
-  fontSize: "inherit",
-  display: "flex",
-  flexDirection: "row",
-  alignItems: "center",
-  justifyContent: "end",
-  gap: "3px",
-});
-
-const dealColumns = ["Strike", "Term", "Type", "Delta", "Buy", "Sell", "Discount", "APY"];
 
 const PROFIT_THRESHOLD = 3;
-
-type DealPart = { price: number; provider: ProviderType };
-type Deal = Pick<OptionsMap, "term" | "strike"> & {
-  amount: number;
-  expiration: number;
-  type: OptionType;
-  buy: DealPart;
-  sell: DealPart;
-};
-
-const DealBuySellItem = ({ item }: { item: DealPart }) => (
-  <td>
-    <StyledDealBuySellItem>
-      <div>{formatCurrency(item.price, 2)}</div>
-      <ProviderIcon provider={item.provider} />
-    </StyledDealBuySellItem>
-  </td>
-);
 
 const useDeals = () => {
   const { allRates } = useRatesData();
@@ -106,7 +77,7 @@ const useDeals = () => {
       })
     );
 
-    return sortBy(res, ({ amount }) => -amount);
+    return res;
   }, [allRates, providers]);
 
   return [deals];
@@ -114,46 +85,25 @@ const useDeals = () => {
 
 const ArbitrageDeals = () => {
   const { price } = useEthPrice();
-  const [sortedDeals] = useDeals();
+  const [deals] = useDeals();
 
-  // cut too long array
-  if (sortedDeals.length > 20) sortedDeals.length = 20;
+  const tableData = useMemo(() => {
+    return deals.map((deal) => {
+      const momentExp = moment(deal?.expiration);
+      const duration = moment.duration(momentExp.diff(moment())).asYears();
+
+      return {
+        ...deal,
+        apy: (deal.amount / price / duration) * 100,
+        discount: (deal.amount / deal.sell.price) * 100,
+      };
+    });
+  }, [deals]);
 
   return (
     <PageWrapper>
-      {sortedDeals.length > 0 ? (
-        <StyledTable>
-          <thead>
-            <tr>
-              {dealColumns.map((val) => (
-                <th style={{ fontWeight: 600 }} key={val}>
-                  {val}
-                </th>
-              ))}
-            </tr>
-          </thead>
-          <tbody>
-            {sortedDeals?.map((deal) => {
-              const momentExp = moment(deal?.expiration);
-              const duration = moment.duration(momentExp.diff(moment())).asYears();
-
-              return (
-                <tr key={deal.strike + deal.term + deal.type}>
-                  <th>{formatCurrency(+deal.strike)}</th>
-                  <th>{deal.term}</th>
-                  <td>
-                    <ColoredOptionType type={deal.type}>{deal.type}</ColoredOptionType>
-                  </td>
-                  <td>{formatCurrency(deal.amount, 2)}</td>
-                  <DealBuySellItem item={deal.buy} />
-                  <DealBuySellItem item={deal.sell} />
-                  <td>{((deal.amount / deal.sell.price) * 100).toFixed(2)}%</td>
-                  <td>{((deal.amount / price / duration) * 100).toFixed(2)}%</td>
-                </tr>
-              );
-            })}
-          </tbody>
-        </StyledTable>
+      {deals.length > 0 ? (
+        <ArbitrageTable data={tableData} />
       ) : (
         <h4>
           {`Currently there are no deals exceeding ${formatCurrency(PROFIT_THRESHOLD, 2)} delta

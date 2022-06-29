@@ -37,3 +37,12 @@ export enum Underlying {
   ETH = "ETH",
   BTC = "BTC",
 }
+
+export type DealPart = { price: number; provider: ProviderType };
+export type Deal = Pick<OptionsMap, "term" | "strike"> & {
+  amount: number;
+  expiration: number;
+  type: OptionType;
+  buy: DealPart;
+  sell: DealPart;
+};
