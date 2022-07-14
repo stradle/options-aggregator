@@ -20,7 +20,7 @@ const getMarketData = async ({ queryKey }: { queryKey: QueryArgs }) => {
     const term = getExpirationTerm(expiration);
 
     return board.strikes().map<Promise<OptionsMap | undefined>>(async (strike) => {
-      const strikePrice = formatWei(strike.strikePrice);
+      const strikePrice = parseFloat(strike.strikePrice.toString()) / 1e18;
       const one = BigNumber.from(10).pow(18);
 
       const quotes = await Promise.all([
@@ -29,8 +29,8 @@ const getMarketData = async ({ queryKey }: { queryKey: QueryArgs }) => {
         strike.quote(false, true, one),
         strike.quote(false, false, one),
       ]);
-      const [callBuyPrice, callSellPrice, putBuyPrice, putSellPrice] = quotes.map((quote) =>
-        parseFloat(formatWei(quote.pricePerOption))
+      const [callBuyPrice, callSellPrice, putBuyPrice, putSellPrice] = quotes.map(
+        (quote) => parseFloat(quote.pricePerOption.toString()) / 1e18
       );
       if ([callBuyPrice, callSellPrice, putBuyPrice, putSellPrice].every((val) => !val)) return;
 

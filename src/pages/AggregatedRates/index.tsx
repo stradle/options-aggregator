@@ -16,6 +16,7 @@ import { formatCurrency, useExpirations, useStrikes } from "../../services/util"
 import { useRatesContext } from "../../providers/RatesProvider";
 import useOptionPopover from "./useOptionPopover";
 import { ColoredOptionType, ProviderIcon, StyledTable } from "../../components";
+import ProviderSelector from "../../components/ProviderSelector";
 import { ConfigSection, PageWrapper, StyledProviderLink } from "../styled";
 import { Option, OptionsMap, OptionType } from "../../types";
 
@@ -145,7 +146,7 @@ const AggregatedRates = () => {
   return (
     <PageWrapper gap={"10px"} width={"100%"}>
       {OptionPopover}
-      <ConfigSection>
+      <ConfigSection style={{ justifyContent: "space-between", width: "100%" }}>
         <DealModeSelector value={dealMode} setValue={setDealMode} />
         <FormControlLabel
           control={<Switch checked={highlight} onChange={(e) => setHighlight(e.target.checked)} />}
@@ -154,6 +155,7 @@ const AggregatedRates = () => {
             userSelect: "none",
           }}
         />
+        <ProviderSelector />
       </ConfigSection>
       <Paper sx={{ width: "100%", mb: 2 }}>
         <StyledTable>

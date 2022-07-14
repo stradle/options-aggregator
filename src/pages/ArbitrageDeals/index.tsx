@@ -8,7 +8,6 @@ import ArbitrageTable from "./ArbitrageTable";
 import { PageWrapper } from "../styled";
 import { Deal, OptionType } from "../../types";
 
-
 const PROFIT_THRESHOLD = 3;
 
 const useDeals = () => {
@@ -100,19 +99,17 @@ const ArbitrageDeals = () => {
     });
   }, [deals]);
 
-  return (
+  return deals.length > 0 ? (
+    <ArbitrageTable data={tableData} />
+  ) : (
     <PageWrapper>
-      {deals.length > 0 ? (
-        <ArbitrageTable data={tableData} />
-      ) : (
-        <h4>
-          {`Currently there are no deals exceeding ${formatCurrency(PROFIT_THRESHOLD, 2)} delta
+      <h4>
+        {`Currently there are no deals exceeding ${formatCurrency(PROFIT_THRESHOLD, 2)} delta
           profit threshold`}
-          <br />
-          <br />
-          Come back later
-        </h4>
-      )}
+        <br />
+        <br />
+        Come back later
+      </h4>
     </PageWrapper>
   );
 };

@@ -1,5 +1,4 @@
-import styled from "styled-components";
-import { Box, Button } from "@mui/material";
+import { Box, Button, styled } from "@mui/material";
 
 export const StyledProviderLink = styled(Button)`
   display: flex;
@@ -17,7 +16,7 @@ export const PageWrapper = styled(Box)`
   margin-top: 1rem;
 `;
 
-export const ConfigSection = styled.div`
+export const ConfigSection = styled("div")`
   display: flex;
   flex-direction: row;
   gap: 1rem;

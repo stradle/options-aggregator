@@ -122,12 +122,6 @@ const DesktopNavigation: React.FC = () => {
 };
 
 const NavigationPanel: React.FC = () => {
-  const navigate = useNavigate();
-
-  function navigateRoot(): void {
-    navigate(routes.root);
-  }
-
   return (
     <AppBar position="static" color="inherit">
       <Container

@@ -14,6 +14,8 @@ import {
 } from "@mui/material";
 import { formatCurrency } from "../../services/util";
 import { ColoredOptionType, ProviderIcon } from "../../components";
+import ProviderSelector from "../../components/ProviderSelector";
+import { PageWrapper } from "../styled";
 import { StyledDealBuySellItem } from "./styled";
 import { Deal, DealPart, OptionType } from "../../types";
 
@@ -126,7 +128,7 @@ const EnhancedTableHead = (props: {
 
 // type Sorting = "apy";
 
-const formatPercent = (amount: number) => amount.toFixed(2) + "%";
+const formatPercent = (amount: number) => amount.toFixed(1) + "%";
 
 const ArbitrageTable = ({ data }: { data: DealsTableItem[] }) => {
   const [order, setOrder] = useState<Order>("desc");
@@ -153,7 +155,10 @@ const ArbitrageTable = ({ data }: { data: DealsTableItem[] }) => {
   const emptyRows = page > 0 ? Math.max(0, (1 + page) * rowsPerPage - data.length) : 0;
 
   return (
-    <Box sx={{ width: "100%" }}>
+    <PageWrapper gap="10px" width="100%">
+      <div style={{ display: "flex", justifyContent: "end", width: "100%" }}>
+        <ProviderSelector />
+      </div>
       <Paper sx={{ width: "100%", mb: 2 }}>
         <TableContainer>
           <Table sx={{ minWidth: 750 }} size="medium">
@@ -224,7 +229,7 @@ const ArbitrageTable = ({ data }: { data: DealsTableItem[] }) => {
           onRowsPerPageChange={handleChangeRowsPerPage}
         />
       </Paper>
-    </Box>
+    </PageWrapper>
   );
 };
 

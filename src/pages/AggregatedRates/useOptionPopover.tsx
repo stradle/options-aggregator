@@ -36,7 +36,7 @@ const useVolatility = (price: number, option?: OptionsMap) => {
     getImpliedVolatility(
       option.options.CALL.askPrice as number,
       price,
-      +(option.strike as string),
+      option.strike,
       duration,
       0.05,
       OptionType.CALL
@@ -46,7 +46,7 @@ const useVolatility = (price: number, option?: OptionsMap) => {
     getImpliedVolatility(
       option.options.PUT.askPrice as number,
       price,
-      +(option.strike as string),
+      option.strike,
       duration,
       0.05,
       OptionType.PUT

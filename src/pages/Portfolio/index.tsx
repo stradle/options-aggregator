@@ -37,69 +37,74 @@ const Portfolio = () => {
   const [lyraPositions, loading] = useLyraPositions();
   const { connector: activeConnector } = useAccount();
 
-  if (!activeConnector) return <Typography>Connect your to see positions</Typography>;
+  if (!activeConnector)
+    return <Typography variant={"h6"}>Connect wallet to see your positions</Typography>;
+
+  if (loading) return <CircularProgress />;
 
   return (
     <>
-      <div>Displaying only <ProviderIcon provider={ProviderType.LYRA} /> Lyra positions at the moment</div>
       <Paper sx={{ width: "100%", mb: 2 }}>
-        {loading ? (
-          <CircularProgress />
-        ) : (
-          <TableContainer>
-            <Table>
-              <TableHead>
-                <TableRow>
-                  {dealColumns.map((col) => {
-                    return (
-                      <TableCell key={col.id} align={col.numeric ? "right" : "center"}>
-                        {col.label}
-                      </TableCell>
-                    );
-                  })}
-                </TableRow>
-              </TableHead>
-              <TableBody>
-                {lyraPositions.map((position) => {
+        <TableContainer>
+          <Table>
+            <TableHead>
+              <TableRow>
+                {dealColumns.map((col) => {
                   return (
-                    <TableRow>
-                      <TableCell align={"center"}>{position.strike / 1e18}</TableCell>
-                      <TableCell align={"center"}>
-                        {getExpirationTerm(position.expiration * 1000)}
-                      </TableCell>
-                      <TableCell align={"center"}>
-                        <ColoredOptionType positive={position.isCall}>
-                          {position.isCall ? "CALL" : "PUT"}
-                        </ColoredOptionType>
-                      </TableCell>
-                      <TableCell align={"center"}>
-                        <ColoredOptionType positive={position.isLong}>
-                          {position.isLong ? "LONG" : "SHORT"}
-                        </ColoredOptionType>
-                      </TableCell>
-                      <TableCell align="right">{position.size / 1e18}</TableCell>
-                      <TableCell align="right">
-                        {formatCurrency(position.avgCostPerOption / 1e18, 2)}
-                      </TableCell>
-                      <TableCell align="right">
-                        {formatCurrency(position.pricePerOption / 1e18, 2)}
-                      </TableCell>
-                      <TableCell align="right">
-                        <ColoredOptionType positive={position.unrealizedPnl > 0}>
-                          {formatCurrency(position.unrealizedPnl / 1e18, 2)}
-                          <Typography fontSize={"12px"}>
-                            {((position.unrealizedPnlPercent / 1e18) * 100).toFixed(1)}%
-                          </Typography>
-                        </ColoredOptionType>
-                      </TableCell>
-                    </TableRow>
+                    <TableCell key={col.id} align={col.numeric ? "right" : "center"}>
+                      {col.label}
+                    </TableCell>
                   );
                 })}
-              </TableBody>
-            </Table>
-          </TableContainer>
-        )}
+              </TableRow>
+            </TableHead>
+            <TableBody>
+              {lyraPositions.map((position) => {
+                return (
+                  <TableRow>
+                    <TableCell align={"center"}>{position.strike / 1e18}</TableCell>
+                    <TableCell align={"center"}>
+                      {getExpirationTerm(position.expiration * 1000)}
+                    </TableCell>
+                    <TableCell align={"center"}>
+                      <ColoredOptionType positive={position.isCall}>
+                        {position.isCall ? "CALL" : "PUT"}
+                      </ColoredOptionType>
+                    </TableCell>
+                    <TableCell align={"center"}>
+                      <ColoredOptionType positive={position.isLong}>
+                        {position.isLong ? "LONG" : "SHORT"}
+                      </ColoredOptionType>
+                    </TableCell>
+                    <TableCell align="right">{position.size / 1e18}</TableCell>
+                    <TableCell align="right">
+                      {formatCurrency(position.avgCostPerOption / 1e18, 2)}
+                    </TableCell>
+                    <TableCell align="right">
+                      {formatCurrency(position.pricePerOption / 1e18, 2)}
+                    </TableCell>
+                    <TableCell align="right">
+                      <ColoredOptionType positive={position.unrealizedPnl > 0}>
+                        {formatCurrency(position.unrealizedPnl / 1e18, 2)}
+                        <Typography fontSize={"12px"}>
+                          {((position.unrealizedPnlPercent / 1e18) * 100).toFixed(1)}%
+                        </Typography>
+                      </ColoredOptionType>
+                    </TableCell>
+                  </TableRow>
+                );
+              })}
+            </TableBody>
+          </Table>
+        </TableContainer>
       </Paper>
+      <div>
+        Temporary displays only <ProviderIcon provider={ProviderType.LYRA} />{" "}
+        <Typography component={"span"} fontWeight={500}>
+          Lyra
+        </Typography>{" "}
+        positions
+      </div>
     </>
   );
 };

@@ -29,7 +29,7 @@ export type OptionsMap = {
   provider: ProviderType;
   expiration: number;
   term: string;
-  strike: string;
+  strike: number;
   options: OptionCouple;
 };
 

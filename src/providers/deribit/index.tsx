@@ -76,7 +76,7 @@ const parseDeribitOption = (
 
   return {
     term,
-    strike: strike,
+    strike: parseFloat(strike),
     type: callOrPut === "P" ? OptionType.PUT : OptionType.CALL,
     expiration: +moment(term, "DDMMMYY"),
     askPrice: (ask_price ?? 0) * ethPrice,
