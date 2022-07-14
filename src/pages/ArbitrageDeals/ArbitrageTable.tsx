@@ -15,7 +15,7 @@ import {
 import { formatCurrency } from "../../services/util";
 import { ColoredOptionType, ProviderIcon } from "../../components";
 import { StyledDealBuySellItem } from "./styled";
-import { Deal, DealPart } from "../../types";
+import { Deal, DealPart, OptionType } from "../../types";
 
 const DealBuySellItem = ({ item }: { item: DealPart }) => (
   <StyledDealBuySellItem>
@@ -185,7 +185,11 @@ const ArbitrageTable = ({ data }: { data: DealsTableItem[] }) => {
                         {deal.term}
                       </TableCell>
                       <TableCell align="center">
-                        {<ColoredOptionType type={deal.type}>{deal.type}</ColoredOptionType>}
+                        {
+                          <ColoredOptionType positive={deal.type === OptionType.CALL}>
+                            {deal.type}
+                          </ColoredOptionType>
+                        }
                       </TableCell>
                       <TableCell align="right">
                         <DealBuySellItem item={deal.buy} />

@@ -13,10 +13,10 @@ import {
   Tab,
 } from "@mui/material";
 import MenuIcon from "@mui/icons-material/Menu";
-import AddchartIcon from "@mui/icons-material/Addchart";
 import useNavigationOptions from "../services/hooks/useNavigationOptions";
 import { routes } from "../services/util/constants";
 import ColorModeSwitcher from "./ColorModeSwitcher";
+import Wallet from "./Wallet";
 
 const MobileNavigation: React.FC = () => {
   const [anchorElNav, setAnchorElNav] = useState<null | HTMLElement>(null);
@@ -113,7 +113,7 @@ const DesktopNavigation: React.FC = () => {
             value={option.path}
             to={option.path}
             component={Link}
-            sx={{ textTransform: "none", fontSize: "1rem" }}
+            sx={{ textTransform: "none", fontSize: "15px" }}
           />
         ))}
       </Tabs>
@@ -145,10 +145,6 @@ const NavigationPanel: React.FC = () => {
               flexDirection: "row",
               alignItems: "center",
             }}>
-            <AddchartIcon
-              sx={{ color: "primary.main", cursor: "pointer" }}
-              onClick={() => navigateRoot()}
-            />
             <Typography
               variant="h6"
               noWrap
@@ -169,6 +165,8 @@ const NavigationPanel: React.FC = () => {
             <DesktopNavigation />
           </div>
           <ColorModeSwitcher />
+
+          <Wallet />
 
           <MobileNavigation />
         </Toolbar>

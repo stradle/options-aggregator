@@ -16,7 +16,6 @@ import { formatCurrency, useExpirations, useStrikes } from "../../services/util"
 import { useRatesContext } from "../../providers/RatesProvider";
 import useOptionPopover from "./useOptionPopover";
 import { ColoredOptionType, ProviderIcon, StyledTable } from "../../components";
-import { OptionTypeColors } from "../../services/util/constants";
 import { ConfigSection, PageWrapper, StyledProviderLink } from "../styled";
 import { Option, OptionsMap, OptionType } from "../../types";
 
@@ -26,8 +25,7 @@ enum DealModes {
 }
 
 const StyledOptionType = styled(ColoredOptionType)<{ highlight?: boolean; type?: OptionType }>(
-  ({ highlight, theme, type }) => ({
-    color: OptionTypeColors[type ?? OptionType.CALL],
+  ({ highlight, theme }) => ({
     height: "20px",
     lineHeight: "20px",
     textAlign: "end",
@@ -63,7 +61,7 @@ const OptionValue = ({
   highlight?: boolean;
   dealMode: DealModes;
 }) => (
-  <StyledOptionType highlight={highlight} type={option?.type}>
+  <StyledOptionType highlight={highlight} positive={option?.type === OptionType.CALL}>
     {
       // @ts-ignore
       option?.askPrice && formatCurrency(option[DealsFields[dealMode]])
@@ -162,8 +160,8 @@ const AggregatedRates = () => {
           <thead>
             <tr>
               <th key={1}>
-                <ColoredOptionType type={OptionType.CALL}>CALL</ColoredOptionType>
-                <ColoredOptionType type={OptionType.PUT}>PUT</ColoredOptionType>
+                <ColoredOptionType positive>CALL</ColoredOptionType>
+                <ColoredOptionType>PUT</ColoredOptionType>
               </th>
               {expirations.map(([term]) => {
                 const providers = termProviders[term];

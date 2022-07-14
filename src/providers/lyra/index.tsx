@@ -1,20 +1,15 @@
 import Lyra from "@lyrafinance/lyra-js";
+import { useAccount } from "wagmi";
 import { BigNumber } from "ethers";
-import moment from "moment";
 import { useQuery } from "react-query";
 import { useAppContext } from "../../context/AppContext";
-import { OptionsMap, OptionType, ProviderType, Underlying } from "../../types";
+import { getExpirationTerm } from "../../services/util";
+import { ActivePosition, OptionsMap, OptionType, ProviderType, Underlying } from "../../types";
 
 type QueryArgs = [string, Underlying];
 
 const lyra = new Lyra();
 const formatWei = (val: BigNumber) => val.div(BigNumber.from(10).pow(18)).toString();
-
-const getExpirationTerm = (expiration: number) => {
-  const term = moment(expiration).format("DDMMMYY").toUpperCase();
-
-  return term.startsWith("0") ? term.slice(1) : term;
-};
 
 const getMarketData = async ({ queryKey }: { queryKey: QueryArgs }) => {
   const [, underlying] = queryKey;
@@ -64,11 +59,45 @@ const getMarketData = async ({ queryKey }: { queryKey: QueryArgs }) => {
   return (await Promise.all(options?.flat()).catch(console.error))?.filter(Boolean) as OptionsMap[];
 };
 
-export const useLyraRates = () => {
+export const useLyraRates: () => [undefined | OptionsMap[], boolean] = () => {
   const { underlying } = useAppContext();
-  const { data } = useQuery(["lyra", underlying] as QueryArgs, getMarketData, {
+  const { data, isLoading } = useQuery(["lyra", underlying] as QueryArgs, getMarketData, {
     refetchInterval: 30000,
   });
 
-  return [data];
+  return [data, isLoading];
+};
+
+export const useLyraPositions = (isOpen = true): [ActivePosition[], boolean] => {
+  const { address } = useAccount();
+
+  const { data = [], isLoading } = useQuery(["lyra-positions", address], async () => {
+    if (!address) return [];
+    const positions = isOpen ? await lyra.openPositions(address) : await lyra.positions(address);
+
+    console.log("refetching positions");
+
+    return positions.map((pos) => ({
+      __source: pos.__source,
+      id: pos.id,
+      strike: +pos.strikePrice,
+      size: +pos.size,
+      expiration: pos.expiryTimestamp,
+      collateral: pos.collateral,
+      isOpen: pos.isOpen,
+      isCall: pos.isCall,
+      isLong: pos.isLong,
+      isSettled: pos.isSettled,
+      isBaseCollateral: pos.collateral?.isBase,
+      numTrades: pos.trades().length,
+      avgCostPerOption: +pos.avgCostPerOption(),
+      pricePerOption: +pos.pricePerOption,
+      realizedPnl: +pos.realizedPnl(),
+      realizedPnlPercent: +pos.realizedPnlPercent(),
+      unrealizedPnl: +pos.unrealizedPnl(),
+      unrealizedPnlPercent: +pos.unrealizedPnlPercent(),
+    }));
+  });
+
+  return [data, isLoading];
 };

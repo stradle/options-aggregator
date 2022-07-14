@@ -109,7 +109,7 @@ const useOptionPopover = () => {
           {call && (
             <Row>
               <Cell>
-                <ColoredOptionType type={OptionType.CALL}>CALL</ColoredOptionType>
+                <ColoredOptionType positive>CALL</ColoredOptionType>
               </Cell>
               <Cell>{formatCurrency(option.options.CALL?.askPrice ?? 0, 2)}</Cell>
               <Cell>
@@ -124,7 +124,7 @@ const useOptionPopover = () => {
           {put && (
             <Row>
               <Cell>
-                <ColoredOptionType type={OptionType.PUT}>PUT</ColoredOptionType>
+                <ColoredOptionType>PUT</ColoredOptionType>
               </Cell>
               <Cell>{formatCurrency(option.options.PUT?.askPrice ?? 0, 2)}</Cell>
               <Cell>

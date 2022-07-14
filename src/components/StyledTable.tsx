@@ -1,6 +1,5 @@
-import { OptionTypeColors } from "../services/util/constants";
-import { OptionType } from "../types";
-import { styled } from "@mui/material";
+import { styled, Typography } from "@mui/material";
+import { ReactNode } from "react";
 
 export const StyledTable = styled("table")(({ theme }) => ({
   borderCollapse: "collapse",
@@ -25,6 +24,14 @@ export const StyledTable = styled("table")(({ theme }) => ({
   },
 }));
 
-export const ColoredOptionType = styled("div")<{ type?: OptionType }>`
-  color: ${({ type }) => OptionTypeColors[type ?? OptionType.CALL]};
-`;
+export const ColoredOptionType = ({
+  children,
+  positive,
+}: {
+  children: ReactNode;
+  positive?: boolean;
+}) => (
+  <Typography color={positive ? "primary.positiveText" : "primary.negativeText"} variant={"body2"}>
+    {children}
+  </Typography>
+);

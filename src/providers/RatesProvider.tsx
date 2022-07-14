@@ -2,7 +2,7 @@ import { createContext, ReactNode, useContext, useMemo } from "react";
 import { useDeribitRates } from "./deribit";
 import { useLyraRates } from "./lyra";
 import { usePremiaRates } from "./premia";
-import { useHegicRates } from "./hegic";
+// import { useHegicRates } from "./hegic";
 import { OptionsMap, ProviderType } from "../types";
 
 type RatesContextType = Record<ProviderType, OptionsMap[] | undefined>;
@@ -21,16 +21,16 @@ export const RatesProvider = ({ children }: { children?: ReactNode }) => {
   const [deribit] = useDeribitRates();
     const [lyra] = useLyraRates();
     const [premia] = usePremiaRates(lyra);
-    const [hegic] = useHegicRates(lyra);
+    // const [hegic] = useHegicRates(lyra);
 
   const context = useMemo(
     () => ({
       [ProviderType.DERIBIT]: deribit,
       [ProviderType.LYRA]: lyra,
       [ProviderType.PREMIA]: premia,
-      [ProviderType.HEGIC]: hegic,
+      [ProviderType.HEGIC]: [],
     }),
-    [deribit, lyra, premia, hegic]
+    [deribit, lyra, premia]
   );
 
   return <RatesContext.Provider value={context}>{children}</RatesContext.Provider>;

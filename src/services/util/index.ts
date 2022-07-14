@@ -2,6 +2,7 @@ import { useQuery } from "react-query";
 import { useMemo } from "react";
 import moment from "moment";
 import { chain } from "lodash";
+import { getAddress } from "@ethersproject/address";
 import { STRIKE_CUTOFF } from "./constants";
 import { OptionsMap } from "../../types";
 
@@ -85,4 +86,28 @@ export const useExpirations = (deribitRates?: OptionsMap[], minDays = 0, maxMont
   );
 
   return [deribitTerms];
+};
+
+// returns the checksummed address if the address is valid, otherwise returns false
+export function isAddress(value: any): string | false {
+  try {
+    return getAddress(value);
+  } catch {
+    return false;
+  }
+}
+
+// shorten the checksummed version of the input address to have 0x + 4 characters at start and end
+export function shortenAddress(address: string, chars = 4): string {
+  const parsed = isAddress(address);
+  if (!parsed) {
+    throw Error(`Invalid 'address' parameter '${address}'.`);
+  }
+  return `${parsed.substring(0, chars + 2)}...${parsed.substring(42 - chars)}`;
+}
+
+export const getExpirationTerm = (expiration: number) => {
+  const term = moment(expiration).format("DDMMMYY").toUpperCase();
+
+  return term.startsWith("0") ? term.slice(1) : term;
 };

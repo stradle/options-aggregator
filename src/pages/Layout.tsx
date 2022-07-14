@@ -23,8 +23,8 @@ const AssetSelector = () => {
     <ButtonGroup variant="outlined">
       {Object.values(Underlying).map((asset) =>
         asset === Underlying.BTC ? (
-          <Tooltip arrow title="Coming soon">
-            <Button key={asset}>{asset}</Button>
+          <Tooltip key={asset} arrow title="Coming soon">
+            <Button>{asset}</Button>
           </Tooltip>
         ) : (
           <Button
@@ -47,7 +47,7 @@ const ProviderSelector = () => {
       multiple
       disableClearable
       filterSelectedOptions
-      options={Object.values(ProviderType)}
+      options={Object.values(ProviderType).filter((prov) => prov !== ProviderType.HEGIC)}
       getOptionLabel={(option) => option}
       renderOption={(props, option) => (
         <Box component="li" sx={{ "& > svg": { mr: 2, flexShrink: 0 } }} {...props}>

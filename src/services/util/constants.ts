@@ -1,16 +1,12 @@
 import { OptionType, ProviderType } from "../../types";
 
-export const OptionTypeColors = {
-  [OptionType.CALL]: "#32C47A",
-  [OptionType.PUT]: "#EB5757",
-};
-
 export const STRIKE_CUTOFF = 1.5;
 
 export const routes = {
   root: "/",
   arbitrageDeals: "arbitrage-deals",
   aggregatedRates: "aggregated-rates",
+  portfolio: "portfolio",
 };
 
 export const getUrlByProvider = (provider: ProviderType) => {

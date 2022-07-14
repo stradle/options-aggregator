@@ -27,6 +27,12 @@ const useNavigationOptions = (): { navigationOptions: NavigationOption[] } => {
       icon: <BrokenImageIcon />,
       isActive: navigationService.matchRoutePath(location.pathname, routes.aggregatedRates),
     },
+    {
+      text: "Portfolio",
+      path: routes.portfolio,
+      icon: <BrokenImageIcon />,
+      isActive: navigationService.matchRoutePath(location.pathname, routes.portfolio),
+    },
   ];
 
   return {

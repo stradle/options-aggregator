@@ -1,8 +1,7 @@
-import { Paper } from "@mui/material";
+import { Paper, Typography } from "@mui/material";
 import { formatCurrency, useEthPrice } from "../services/util";
 import EthIcon from "../assets/ethereum-logo.png";
 import { ColoredOptionType } from "./StyledTable";
-import { OptionType } from "../types";
 
 const BasePriceWidget = () => {
   const { price, change } = useEthPrice();
@@ -20,12 +19,8 @@ const BasePriceWidget = () => {
         padding: "6px",
       }}>
       <img width={"32px"} src={EthIcon} alt={"ETH icon"} />
-      <div style={{ fontWeight: 600 }}>{formatCurrency(price)}</div>
-      <ColoredOptionType
-        style={{ fontSize: "14px" }}
-        type={change < 0 ? OptionType.PUT : OptionType.CALL}>
-        {change.toFixed(2)}%
-      </ColoredOptionType>
+      <Typography>{formatCurrency(price)}</Typography>
+      <ColoredOptionType positive={change > 0}>{change.toFixed(1)}%</ColoredOptionType>
     </Paper>
   );
 };

@@ -40,7 +40,7 @@ const reqOption = async (offset: number, strike: number, expiration: number, typ
 };
 
 const getRoundedStrikeByEth = (eth: number) => (offset: number) => {
-  return [offset, Math.round(((offset / 100) * eth) / 100) * 100];
+  return [offset, Math.round(((offset / 100) * eth) / 50) * 50];
 };
 
 export const useHegicRates = (lyraRates?: OptionsMap[]): [OptionsMap[] | undefined] => {

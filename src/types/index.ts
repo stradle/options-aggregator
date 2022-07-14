@@ -46,3 +46,22 @@ export type Deal = Pick<OptionsMap, "term" | "strike"> & {
   buy: DealPart;
   sell: DealPart;
 };
+
+export type ActivePosition = {
+  id: number;
+  strike: number;
+  size: number;
+  expiration: number;
+  isOpen: boolean;
+  isCall: boolean;
+  isLong: boolean;
+  isSettled: boolean;
+  isBaseCollateral?: boolean;
+  numTrades: number;
+  avgCostPerOption: number;
+  pricePerOption: number;
+  realizedPnl: number;
+  realizedPnlPercent: number;
+  unrealizedPnl: number;
+  unrealizedPnlPercent: number;
+};
