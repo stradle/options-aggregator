@@ -56,7 +56,6 @@ export type ActivePosition = {
   isCall: boolean;
   isLong: boolean;
   isSettled: boolean;
-  isBaseCollateral?: boolean;
   numTrades: number;
   avgCostPerOption: number;
   pricePerOption: number;
@@ -64,4 +63,6 @@ export type ActivePosition = {
   realizedPnlPercent: number;
   unrealizedPnl: number;
   unrealizedPnlPercent: number;
+  collateral?: number;
+  isBaseCollateral?: boolean;
 };

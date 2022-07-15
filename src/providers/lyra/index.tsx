@@ -83,7 +83,7 @@ export const useLyraPositions = (isOpen = true): [ActivePosition[], boolean] => 
       strike: +pos.strikePrice,
       size: +pos.size,
       expiration: pos.expiryTimestamp,
-      collateral: pos.collateral,
+      collateral: pos.collateral && +pos.collateral?.amount,
       isOpen: pos.isOpen,
       isCall: pos.isCall,
       isLong: pos.isLong,

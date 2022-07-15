@@ -32,7 +32,9 @@ const dealColumns: readonly HeadCell[] = [
   { numeric: true, disablePadding: false, id: "avgCostPerOption", label: "Avg price" },
   { numeric: true, disablePadding: false, id: "pricePerOption", label: "Cur price" },
   { numeric: true, disablePadding: false, id: "unrealizedPnl", label: "Unrealized PnL" },
+  { numeric: true, disablePadding: false, id: "collateral", label: "Collateral" },
 ];
+
 const Portfolio = () => {
   const [lyraPositions, loading] = useLyraPositions();
   const { connector: activeConnector } = useAccount();
@@ -60,6 +62,14 @@ const Portfolio = () => {
             </TableHead>
             <TableBody>
               {lyraPositions.map((position) => {
+                let collateral = "";
+                if (!position.isLong) {
+                  collateral += ((position.collateral as number) / 1e18).toFixed(2);
+                  collateral += " ";
+                  // TODO: make callateral dynamic  after adding BTC
+                  collateral += position.isBaseCollateral ? "ETH" : "sUSD";
+                }
+
                 return (
                   <TableRow>
                     <TableCell align={"center"}>{position.strike / 1e18}</TableCell>
@@ -91,6 +101,7 @@ const Portfolio = () => {
                         </Typography>
                       </ColoredOptionType>
                     </TableCell>
+                    <TableCell align="right">{collateral}</TableCell>
                   </TableRow>
                 );
               })}
