@@ -21,7 +21,7 @@ import { ColoredOptionType, ProviderIcon, StyledTable } from "../../components";
 import ProviderSelector from "../../components/ProviderSelector";
 import OptionValue from "../../components/OptionValue";
 import { ConfigSection, PageWrapper } from "../styled";
-import {BuySellModes, DealsFields, OptionsMap, OptionType} from "../../types";
+import { BuySellModes, DealsFields, OptionsMap, OptionType } from "../../types";
 
 const StyledCell = styled("div")({
   display: "flex",
@@ -31,8 +31,6 @@ const StyledCell = styled("div")({
 const TableHeader = ({ text }: { text: string }) => {
   return <Typography fontWeight={500}>{text}</Typography>;
 };
-
-
 
 const StyledOptionCouple = styled("div")`
   display: flex;
@@ -141,8 +139,12 @@ const AggregatedRates = () => {
           <thead>
             <tr>
               <th key={1}>
-                <ColoredOptionType positive>CALL</ColoredOptionType>
-                <ColoredOptionType>PUT</ColoredOptionType>
+                <div>
+                  <ColoredOptionType positive>CALL</ColoredOptionType>
+                </div>
+                <div>
+                  <ColoredOptionType>PUT</ColoredOptionType>
+                </div>
               </th>
               {expirations.map(([term]) => {
                 const providers = termProviders[term];
