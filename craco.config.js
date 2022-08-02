@@ -8,22 +8,25 @@ const webpack = require("webpack");
  */
 
 module.exports = {
-    webpack: {
-        configure: {
-            resolve: {
-                fallback: {
-                    // process: require.resolve("process/browser"),
-                    stream: require.resolve("stream-browserify"),
-                    buffer: require.resolve("buffer"),
-                    // timers: require.resolve("timers-browserify")
-                },
-            },
-            plugins: [
-                new webpack.ProvidePlugin({
-                    Buffer: ["buffer", "Buffer"],
-                    // process: "process/browser",
-                })
-            ],
-        }
+  webpack: {
+    configure: {
+      node: {
+        global: true,
+      },
+      resolve: {
+        fallback: {
+          process: "process/browser",
+          buffer: "buffer",
+        },
+      },
     },
+    plugins: [
+      new webpack.ProvidePlugin({
+        Buffer: ["buffer", "Buffer"],
+      }),
+      new webpack.ProvidePlugin({
+        process: "process/browser",
+      }),
+    ],
+  },
 };

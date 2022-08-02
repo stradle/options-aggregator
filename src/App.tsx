@@ -1,13 +1,18 @@
 import { useMemo } from "react";
 import { QueryClient, QueryClientProvider } from "react-query";
 import { ThemeProvider, CssBaseline, createTheme } from "@mui/material";
+import { useLocalStorage } from "react-use";
+import { createClient, WagmiConfig } from "wagmi";
+import {
+  darkTheme,
+  lightTheme,
+  RainbowKitProvider,
+} from "@rainbow-me/rainbowkit";
 import { RatesProvider } from "./context/RatesProvider";
 import AppRouter from "./pages/AppRouter";
 import AppContextProvider from "./context/AppContext";
 import { ColorModeContext } from "./context/ColorModeContext";
-import { useLocalStorage } from "react-use";
-import { createClient, WagmiConfig } from "wagmi";
-import { connectors, provider } from "./services/wallet/connectors";
+import { chains, connectors, provider } from "./services/wallet/connectors";
 
 type ColorTheme = "light" | "dark";
 
@@ -36,6 +41,10 @@ const client = createClient({
   provider,
 });
 
+const getRainbowTheme = (light: boolean) => ({
+  ...(light ? lightTheme() : darkTheme()),
+});
+
 const App = () => {
   const [mode = "light", setMode] = useLocalStorage<ColorTheme>("light");
   const colorModeContext = useMemo(
@@ -47,20 +56,23 @@ const App = () => {
     [mode]
   );
   const theme = useMemo(() => getTheme(mode), [mode]);
+  const rainbowTheme = useMemo(() => getRainbowTheme(mode === "light"), [mode]);
 
   return (
     <QueryClientProvider client={queryClient}>
       <WagmiConfig client={client}>
-        <AppContextProvider>
-          <RatesProvider>
-            <ThemeProvider theme={theme}>
-              <ColorModeContext.Provider value={colorModeContext}>
-                <CssBaseline enableColorScheme />
-                <AppRouter />
-              </ColorModeContext.Provider>
-            </ThemeProvider>
-          </RatesProvider>
-        </AppContextProvider>
+        <RainbowKitProvider theme={rainbowTheme} chains={chains}>
+          <AppContextProvider>
+            <RatesProvider>
+              <ThemeProvider theme={theme}>
+                <ColorModeContext.Provider value={colorModeContext}>
+                  <CssBaseline enableColorScheme />
+                  <AppRouter />
+                </ColorModeContext.Provider>
+              </ThemeProvider>
+            </RatesProvider>
+          </AppContextProvider>
+        </RainbowKitProvider>
       </WagmiConfig>
     </QueryClientProvider>
   );

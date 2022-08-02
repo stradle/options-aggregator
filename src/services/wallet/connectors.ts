@@ -1,8 +1,6 @@
 import { configureChains, chain } from "wagmi";
 import { publicProvider } from "wagmi/providers/public";
-import { MetaMaskConnector } from "wagmi/connectors/metaMask";
-import { WalletConnectConnector } from "wagmi/connectors/walletConnect";
-import { CoinbaseWalletConnector } from "wagmi/connectors/coinbaseWallet";
+import {getDefaultWallets} from "@rainbow-me/rainbowkit";
 
 // API key for Ethereum node
 // Two popular services are Infura (infura.io) and Alchemy (alchemy.com)
@@ -15,21 +13,8 @@ export const { chains, provider } = configureChains(
 );
 
 // Set up connectors
-export const connectors = [
-  new CoinbaseWalletConnector({
-    chains,
-    options: {
-      appName: "stradle",
-    },
-  }),
-  new WalletConnectConnector({
-    chains,
-    options: {
-      infuraId,
-      qrcode: true,
-    },
-  }),
-  new MetaMaskConnector({
-    chains,
-  }),
-];
+export const { connectors } = getDefaultWallets({
+  appName: 'My RainbowKit App',
+  chains
+});
+
