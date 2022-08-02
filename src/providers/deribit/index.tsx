@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import moment from "moment";
 import { pick } from "lodash";
 import { useEthPrice } from "../../services/util";
-import { Option, OptionsMap, OptionType, ProviderType } from "../../types";
+import { Instrument, OptionsMap, OptionType, ProviderType } from "../../types";
 
 // const authRequest = {
 //   jsonrpc: "2.0",
@@ -26,7 +26,7 @@ const ethOptions = {
     kind: "option",
   },
 };
-
+//     @ response data
 //     ask_price: null,
 //     base_currency: "ETH",
 //     bid_price: 0.001,
@@ -70,11 +70,12 @@ const ws = new WebSocket("wss://www.deribit.com/ws/api/v2");
 const parseDeribitOption = (
   { instrument_name, ask_price, bid_price, mid_price }: DeribitItem,
   ethPrice: number
-): Option & Pick<OptionsMap, "term" | "strike" | "expiration"> => {
+): Instrument & Pick<OptionsMap, "term" | "strike" | "expiration"> => {
   // 'ETH-27MAY22-2400-C'
   const [, term, strike, callOrPut] = instrument_name.split("-");
 
   return {
+    provider: ProviderType.DERIBIT,
     term,
     strike: parseFloat(strike),
     type: callOrPut === "P" ? OptionType.PUT : OptionType.CALL,
@@ -124,14 +125,11 @@ export const useDeribitRates = () => {
 
           if (found) {
             // @ts-ignore
-            found.options[option.type] = option;
+            found[option.type] = option;
           } else {
             acc.push({
-              ...pick(option, ["term", "strike", "expiration"]),
-              provider: ProviderType.DERIBIT,
-              options: {
-                [option.type]: pick(option, ["askPrice", "bidPrice", "midPrice", "type"]),
-              },
+              ...pick(option, ["term", "strike", "expiration", "provider"]),
+              [option.type]: option,
             });
           }
 

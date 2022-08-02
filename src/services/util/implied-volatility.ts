@@ -18,15 +18,22 @@ export const getImpliedVolatility = (
   price: number,
   strike: number,
   expiration: number,
-  rate: number,
   callPut: OptionType,
-  estimate = 1
+  estimate = 1,
+  rate = 0.05
 ) => {
   let low = 0;
   let high = Infinity;
   // perform 100 iterations max
   for (let i = 0; i < 1000; i++) {
-    const actualCost = blackScholes(price, strike, expiration, estimate, rate, callPut);
+    const actualCost = blackScholes(
+      price,
+      strike,
+      expiration,
+      estimate,
+      rate,
+      callPut
+    );
     // compare the price down to the cent
     if (expectedCost * 100 === Math.floor(actualCost * 100)) {
       break;

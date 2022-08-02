@@ -1,3 +1,13 @@
+export enum BuySellModes {
+  BUY = "Buy",
+  SELL = "Sell",
+}
+
+export const DealsFields: Record<BuySellModes, "askPrice" | "bidPrice"> = {
+  [BuySellModes.BUY]: "askPrice",
+  [BuySellModes.SELL]: "bidPrice",
+};
+
 export enum ProviderType {
   LYRA = "LYRA",
   DERIBIT = "DERIBIT",
@@ -10,28 +20,29 @@ export enum OptionType {
   PUT = "PUT",
 }
 
-export interface Option {
-  type: OptionType;
-  askPrice?: number;
-  bidPrice?: number;
-  midPrice?: number;
-}
-
-export type CallOption = Option & { type: OptionType.CALL };
-export type PutOption = Option & { type: OptionType.PUT };
-
-export type OptionCouple = {
-  [OptionType.CALL]?: CallOption | undefined;
-  [OptionType.PUT]?: PutOption | undefined;
-};
-
-export type OptionsMap = {
+export type InstrumentMeta = {
   provider: ProviderType;
   expiration: number;
   term: string;
   strike: number;
-  options: OptionCouple;
 };
+
+export type Instrument = {
+  type: OptionType;
+  askPrice?: number;
+  bidPrice?: number;
+  midPrice?: number;
+} & InstrumentMeta;
+
+export type CallOption = Instrument & { type: OptionType.CALL };
+export type PutOption = Instrument & { type: OptionType.PUT };
+
+export type InstrumentCouple = {
+  [OptionType.CALL]?: CallOption;
+  [OptionType.PUT]?: PutOption;
+};
+
+export type OptionsMap = InstrumentMeta & InstrumentCouple;
 
 export enum Underlying {
   ETH = "ETH",
@@ -43,8 +54,8 @@ export type Deal = Pick<OptionsMap, "term" | "strike"> & {
   amount: number;
   expiration: number;
   type: OptionType;
-  buy: DealPart;
-  sell: DealPart;
+  buy: Instrument;
+  sell: Instrument;
 };
 
 export type ActivePosition = {

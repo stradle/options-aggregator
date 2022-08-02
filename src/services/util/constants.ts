@@ -1,4 +1,5 @@
-import { OptionType, ProviderType } from "../../types";
+import { ProviderType } from "../../types";
+import {BigNumber} from "ethers";
 
 export const STRIKE_CUTOFF = 1.5;
 
@@ -21,3 +22,5 @@ export const getUrlByProvider = (provider: ProviderType) => {
       return "https://hegic.co/app.html#/arbitrum/options/buy-otm";
   }
 };
+
+export const MAX_BN = BigNumber.from(2).pow(256).sub(1);

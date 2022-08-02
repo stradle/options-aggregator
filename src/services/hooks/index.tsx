@@ -1,7 +1,7 @@
 import { useMemo } from "react";
-import { chain, groupBy } from "lodash";
-import { useRatesContext } from "../../providers/RatesProvider";
-import { OptionsMap } from "../../types";
+import { chain, groupBy, pick } from "lodash";
+import { useRatesContext } from "../../context/RatesProvider";
+import { OptionsMap, OptionType } from "../../types";
 import { useAppContext } from "../../context/AppContext";
 
 type TermStrikesOptions = {
@@ -18,7 +18,11 @@ export const useRatesData = (filterSell = false) => {
         .flatten()
         // @ts-ignore
         .filter((optionsMap: OptionsMap) =>
-          filterSell ? Object.values(optionsMap.options).some((option) => option?.bidPrice) : true
+          filterSell
+            ? Object.values(pick(optionsMap, Object.values(OptionType))).some(
+                (option) => option?.bidPrice
+              )
+            : true
         )
         .groupBy("term")
         .mapValues((optionsMap: OptionsMap) => groupBy(optionsMap, "strike"))

@@ -1,5 +1,4 @@
-import { configureChains, defaultChains } from "wagmi";
-import { infuraProvider } from "wagmi/providers/infura";
+import { configureChains, chain } from "wagmi";
 import { publicProvider } from "wagmi/providers/public";
 import { MetaMaskConnector } from "wagmi/connectors/metaMask";
 import { WalletConnectConnector } from "wagmi/connectors/walletConnect";
@@ -10,17 +9,17 @@ import { CoinbaseWalletConnector } from "wagmi/connectors/coinbaseWallet";
 const infuraId = process.env.REACT_APP_INFURA_ID;
 
 // Configure chains for connectors to support
-export const { chains } = configureChains(defaultChains, [
-  infuraProvider({ infuraId }),
-  publicProvider(),
-]);
+export const { chains, provider } = configureChains(
+  [chain.mainnet, chain.optimism, chain.arbitrum],
+  [publicProvider()]
+);
 
 // Set up connectors
 export const connectors = [
   new CoinbaseWalletConnector({
     chains,
     options: {
-      appName: "wagmi demo",
+      appName: "stradle",
     },
   }),
   new WalletConnectConnector({

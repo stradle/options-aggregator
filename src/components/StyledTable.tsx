@@ -31,7 +31,7 @@ export const ColoredOptionType = ({
   children: ReactNode;
   positive?: boolean;
 }) => (
-  <Typography color={positive ? "primary.positiveText" : "primary.negativeText"} variant={"body2"}>
+  <Typography color={positive ? "primary.positiveText" : "primary.negativeText"} component={'span'} variant={"body2"}>
     {children}
   </Typography>
 );

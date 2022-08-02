@@ -13,18 +13,11 @@ import {
   TableSortLabel,
 } from "@mui/material";
 import { formatCurrency } from "../../services/util";
-import { ColoredOptionType, ProviderIcon } from "../../components";
+import { ColoredOptionType } from "../../components";
 import ProviderSelector from "../../components/ProviderSelector";
 import { PageWrapper } from "../styled";
-import { StyledDealBuySellItem } from "./styled";
-import { Deal, DealPart, OptionType } from "../../types";
-
-const DealBuySellItem = ({ item }: { item: DealPart }) => (
-  <StyledDealBuySellItem>
-    <div>{formatCurrency(item.price, 2)}</div>
-    <ProviderIcon provider={item.provider} />
-  </StyledDealBuySellItem>
-);
+import { BuySellModes, Deal, OptionType } from "../../types";
+import OptionValue from "../../components/OptionValue";
 
 function descendingComparator<T>(a: T, b: T, orderBy: keyof T) {
   if (b[orderBy] < a[orderBy]) {
@@ -45,7 +38,10 @@ const notSortableKeys: readonly string[] = ["buy", "sell"];
 function getComparator<Key extends keyof any>(
   order: Order,
   orderBy: Key
-): (a: { [key in Key]: number | string }, b: { [key in Key]: number | string }) => number {
+): (
+  a: { [key in Key]: number | string },
+  b: { [key in Key]: number | string }
+) => number {
   return order === "desc"
     ? (a, b) => descendingComparator(a, b, orderBy)
     : (a, b) => -descendingComparator(a, b, orderBy);
@@ -53,7 +49,10 @@ function getComparator<Key extends keyof any>(
 
 // This method is created for cross-browser compatibility, if you don't
 // need to support IE11, you can use Array.prototype.sort() directly
-function stableSort<T>(array: readonly T[], comparator: (a: T, b: T) => number) {
+function stableSort<T>(
+  array: readonly T[],
+  comparator: (a: T, b: T) => number
+) {
   const stabilizedThis = array.map((el, index) => [el, index] as [T, number]);
   stabilizedThis.sort((a, b) => {
     const order = comparator(a[0], b[0]);
@@ -84,15 +83,19 @@ const dealColumns: readonly HeadCell[] = [
 ];
 
 const EnhancedTableHead = (props: {
-  onRequestSort: (event: React.MouseEvent<unknown>, property: DealsSorting) => void;
+  onRequestSort: (
+    event: React.MouseEvent<unknown>,
+    property: DealsSorting
+  ) => void;
   order: Order;
   orderBy: string;
   rowCount: number;
 }) => {
   const { order, orderBy, onRequestSort } = props;
-  const createSortHandler = (property: DealsSorting) => (event: React.MouseEvent<unknown>) => {
-    onRequestSort(event, property);
-  };
+  const createSortHandler =
+    (property: DealsSorting) => (event: React.MouseEvent<unknown>) => {
+      onRequestSort(event, property);
+    };
 
   return (
     <TableHead>
@@ -102,7 +105,8 @@ const EnhancedTableHead = (props: {
             key={headCell.id}
             align={headCell.numeric ? "right" : "center"}
             padding={headCell.disablePadding ? "none" : "normal"}
-            sortDirection={orderBy === headCell.id ? order : false}>
+            sortDirection={orderBy === headCell.id ? order : false}
+          >
             <TableSortLabel
               disabled={notSortableKeys.includes(headCell.id)}
               active={orderBy === headCell.id}
@@ -111,7 +115,8 @@ const EnhancedTableHead = (props: {
                 notSortableKeys.includes(headCell.id)
                   ? undefined
                   : createSortHandler(headCell.id as DealsSorting)
-              }>
+              }
+            >
               {headCell.label}
               {orderBy === headCell.id ? (
                 <Box component="span" sx={visuallyHidden}>
@@ -126,8 +131,6 @@ const EnhancedTableHead = (props: {
   );
 };
 
-// type Sorting = "apy";
-
 const formatPercent = (amount: number) => amount.toFixed(1) + "%";
 
 const ArbitrageTable = ({ data }: { data: DealsTableItem[] }) => {
@@ -136,7 +139,10 @@ const ArbitrageTable = ({ data }: { data: DealsTableItem[] }) => {
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(20);
 
-  const handleRequestSort = (event: React.MouseEvent<unknown>, property: DealsSorting) => {
+  const handleRequestSort = (
+    event: React.MouseEvent<unknown>,
+    property: DealsSorting
+  ) => {
     const isAsc = orderBy === property && order === "asc";
     setOrder(isAsc ? "desc" : "asc");
     setOrderBy(property);
@@ -146,13 +152,16 @@ const ArbitrageTable = ({ data }: { data: DealsTableItem[] }) => {
     setPage(newPage);
   };
 
-  const handleChangeRowsPerPage = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleChangeRowsPerPage = (
+    event: React.ChangeEvent<HTMLInputElement>
+  ) => {
     setRowsPerPage(parseInt(event.target.value, 10));
     setPage(0);
   };
 
   // Avoid a layout jump when reaching the last page with empty rows.
-  const emptyRows = page > 0 ? Math.max(0, (1 + page) * rowsPerPage - data.length) : 0;
+  const emptyRows =
+    page > 0 ? Math.max(0, (1 + page) * rowsPerPage - data.length) : 0;
 
   return (
     <PageWrapper gap="10px" width="100%">
@@ -177,13 +186,18 @@ const ArbitrageTable = ({ data }: { data: DealsTableItem[] }) => {
                   const labelId = `enhanced-table-checkbox-${index}`;
 
                   return (
-                    <TableRow hover tabIndex={-1} key={deal.strike + deal.term + deal.type}>
+                    <TableRow
+                      hover
+                      tabIndex={-1}
+                      key={deal.strike + deal.term + deal.type}
+                    >
                       <TableCell
                         align="right"
                         component="th"
                         id={labelId}
                         scope="row"
-                        padding="none">
+                        padding="none"
+                      >
                         {formatCurrency(+deal.strike)}
                       </TableCell>
                       <TableCell align="center" component="th">
@@ -191,20 +205,36 @@ const ArbitrageTable = ({ data }: { data: DealsTableItem[] }) => {
                       </TableCell>
                       <TableCell align="center">
                         {
-                          <ColoredOptionType positive={deal.type === OptionType.CALL}>
+                          <ColoredOptionType
+                            positive={deal.type === OptionType.CALL}
+                          >
                             {deal.type}
                           </ColoredOptionType>
                         }
                       </TableCell>
                       <TableCell align="right">
-                        <DealBuySellItem item={deal.buy} />
+                        <OptionValue
+                          detailed
+                          instrument={deal.buy}
+                          dealMode={BuySellModes.BUY}
+                        />
                       </TableCell>
                       <TableCell align="right">
-                        <DealBuySellItem item={deal.sell} />
+                        <OptionValue
+                          detailed
+                          instrument={deal.sell}
+                          dealMode={BuySellModes.SELL}
+                        />
                       </TableCell>
-                      <TableCell align="right">{formatCurrency(deal.amount, 2)}</TableCell>
-                      <TableCell align="right">{formatPercent(deal.discount)}</TableCell>
-                      <TableCell align="right">{formatPercent(deal.apy)}</TableCell>
+                      <TableCell align="right">
+                        {formatCurrency(deal.amount, 2)}
+                      </TableCell>
+                      <TableCell align="right">
+                        {formatPercent(deal.discount)}
+                      </TableCell>
+                      <TableCell align="right">
+                        {formatPercent(deal.apy)}
+                      </TableCell>
                     </TableRow>
                   );
                 })}
@@ -212,7 +242,8 @@ const ArbitrageTable = ({ data }: { data: DealsTableItem[] }) => {
                 <TableRow
                   style={{
                     height: 53 * emptyRows,
-                  }}>
+                  }}
+                >
                   <TableCell colSpan={6} />
                 </TableRow>
               )}

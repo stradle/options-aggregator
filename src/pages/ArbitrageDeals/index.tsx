@@ -20,24 +20,26 @@ const useDeals = () => {
     Object.values(allRates).forEach((strike) =>
       Object.values(strike).forEach((interception) => {
         const providerFiltered = providers
-          ? interception.filter((option) => option && providers.includes(option.provider))
+          ? interception.filter(
+              (option) => option && providers.includes(option.provider)
+            )
           : interception;
         if (providerFiltered?.length < 2) return;
 
-        const maxCall = maxBy(providerFiltered, "options.CALL.bidPrice");
-        const minCall = minBy(providerFiltered, "options.CALL.askPrice");
-        const maxPut = maxBy(providerFiltered, "options.PUT.bidPrice");
-        const minPut = minBy(providerFiltered, "options.PUT.askPrice");
+        const maxCall = maxBy(providerFiltered, "CALL.bidPrice")?.CALL;
+        const minCall = minBy(providerFiltered, "CALL.askPrice")?.CALL;
+        const maxPut = maxBy(providerFiltered, "PUT.bidPrice")?.PUT;
+        const minPut = minBy(providerFiltered, "PUT.askPrice")?.PUT;
         const callDeal =
-          maxCall?.options.CALL?.bidPrice &&
-          minCall?.options.CALL?.askPrice &&
+          maxCall?.bidPrice &&
+          minCall?.askPrice &&
           maxCall.provider !== minCall.provider &&
-          maxCall.options.CALL.bidPrice - minCall.options.CALL.askPrice;
+          maxCall.bidPrice - minCall.askPrice;
         const putDeal =
-          maxPut?.options.PUT?.bidPrice &&
-          minPut?.options.PUT?.askPrice &&
+          maxPut?.bidPrice &&
+          minPut?.askPrice &&
           maxPut.provider !== minPut.provider &&
-          maxPut.options.PUT.bidPrice - minPut.options.PUT.askPrice;
+          maxPut.bidPrice - minPut.askPrice;
 
         if (callDeal && callDeal > PROFIT_THRESHOLD) {
           res.push({
@@ -46,14 +48,8 @@ const useDeals = () => {
             strike: maxCall.strike,
             expiration: maxCall.expiration,
             amount: callDeal,
-            buy: {
-              price: minCall?.options.CALL?.askPrice as number,
-              provider: minCall.provider,
-            },
-            sell: {
-              price: maxCall?.options.CALL?.bidPrice as number,
-              provider: maxCall.provider,
-            },
+            buy: minCall,
+            sell: maxCall,
           });
         }
         if (putDeal && putDeal > PROFIT_THRESHOLD) {
@@ -63,14 +59,8 @@ const useDeals = () => {
             strike: maxPut.strike,
             expiration: maxPut.expiration,
             amount: putDeal,
-            buy: {
-              price: minPut?.options.PUT?.askPrice as number,
-              provider: minPut.provider,
-            },
-            sell: {
-              price: maxPut?.options.PUT?.bidPrice as number,
-              provider: maxPut.provider,
-            },
+            buy: minPut,
+            sell: maxPut,
           });
         }
       })
@@ -94,7 +84,7 @@ const ArbitrageDeals = () => {
       return {
         ...deal,
         apy: (deal.amount / price / duration) * 100,
-        discount: (deal.amount / deal.sell.price) * 100,
+        discount: (deal.amount / (deal.sell?.bidPrice as number)) * 100,
       };
     });
   }, [deals]);
@@ -104,7 +94,10 @@ const ArbitrageDeals = () => {
   ) : (
     <PageWrapper>
       <h4>
-        {`Currently there are no deals exceeding ${formatCurrency(PROFIT_THRESHOLD, 2)} delta
+        {`Currently there are no deals exceeding ${formatCurrency(
+          PROFIT_THRESHOLD,
+          2
+        )} delta
           profit threshold`}
         <br />
         <br />

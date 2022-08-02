@@ -1,7 +1,6 @@
 import { filter, maxBy, minBy } from "lodash";
 import { useLocalStorage } from "react-use";
 import {
-  alpha,
   Button,
   ButtonGroup,
   Divider,
@@ -12,33 +11,18 @@ import {
   Typography,
 } from "@mui/material";
 import { useRatesData } from "../../services/hooks";
-import { formatCurrency, useExpirations, useStrikes } from "../../services/util";
-import { useRatesContext } from "../../providers/RatesProvider";
-import useOptionPopover from "./useOptionPopover";
+import {
+  formatCurrency,
+  useExpirations,
+  useStrikes,
+} from "../../services/util";
+import { useRatesContext } from "../../context/RatesProvider";
 import { ColoredOptionType, ProviderIcon, StyledTable } from "../../components";
 import ProviderSelector from "../../components/ProviderSelector";
-import { ConfigSection, PageWrapper, StyledProviderLink } from "../styled";
-import { Option, OptionsMap, OptionType } from "../../types";
+import OptionValue from "../../components/OptionValue";
+import { ConfigSection, PageWrapper } from "../styled";
+import {BuySellModes, DealsFields, OptionsMap, OptionType} from "../../types";
 
-enum DealModes {
-  BUY = "Buy",
-  SELL = "Sell",
-}
-
-const StyledOptionType = styled(ColoredOptionType)<{ highlight?: boolean; type?: OptionType }>(
-  ({ highlight, theme }) => ({
-    height: "20px",
-    lineHeight: "20px",
-    textAlign: "end",
-    borderRadius: "4px",
-    width: "fit-content",
-    border: highlight ? "1px solid" : "",
-    borderColor: theme.palette.divider,
-    backgroundColor: highlight
-      ? alpha(theme.palette.text.primary, theme.palette.action.focusOpacity)
-      : "",
-  })
-);
 const StyledCell = styled("div")({
   display: "flex",
   gap: "3px",
@@ -48,65 +32,49 @@ const TableHeader = ({ text }: { text: string }) => {
   return <Typography fontWeight={500}>{text}</Typography>;
 };
 
-const DealsFields = {
-  [DealModes.BUY]: "askPrice",
-  [DealModes.SELL]: "bidPrice",
-};
 
-const OptionValue = ({
-  option,
-  highlight,
-  dealMode,
-}: {
-  option?: Option;
-  highlight?: boolean;
-  dealMode: DealModes;
-}) => (
-  <StyledOptionType highlight={highlight} positive={option?.type === OptionType.CALL}>
-    {
-      // @ts-ignore
-      option?.askPrice && formatCurrency(option[DealsFields[dealMode]])
-    }
-  </StyledOptionType>
-);
+
+const StyledOptionCouple = styled("div")`
+  display: flex;
+  flex-direction: column;
+  min-width: 40px;
+  align-items: end;
+  flex: 1;
+`;
 
 const OptionsCouple = ({
   optionCouple,
   markCheap,
   dealMode,
-  onClick,
 }: {
   optionCouple: OptionsMap;
   markCheap: { call: boolean; put: boolean };
-  dealMode: DealModes;
-  onClick: (event: React.MouseEvent, option: OptionsMap) => void;
+  dealMode: BuySellModes;
 }) => {
-  const { [OptionType.CALL]: call, [OptionType.PUT]: put } = optionCouple.options;
-
   return (
-    <StyledProviderLink onClick={(event) => onClick(event, optionCouple)}>
-      <div
-        style={{
-          display: "flex",
-          flexDirection: "column",
-          minWidth: "40px",
-          alignItems: "end",
-        }}>
-        <OptionValue dealMode={dealMode} highlight={markCheap.call} option={call} />
-        <OptionValue dealMode={dealMode} highlight={markCheap.put} option={put} />
-      </div>
-    </StyledProviderLink>
+    <StyledOptionCouple>
+      <OptionValue
+        dealMode={dealMode}
+        highlight={markCheap.call}
+        instrument={optionCouple.CALL}
+      />
+      <OptionValue
+        dealMode={dealMode}
+        highlight={markCheap.put}
+        instrument={optionCouple.PUT}
+      />
+    </StyledOptionCouple>
   );
 };
 
-const buyAskOptions = Object.values(DealModes);
+const buyAskOptions = Object.values(BuySellModes);
 
 const DealModeSelector = ({
   value,
   setValue,
 }: {
   value: string;
-  setValue: (value: DealModes) => void;
+  setValue: (value: BuySellModes) => void;
 }) => {
   return (
     <ButtonGroup variant="outlined">
@@ -114,7 +82,8 @@ const DealModeSelector = ({
         <Button
           key={asset}
           variant={asset === value ? "contained" : undefined}
-          onClick={() => setValue(asset)}>
+          onClick={() => setValue(asset)}
+        >
           {asset}
         </Button>
       ))}
@@ -122,34 +91,44 @@ const DealModeSelector = ({
   );
 };
 
-const compare = (options: OptionsMap[], type: OptionType, mode: DealModes) => {
+const compare = (
+  options: OptionsMap[],
+  type: OptionType,
+  mode: BuySellModes
+) => {
   const field = DealsFields[mode];
-  const compareFunc = mode === DealModes.BUY ? minBy : maxBy;
+  const compareFunc = mode === BuySellModes.BUY ? minBy : maxBy;
 
   return (
-    filter(options, `options.${type}.${field}`).length > 1 &&
-    compareFunc(options, `options.${type}.${field}`)?.provider
+    filter(options, `${type}.${field}`).length > 1 &&
+    compareFunc(options, `${type}.${field}`)?.provider
   );
 };
 
 const AggregatedRates = () => {
   const [highlight, setHighlight] = useLocalStorage("highlight", false);
-  const [dealMode = DealModes.BUY, setDealMode] = useLocalStorage("ask-bid", DealModes.BUY);
+  const [dealMode = BuySellModes.BUY, setDealMode] = useLocalStorage(
+    "ask-bid",
+    BuySellModes.BUY
+  );
   const rates = useRatesContext();
   const { allStrikes = [] } = useStrikes();
-
   const [expirations] = useExpirations(rates.LYRA);
-  const { allRates, termProviders } = useRatesData(dealMode === DealModes.SELL);
-
-  const { handleOpen, OptionPopover } = useOptionPopover();
+  const { allRates, termProviders } = useRatesData(
+    dealMode === BuySellModes.SELL
+  );
 
   return (
     <PageWrapper gap={"10px"} width={"100%"}>
-      {OptionPopover}
-      <ConfigSection style={{ justifyContent: "space-between", width: "100%" }}>
+      <ConfigSection sx={{ justifyContent: "space-between", width: "100%" }}>
         <DealModeSelector value={dealMode} setValue={setDealMode} />
         <FormControlLabel
-          control={<Switch checked={highlight} onChange={(e) => setHighlight(e.target.checked)} />}
+          control={
+            <Switch
+              checked={highlight}
+              onChange={(e) => setHighlight(e.target.checked)}
+            />
+          }
           label="Best value"
           sx={{
             userSelect: "none",
@@ -175,9 +154,11 @@ const AggregatedRates = () => {
                       {providers?.map((provider, index) => (
                         <>
                           <div
+                            key={provider}
                             style={{
                               flex: 1,
-                            }}>
+                            }}
+                          >
                             <ProviderIcon provider={provider} />
                           </div>
                           {index !== providers.length - 1 && (
@@ -204,9 +185,11 @@ const AggregatedRates = () => {
                     const providers = termProviders[term];
 
                     const cheapestCallProvider =
-                      highlight && compare(termStrikeOptions, OptionType.CALL, dealMode);
+                      highlight &&
+                      compare(termStrikeOptions, OptionType.CALL, dealMode);
                     const cheapestPutProvider =
-                      highlight && compare(termStrikeOptions, OptionType.PUT, dealMode);
+                      highlight &&
+                      compare(termStrikeOptions, OptionType.PUT, dealMode);
 
                     if (!termStrikeOptions?.length) return <td key={term} />;
 
@@ -230,13 +213,16 @@ const AggregatedRates = () => {
                                     markCheap={markCheap}
                                     dealMode={dealMode}
                                     optionCouple={optionCouple}
-                                    onClick={handleOpen}
                                   />
                                 ) : (
                                   <div style={{ flex: 1 }} />
                                 )}
                                 {index !== providers.length - 1 && (
-                                  <Divider orientation="vertical" flexItem variant="middle" />
+                                  <Divider
+                                    flexItem
+                                    orientation="vertical"
+                                    variant="middle"
+                                  />
                                 )}
                               </>
                             );

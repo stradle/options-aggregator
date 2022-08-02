@@ -1,11 +1,11 @@
 import styled from "styled-components";
 import { Outlet } from "react-router-dom";
-import { Autocomplete, Box, Button, ButtonGroup, Chip, TextField, Tooltip } from "@mui/material";
-import { BasePriceWidget, Loader, ProviderIcon } from "../components";
+import { Button, ButtonGroup, Tooltip } from "@mui/material";
+import { BasePriceWidget, Loader } from "../components";
 import { useAppContext } from "../context/AppContext";
-import { useRatesContext } from "../providers/RatesProvider";
+import { useRatesContext } from "../context/RatesProvider";
 import { ConfigSection } from "./styled";
-import { Underlying, ProviderType } from "../types";
+import { Underlying } from "../types";
 
 const LayoutBase = styled.div`
   max-width: 1120px;
@@ -30,7 +30,8 @@ const AssetSelector = () => {
           <Button
             key={asset}
             variant={asset === underlying ? "contained" : undefined}
-            onClick={() => setUnderlying(asset)}>
+            onClick={() => setUnderlying(asset)}
+          >
             {asset}
           </Button>
         )

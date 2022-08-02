@@ -1,7 +1,7 @@
 import { createContext, ReactNode, useContext, useMemo } from "react";
-import { useDeribitRates } from "./deribit";
-import { useLyraRates } from "./lyra";
-import { usePremiaRates } from "./premia";
+import { useDeribitRates } from "../providers/deribit";
+import { useLyraRates } from "../providers/lyra";
+import { usePremiaRates } from "../providers/premia";
 // import { useHegicRates } from "./hegic";
 import { OptionsMap, ProviderType } from "../types";
 

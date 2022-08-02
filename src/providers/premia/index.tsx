@@ -65,26 +65,32 @@ export const usePremiaRates = (lyraRates?: OptionsMap[]): [OptionsMap[] | undefi
     if (!(callStrikes && putStrikes && allStrikes)) return undefined;
 
     const requests = expirations.map(([term, exp]) =>
-      allStrikes.map(async (strike) => ({
-        provider: ProviderType.PREMIA,
-        expiration: exp,
-        term,
-        strike: strike.toString(),
-        options: {
+      allStrikes.map(async (strike) => {
+        const instrumentMeta = {
+          provider: ProviderType.PREMIA,
+          expiration: exp,
+          term,
+          strike: strike.toString(),
+        };
+
+        return {
+          ...instrumentMeta,
           [OptionType.CALL]: callStrikes.includes(strike)
             ? {
+                ...instrumentMeta,
                 type: OptionType.CALL,
                 askPrice: await reqOption(strike, exp, true).then(toEth),
               }
             : undefined,
           [OptionType.PUT]: putStrikes.includes(strike)
             ? {
+                ...instrumentMeta,
                 type: OptionType.PUT,
                 askPrice: await reqOption(strike, exp, false),
               }
             : undefined,
-        },
-      }))
+        };
+      })
     );
     // @ts-ignore
     return Promise.all(requests.flat());

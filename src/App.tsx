@@ -1,15 +1,13 @@
 import { useMemo } from "react";
 import { QueryClient, QueryClientProvider } from "react-query";
 import { ThemeProvider, CssBaseline, createTheme } from "@mui/material";
-import { RatesProvider } from "./providers/RatesProvider";
+import { RatesProvider } from "./context/RatesProvider";
 import AppRouter from "./pages/AppRouter";
 import AppContextProvider from "./context/AppContext";
 import { ColorModeContext } from "./context/ColorModeContext";
 import { useLocalStorage } from "react-use";
 import { createClient, WagmiConfig } from "wagmi";
-import { connectors } from "./services/wallet/connectors";
-// import amber from '@mui/material/colors/amber';
-import { getDefaultProvider } from "ethers";
+import { connectors, provider } from "./services/wallet/connectors";
 
 type ColorTheme = "light" | "dark";
 
@@ -35,7 +33,7 @@ const getTheme = (theme: ColorTheme) =>
 const client = createClient({
   autoConnect: true,
   connectors,
-  provider: getDefaultProvider(),
+  provider,
 });
 
 const App = () => {
