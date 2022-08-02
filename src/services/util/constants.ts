@@ -13,7 +13,7 @@ export const routes = {
 export const getUrlByProvider = (provider: ProviderType) => {
   switch (provider) {
     case ProviderType.LYRA:
-      return "https://avalon.app.lyra.finance/trade/eth";
+      return "https://app.lyra.finance/trade/eth";
     case ProviderType.DERIBIT:
       return "https://deribit.com/options/ETH";
     case ProviderType.PREMIA:

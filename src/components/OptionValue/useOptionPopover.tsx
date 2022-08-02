@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { Card, Popover, styled, Typography, Link } from "@mui/material";
 import moment from "moment";
-// import { Link } from "react-router-dom";
 import { capitalize } from "lodash";
 import OpenInNewIcon from "@mui/icons-material/OpenInNew";
 import { formatCurrency, useEthPrice } from "../../services/util";
@@ -98,7 +97,7 @@ export const OptionPopover = ({
               <ProviderIcon provider={instrument.provider} />
               {capitalize(instrument.provider)}
             </Typography>
-            <Link href={getUrlByProvider(instrument.provider)} color="inherit">
+            <Link target="_blank" rel="noopener" href={getUrlByProvider(instrument.provider)} color="inherit">
               <OpenInNewIcon
                 sx={{ height: "15px", width: "15px" }}
                 color={"action"}
