@@ -27,11 +27,17 @@ export const StyledTable = styled("table")(({ theme }) => ({
 export const ColoredOptionType = ({
   children,
   positive,
+  enlarged,
 }: {
   children: ReactNode;
+  enlarged?: boolean;
   positive?: boolean;
 }) => (
-  <Typography color={positive ? "primary.positiveText" : "primary.negativeText"} component={'span'} variant={"body2"}>
+  <Typography
+    color={positive ? "primary.positiveText" : "primary.negativeText"}
+    component={"span"}
+    variant={enlarged ? "body1" : "body2"}
+  >
     {children}
   </Typography>
 );

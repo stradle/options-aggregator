@@ -41,9 +41,8 @@ const client = createClient({
   provider,
 });
 
-const getRainbowTheme = (light: boolean) => ({
-  ...(light ? lightTheme() : darkTheme()),
-});
+const getRainbowTheme = (light: boolean) =>
+  light ? lightTheme() : darkTheme();
 
 const App = () => {
   const [mode = "light", setMode] = useLocalStorage<ColorTheme>("light");

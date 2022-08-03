@@ -1,3 +1,4 @@
+import { Fragment } from "react";
 import { filter, maxBy, minBy } from "lodash";
 import { useLocalStorage } from "react-use";
 import {
@@ -154,9 +155,8 @@ const AggregatedRates = () => {
                     <TableHeader text={term} />
                     <StyledCell>
                       {providers?.map((provider, index) => (
-                        <>
+                        <Fragment key={provider}>
                           <div
-                            key={provider}
                             style={{
                               flex: 1,
                             }}
@@ -166,7 +166,7 @@ const AggregatedRates = () => {
                           {index !== providers.length - 1 && (
                             <Divider orientation="vertical" flexItem />
                           )}
-                        </>
+                        </Fragment>
                       ))}
                     </StyledCell>
                   </th>
@@ -208,10 +208,9 @@ const AggregatedRates = () => {
                             };
 
                             return (
-                              <>
+                              <Fragment key={provider}>
                                 {optionCouple ? (
                                   <OptionsCouple
-                                    key={provider}
                                     markCheap={markCheap}
                                     dealMode={dealMode}
                                     optionCouple={optionCouple}
@@ -226,7 +225,7 @@ const AggregatedRates = () => {
                                     variant="middle"
                                   />
                                 )}
-                              </>
+                              </Fragment>
                             );
                           })}
                         </StyledCell>

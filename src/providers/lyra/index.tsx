@@ -1,4 +1,4 @@
-import Lyra from "@lyrafinance/lyra-js";
+import Lyra, { Market } from "@lyrafinance/lyra-js";
 import { useAccount } from "wagmi";
 import { BigNumber } from "ethers";
 import { useQuery } from "react-query";
@@ -9,16 +9,38 @@ import {
   OptionsMap,
   OptionType,
   ProviderType,
-  Underlying,
 } from "../../types";
-
-type QueryArgs = [string, Underlying];
 
 const lyra = new Lyra();
 
-const getMarketData = async ({ queryKey }: { queryKey: QueryArgs }) => {
-  const [, underlying] = queryKey;
-  const market = await lyra.market(underlying.toLowerCase());
+const useLyraMarket = () => {
+  const { underlying } = useAppContext();
+  const { data: market } = useQuery(
+    ["lyra-markets", underlying],
+    () => lyra.market(underlying),
+    { staleTime: Infinity }
+  );
+
+  return { market };
+};
+
+export const useLyraStrikeId = (strike: number, expiration: number) => {
+  const { market } = useLyraMarket();
+  const expirationDate = new Date(expiration).toDateString();
+  const board = market
+    ?.liveBoards()
+    .find(
+      (board) =>
+        new Date(board.expiryTimestamp * 1000).toDateString() === expirationDate
+    );
+
+  return board?.strikes().find(({ strikePrice }) => {
+    return strikePrice.div((1e18).toString()).toString() === strike.toString();
+  });
+};
+
+const getMarketData = async (market: Market) => {
+  // TODO: set global rate varibale for IV and greeks
   // const rate = market.__marketData.marketParameters.greekCacheParams.rateAndCarry ?? 5;
   const options = market.liveBoards().map((board) => {
     const expiration = board.expiryTimestamp * 1000;
@@ -79,10 +101,10 @@ const getMarketData = async ({ queryKey }: { queryKey: QueryArgs }) => {
 };
 
 export const useLyraRates: () => [undefined | OptionsMap[], boolean] = () => {
-  const { underlying } = useAppContext();
+  const { market } = useLyraMarket();
   const { data, isLoading } = useQuery(
-    ["lyra", underlying] as QueryArgs,
-    getMarketData,
+    ["lyra", market],
+    () => market && getMarketData(market),
     {
       refetchInterval: 30000,
     }

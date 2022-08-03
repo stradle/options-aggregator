@@ -1,5 +1,12 @@
 import { useState } from "react";
-import { Card, Popover, styled, Typography, Link } from "@mui/material";
+import {
+  Card,
+  Divider,
+  Link,
+  Popover,
+  styled,
+  Typography,
+} from "@mui/material";
 import moment from "moment";
 import { capitalize } from "lodash";
 import OpenInNewIcon from "@mui/icons-material/OpenInNew";
@@ -7,7 +14,14 @@ import { formatCurrency, useEthPrice } from "../../services/util";
 import { getImpliedVolatility } from "../../services/util/implied-volatility";
 import { ColoredOptionType, ProviderIcon } from "../index";
 import { getUrlByProvider } from "../../services/util/constants";
-import { BuySellModes, DealsFields, Instrument, OptionType } from "../../types";
+import {
+  BuySellModes,
+  DealsFields,
+  Instrument,
+  OptionType,
+  ProviderType,
+} from "../../types";
+import { useLyraStrikeId } from "../../providers/lyra";
 
 const Row = styled("div")`
   display: flex;
@@ -57,7 +71,32 @@ const getIV = (
   return iv > 500 ? ">500" : iv.toFixed();
 };
 
-export const OptionPopover = ({
+const OptionLink = ({
+  instrument,
+  sell,
+}: {
+  instrument: Instrument;
+  sell?: boolean;
+}) => {
+  const strike = useLyraStrikeId(instrument.strike, instrument.expiration);
+
+  let url = getUrlByProvider(instrument.provider);
+
+  if (instrument.provider === ProviderType.LYRA) {
+    url += "?board=" + strike?.board().id;
+    url += "&strike=" + strike?.id;
+    if (instrument.type === OptionType.CALL) url += "&call=1";
+    if (sell) url += "&sell=1";
+  }
+
+  return (
+    <Link target="_blank" rel="noopener" href={url} color="inherit">
+      <OpenInNewIcon sx={{ height: "15px", width: "15px" }} color={"action"} />
+    </Link>
+  );
+};
+
+const OptionPopover = ({
   anchorEl,
   handleClose,
   instrument,
@@ -84,61 +123,68 @@ export const OptionPopover = ({
       {
         <StyledCard>
           <SpacedRow>
-            <Typography
-              width={"100%"}
-              fontWeight={500}
-              sx={{
-                display: "flex",
-                justifyContent: "center",
-                alignItems: "center",
-                gap: ".2rem",
-              }}
-            >
-              <ProviderIcon provider={instrument.provider} />
-              {capitalize(instrument.provider)}
-            </Typography>
-            <Link target="_blank" rel="noopener" href={getUrlByProvider(instrument.provider)} color="inherit">
-              <OpenInNewIcon
-                sx={{ height: "15px", width: "15px" }}
-                color={"action"}
-              />
-            </Link>
+            <Cell>
+              <Typography
+                width={"100%"}
+                fontWeight={500}
+                sx={{
+                  display: "flex",
+                  justifyContent: "center",
+                  alignItems: "center",
+                  gap: ".2rem",
+                }}
+              >
+                <ProviderIcon provider={instrument.provider} />
+                {capitalize(instrument.provider)}
+              </Typography>
+            </Cell>
           </SpacedRow>
           <SpacedRow>
             <Cell>
-              {" "}
               <div>{formatCurrency(instrument.strike)}</div>
             </Cell>
             <Cell>
-              {" "}
-              <ColoredOptionType positive={instrument.type === OptionType.CALL}>
+              <ColoredOptionType
+                positive={instrument.type === OptionType.CALL}
+                enlarged
+              >
                 {instrument.type}
               </ColoredOptionType>
             </Cell>
             <Cell>
-              {" "}
               <div>{instrument.term}</div>
             </Cell>
           </SpacedRow>
+          <Divider />
 
-          {instrument?.askPrice && (
-            <Row>
-              <Cell>
-                <ColoredOptionType positive>BUY:</ColoredOptionType>
-              </Cell>
-              <Cell>{formatCurrency(instrument.askPrice, 2)}</Cell>
-              <Cell>{buyIv}%</Cell>
-            </Row>
-          )}
-          {instrument?.bidPrice && (
-            <Row>
-              <Cell>
-                <ColoredOptionType>SELL:</ColoredOptionType>
-              </Cell>
-              <Cell>{formatCurrency(instrument.bidPrice, 2)}</Cell>
-              <Cell>{sellIv}%</Cell>
-            </Row>
-          )}
+          <table>
+            {instrument?.askPrice && (
+              <tr>
+                <td>
+                  <ColoredOptionType positive enlarged>
+                    LONG
+                  </ColoredOptionType>
+                </td>
+                <td>{formatCurrency(instrument.askPrice, 2)}</td>
+                <td>{buyIv}%</td>
+                <td>
+                  <OptionLink instrument={instrument} />
+                </td>
+              </tr>
+            )}
+            {instrument?.bidPrice && (
+              <tr>
+                <td>
+                  <ColoredOptionType enlarged>SHORT</ColoredOptionType>
+                </td>
+                <td>{formatCurrency(instrument.bidPrice, 2)}</td>
+                <td>{sellIv}%</td>
+                <td>
+                  <OptionLink instrument={instrument} sell />
+                </td>
+              </tr>
+            )}
+          </table>
         </StyledCard>
       }
     </Popover>
