@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { MouseEventHandler, useState } from "react";
 import {
   Card,
   Divider,
@@ -198,7 +198,10 @@ const useOptionPopover = () => {
   }>({ instrument: null, anchorEl: null });
 
   const handleOpen = (event: React.MouseEvent, instrument: Instrument) => {
-    setSelected({ anchorEl: event.currentTarget, instrument });
+    setSelected({
+      anchorEl: event.currentTarget,
+      instrument,
+    });
   };
   const handleClose = () => {
     setSelected({ instrument: null, anchorEl: null });

@@ -103,7 +103,7 @@ const getMarketData = async (market: Market) => {
 export const useLyraRates: () => [undefined | OptionsMap[], boolean] = () => {
   const { market } = useLyraMarket();
   const { data, isLoading } = useQuery(
-    ["lyra", market],
+    ["lyra", market?.address],
     () => market && getMarketData(market),
     {
       refetchInterval: 30000,
@@ -121,12 +121,11 @@ export const useLyraPositions = (
   const { data = [], isLoading } = useQuery(
     ["lyra-positions", address],
     async () => {
+      console.log("fetching lyra positions", address);
       if (!address) return [];
       const positions = isOpen
         ? await lyra.openPositions(address)
         : await lyra.positions(address);
-
-      console.log("refetching positions");
 
       return positions.map((pos) => ({
         __source: pos.__source,
@@ -148,7 +147,8 @@ export const useLyraPositions = (
         unrealizedPnl: +pos.unrealizedPnl(),
         unrealizedPnlPercent: +pos.unrealizedPnlPercent(),
       }));
-    }
+    },
+    { refetchInterval: 30000 }
   );
 
   return [data, isLoading];

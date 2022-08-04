@@ -4,6 +4,7 @@ import { ColoredOptionType } from "../StyledTable";
 import { formatCurrency } from "../../services/util";
 import { ProviderIcon } from "../ProviderIcon";
 import { BuySellModes, DealsFields, Instrument, OptionType } from "../../types";
+import {MouseEventHandler} from "react";
 
 const StyledOptionValue = styled(Button)<{
   highlight?: boolean;

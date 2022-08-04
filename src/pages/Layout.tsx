@@ -1,13 +1,12 @@
-import styled from "styled-components";
 import { Outlet } from "react-router-dom";
-import { Button, ButtonGroup, Tooltip } from "@mui/material";
+import { Button, ButtonGroup, styled, Tooltip } from "@mui/material";
 import { BasePriceWidget, Loader } from "../components";
 import { useAppContext } from "../context/AppContext";
 import { useRatesContext } from "../context/RatesProvider";
 import { ConfigSection } from "./styled";
 import { Underlying } from "../types";
 
-const LayoutBase = styled.div`
+const LayoutBase = styled("div")`
   max-width: 1120px;
   margin: 0 auto;
   display: flex;

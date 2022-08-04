@@ -45,7 +45,7 @@ const getRainbowTheme = (light: boolean) =>
   light ? lightTheme() : darkTheme();
 
 const App = () => {
-  const [mode = "light", setMode] = useLocalStorage<ColorTheme>("light");
+  const [mode = "dark", setMode] = useLocalStorage<ColorTheme>("dark");
   const colorModeContext = useMemo(
     () => ({
       toggleColorMode: () => {
