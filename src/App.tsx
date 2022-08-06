@@ -1,6 +1,8 @@
 import { useMemo } from "react";
-import { QueryClient, QueryClientProvider } from "react-query";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import { ThemeProvider, CssBaseline, createTheme } from "@mui/material";
+import { ThemeOptions } from "@rainbow-me/rainbowkit/dist/themes/baseTheme";
 import { useLocalStorage } from "react-use";
 import { createClient, WagmiConfig } from "wagmi";
 import {
@@ -41,8 +43,11 @@ const client = createClient({
   provider,
 });
 
-const getRainbowTheme = (light: boolean) =>
-  light ? lightTheme() : darkTheme();
+const getRainbowTheme = (light: boolean) => {
+  const params: ThemeOptions = { fontStack: "system" };
+
+  return light ? lightTheme(params) : darkTheme(params);
+};
 
 const App = () => {
   const [mode = "dark", setMode] = useLocalStorage<ColorTheme>("dark");
@@ -67,6 +72,7 @@ const App = () => {
                 <ColorModeContext.Provider value={colorModeContext}>
                   <CssBaseline enableColorScheme />
                   <AppRouter />
+                  <ReactQueryDevtools />
                 </ColorModeContext.Provider>
               </ThemeProvider>
             </RatesProvider>

@@ -1,4 +1,4 @@
-import { useQuery } from "react-query";
+import { useQuery } from "@tanstack/react-query";
 import { useMemo } from "react";
 import moment from "moment";
 import { chain } from "lodash";
@@ -25,12 +25,15 @@ export const fetchEthPrice = (): Promise<UnderlyingResult> =>
     }));
 
 export const useEthPrice = () => {
-  const { data = { price: 0, change: 0 } } = useQuery("eth-price", fetchEthPrice);
+  const { data = { price: 0, change: 0 } } = useQuery(
+    ["eth-price"],
+    fetchEthPrice
+  );
 
   return data;
 };
 
-type Strikes = {
+export type Strikes = {
   allStrikes?: number[];
   callStrikes?: number[];
   putStrikes?: number[];
@@ -62,12 +65,16 @@ export const useStrikes = (): Strikes => {
   }, [basePrice]);
 };
 
-export const useExpirations = (deribitRates?: OptionsMap[], minDays = 0, maxMonths = 3) => {
+export const useExpirations = (
+  baseRates?: OptionsMap[],
+  minDays = 0,
+  maxMonths = 3
+) => {
   const currentDate = moment(new Date());
 
-  const deribitTerms = useMemo<[string, number][]>(
+  return useMemo<[string, number][]>(
     () =>
-      chain(deribitRates)
+      chain(baseRates)
         .uniqBy("term")
         .sortBy("expiration")
         .filter(({ term, expiration }) => {
@@ -79,13 +86,12 @@ export const useExpirations = (deribitRates?: OptionsMap[], minDays = 0, maxMont
           return monthsPassed <= maxMonths && daysPassed > minDays;
         })
         .map(
-          ({ term, expiration }) => [term, +moment(expiration).set("hour", 8)] as [string, number]
+          ({ term, expiration }) =>
+            [term, +moment(expiration).set("hour", 8)] as [string, number]
         )
         .value(),
-    [deribitRates?.length]
+    [baseRates?.length]
   );
-
-  return [deribitTerms];
 };
 
 // returns the checksummed address if the address is valid, otherwise returns false

@@ -1,9 +1,9 @@
-import { useQuery } from "react-query";
+import { useQuery } from "@tanstack/react-query";
 import { BigNumber, Contract } from "ethers";
-import { useExpirations, useStrikes } from "../../services/util";
+import { Strikes, useExpirations, useStrikes } from "../../services/util";
 import { fixedFromFloat, fixedToNumber } from "../../services/util/fixedMath";
 import premiaPoolAbi from "./premiaPoolAbi.json";
-import { arbitrumProvider } from "../providers";
+import { arbitrumProvider, optimismProvider } from "../providers";
 import { OptionsMap, OptionType, ProviderType } from "../../types";
 
 // const getFriday = () => {
@@ -33,10 +33,18 @@ import { OptionsMap, OptionType, ProviderType } from "../../types";
 //   return lastDay.subtract(sub, "days");
 // };
 
-const ethPoolContract = new Contract(
-  "0xE5DbC4EDf467B609A063c7ea7fAb976C6b9BAa1a",
+const PREMIA_ARBITRUM = "0xE5DbC4EDf467B609A063c7ea7fAb976C6b9BAa1a";
+const PREMIA_OPTIMISM = "0x9623BF820A0B9Db26aFF216fCfBc119c92D3Cd96";
+
+const arbEthPoolContract = new Contract(
+  PREMIA_ARBITRUM,
   premiaPoolAbi,
   arbitrumProvider
+);
+const opEthPoolContract = new Contract(
+  PREMIA_OPTIMISM,
+  premiaPoolAbi,
+  optimismProvider
 );
 
 const convertPrice = ([price, fee]: [price: BigNumber, fee: BigNumber]) =>
@@ -45,7 +53,7 @@ const convertPrice = ([price, fee]: [price: BigNumber, fee: BigNumber]) =>
 const reqOption = async (strike: number, expiration: number, call: boolean) => {
   const expSecs = Math.floor(expiration / 1000);
 
-  return ethPoolContract
+  return opEthPoolContract
     .quote(
       "0x0000000000000000000000000000000000000000",
       BigNumber.from(expSecs),
@@ -57,48 +65,61 @@ const reqOption = async (strike: number, expiration: number, call: boolean) => {
     .catch(console.error);
 };
 
-export const usePremiaRates = (lyraRates?: OptionsMap[]): [OptionsMap[] | undefined] => {
-  const [expirations] = useExpirations(lyraRates, 1);
-  const { allStrikes = [], callStrikes = [], putStrikes = [], basePrice = 0 } = useStrikes();
+const fetchPrices = async (
+  { callStrikes, putStrikes, allStrikes, basePrice }: Strikes,
+  expirations: [string, number][]
+) => {
+  if (!(callStrikes && putStrikes && allStrikes && basePrice)) return undefined;
   const toEth = (val: number) => basePrice * val;
-  const fetchPrices = async () => {
-    if (!(callStrikes && putStrikes && allStrikes)) return undefined;
 
-    const requests = expirations.map(([term, exp]) =>
-      allStrikes.map(async (strike) => {
-        const instrumentMeta = {
-          provider: ProviderType.PREMIA,
-          expiration: exp,
-          term,
-          strike: strike.toString(),
-        };
+  const requests = expirations.map(([term, exp]) =>
+    allStrikes.map(async (strike) => {
+      const instrumentMeta = {
+        provider: ProviderType.PREMIA,
+        expiration: exp,
+        term,
+        strike: strike.toString(),
+      };
 
-        return {
-          ...instrumentMeta,
-          [OptionType.CALL]: callStrikes.includes(strike)
-            ? {
-                ...instrumentMeta,
-                type: OptionType.CALL,
-                askPrice: await reqOption(strike, exp, true).then(toEth),
-              }
-            : undefined,
-          [OptionType.PUT]: putStrikes.includes(strike)
-            ? {
-                ...instrumentMeta,
-                type: OptionType.PUT,
-                askPrice: await reqOption(strike, exp, false),
-              }
-            : undefined,
-        };
-      })
-    );
-    // @ts-ignore
-    return Promise.all(requests.flat());
-  };
+      return {
+        ...instrumentMeta,
+        [OptionType.CALL]: callStrikes.includes(strike)
+          ? {
+              ...instrumentMeta,
+              type: OptionType.CALL,
+              askPrice: await reqOption(strike, exp, true).then(toEth),
+            }
+          : undefined,
+        [OptionType.PUT]: putStrikes.includes(strike)
+          ? {
+              ...instrumentMeta,
+              type: OptionType.PUT,
+              askPrice: await reqOption(strike, exp, false),
+            }
+          : undefined,
+      };
+    })
+  );
+  // @ts-ignore
+  return Promise.all(requests.flat());
+};
 
-  const { data } = useQuery(["premia-prices", expirations], fetchPrices, {
-    staleTime: 600 * 1000,
-  });
+export const usePremiaRates = (
+  lyraRates?: OptionsMap[]
+): [OptionsMap[] | undefined] => {
+  const expirations = useExpirations(lyraRates, 1);
+  const strikes = useStrikes();
+
+  const { data } = useQuery(
+    ["premia-prices", expirations.length, strikes.allStrikes?.length],
+    () => fetchPrices(strikes, expirations),
+    {
+      staleTime: 600 * 1000,
+      enabled: Boolean(
+        strikes.allStrikes?.length && strikes.basePrice && expirations.length
+      ),
+    }
+  );
   // @ts-ignore
   return [data];
 };

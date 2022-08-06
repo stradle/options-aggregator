@@ -112,7 +112,7 @@ const AggregatedRates = () => {
   );
   const rates = useRatesContext();
   const { allStrikes = [] } = useStrikes();
-  const [expirations] = useExpirations(rates.LYRA);
+  const expirations = useExpirations(rates.LYRA);
   const { allRates, termProviders } = useRatesData(
     dealMode === BuySellModes.SELL
   );

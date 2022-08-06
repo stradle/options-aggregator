@@ -65,7 +65,6 @@ export type DeribitItem = {
   underlying_price: number;
   volume: number;
 };
-const ws = new WebSocket("wss://www.deribit.com/ws/api/v2");
 
 const parseDeribitOption = (
   { instrument_name, ask_price, bid_price, mid_price }: DeribitItem,
@@ -86,13 +85,30 @@ const parseDeribitOption = (
   };
 };
 
-const useDeribitData = () => {
-  const [ethData, setEthData] = useState<DeribitItem[]>([]);
+const connect = () => new WebSocket("wss://www.deribit.com/ws/api/v2");
+const useDeribitSocket = () => {
+  const [ws, setWs] = useState<WebSocket>();
 
   useEffect(() => {
+    if (ws) return;
+    const connection = connect();
+
+    setWs(connection);
+    connection.onclose = () => setWs(undefined);
+  }, [ws]);
+
+  return ws;
+};
+
+const useDeribitData = () => {
+  const [ethData, setEthData] = useState<DeribitItem[]>([]);
+  const ws = useDeribitSocket();
+
+  useEffect(() => {
+    if (!ws) return;
     let interval: NodeJS.Timer;
     const triggerUpdate = () => ws.send(JSON.stringify(ethOptions));
-
+    console.log("sub again");
     ws.onopen = () => {
       triggerUpdate();
       interval = setInterval(triggerUpdate, 10000);
@@ -105,7 +121,7 @@ const useDeribitData = () => {
       clearInterval(interval);
       ws.close();
     };
-  }, []);
+  }, [ws]);
 
   return [ethData];
 };
@@ -120,7 +136,8 @@ export const useDeribitRates = () => {
         .map((item) => parseDeribitOption(item, price))
         .reduce<OptionsMap[]>((acc, option) => {
           const found = acc.find(
-            ({ term, strike }) => option.term === term && option.strike === strike
+            ({ term, strike }) =>
+              option.term === term && option.strike === strike
           );
 
           if (found) {

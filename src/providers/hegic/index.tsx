@@ -1,5 +1,5 @@
 import { BigNumber, Contract } from "ethers";
-import { useQuery } from "react-query";
+import { useQuery } from "@tanstack/react-query";
 import moment from "moment";
 import { formatUnits } from "ethers/lib/utils";
 import { useEthPrice, useExpirations } from "../../services/util";
@@ -27,25 +27,34 @@ const getContractByStrike = (offset: number, type: OptionType) => {
 
 const currentDate = moment();
 
-const reqOption = async (offset: number, strike: number, expiration: number, type: OptionType) => {
-  const left = moment.duration(moment(expiration).diff(currentDate)).asSeconds().toFixed(0);
+const reqOption = async (
+  offset: number,
+  strike: number,
+  expiration: number,
+  type: OptionType
+) => {
+  const left = moment
+    .duration(moment(expiration).diff(currentDate))
+    .asSeconds()
+    .toFixed(0);
   const contract = getContractByStrike(offset, type);
-  const res = await contract
+
+  return await contract
     .calculatePremium(left, (1e18).toString(), strike * 1e8)
     // usdc 6 decimals
     .then(({ premium }: { premium: BigNumber }) => formatUnits(premium, "mwei"))
     .catch(console.error);
-
-  return res;
 };
 
 const getRoundedStrikeByEth = (eth: number) => (offset: number) => {
   return [offset, Math.round(((offset / 100) * eth) / 50) * 50];
 };
 
-export const useHegicRates = (lyraRates?: OptionsMap[]): [OptionsMap[] | undefined] => {
+export const useHegicRates = (
+  lyraRates?: OptionsMap[]
+): [OptionsMap[] | undefined] => {
   const { price } = useEthPrice();
-  const [expirations] = useExpirations(lyraRates, 7, 2);
+  const expirations = useExpirations(lyraRates, 7, 2);
   const getRoundedStrike = getRoundedStrikeByEth(price);
 
   const callOffsets = [110, 120, 130].map(getRoundedStrike);
@@ -84,6 +93,7 @@ export const useHegicRates = (lyraRates?: OptionsMap[]): [OptionsMap[] | undefin
 
   const { data } = useQuery(["hegic-prices", expirations.length], fetchPrices, {
     staleTime: 600 * 1000,
+    enabled: expirations.length > 0,
   });
   // @ts-ignore
   return [data];

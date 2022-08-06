@@ -1,7 +1,7 @@
 import Lyra, { Market } from "@lyrafinance/lyra-js";
 import { useAccount } from "wagmi";
 import { BigNumber } from "ethers";
-import { useQuery } from "react-query";
+import { useQuery } from "@tanstack/react-query";
 import { useAppContext } from "../../context/AppContext";
 import { getExpirationTerm } from "../../services/util";
 import {
@@ -104,28 +104,22 @@ export const useLyraRates: () => [undefined | OptionsMap[], boolean] = () => {
   const { market } = useLyraMarket();
   const { data, isLoading } = useQuery(
     ["lyra", market?.address],
-    () => market && getMarketData(market),
+    () => market?.liveBoards && getMarketData(market),
     {
-      refetchInterval: 30000,
+      staleTime: 30000,
     }
   );
 
   return [data, isLoading];
 };
 
-export const useLyraPositions = (
-  isOpen = true
-): [ActivePosition[], boolean] => {
+export const useLyraPositions = (): [ActivePosition[], boolean] => {
   const { address } = useAccount();
 
   const { data = [], isLoading } = useQuery(
     ["lyra-positions", address],
     async () => {
-      console.log("fetching lyra positions", address);
-      if (!address) return [];
-      const positions = isOpen
-        ? await lyra.openPositions(address)
-        : await lyra.positions(address);
+      const positions = await lyra.openPositions(address as string);
 
       return positions.map((pos) => ({
         __source: pos.__source,
@@ -148,7 +142,7 @@ export const useLyraPositions = (
         unrealizedPnlPercent: +pos.unrealizedPnlPercent(),
       }));
     },
-    { refetchInterval: 30000 }
+    { enabled: Boolean(address), staleTime: 30000 }
   );
 
   return [data, isLoading];
