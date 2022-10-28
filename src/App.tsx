@@ -14,7 +14,8 @@ import { RatesProvider } from "./context/RatesProvider";
 import AppRouter from "./pages/AppRouter";
 import AppContextProvider from "./context/AppContext";
 import { ColorModeContext } from "./context/ColorModeContext";
-import { chains, connectors, provider } from "./services/wallet/connectors";
+import { chains, provider } from "./services/wallet/connectors";
+import { useCheckStorage } from "./services/util";
 
 type ColorTheme = "light" | "dark";
 
@@ -39,7 +40,6 @@ const getTheme = (theme: ColorTheme) =>
 
 const client = createClient({
   autoConnect: true,
-  connectors,
   provider,
 });
 
@@ -50,6 +50,7 @@ const getRainbowTheme = (light: boolean) => {
 };
 
 const App = () => {
+  useCheckStorage();
   const [mode = "dark", setMode] = useLocalStorage<ColorTheme>("dark");
   const colorModeContext = useMemo(
     () => ({

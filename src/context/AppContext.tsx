@@ -1,6 +1,7 @@
 import { createContext, ReactNode, useContext, useMemo, useState } from "react";
 import { useLocalStorage } from "react-use";
-import { Underlying, ProviderType } from "../types";
+import { currencyProviders } from "../services/util/constants";
+import { ProviderType, Underlying } from "../types";
 
 type AppContextType = {
   underlying: Underlying;
@@ -14,7 +15,7 @@ type AppContextType = {
 const AppContext = createContext<AppContextType>({
   underlying: Underlying.ETH,
   setUnderlying: () => {},
-  providers: Object.values(ProviderType),
+  providers: [],
   setProviders: () => {},
   interestRate: 0,
   setInterestRate: () => {},
@@ -26,17 +27,30 @@ export const useAppContext = () => {
 
 const AppContextProvider = ({ children }: { children?: ReactNode }) => {
   const [interestRate, setInterestRate] = useState(0.05);
-  const [underlying = Underlying.ETH, setUnderlying] = useLocalStorage<Underlying>(
-    "underlying",
-    Underlying.ETH
+  const [underlying = Underlying.ETH, setUnderlying] =
+    useLocalStorage<Underlying>("underlying", Underlying.ETH);
+  const [ethProviders = [], setEthProviders] = useLocalStorage(
+    `${underlying}-providers`,
+    currencyProviders[Underlying.ETH]
   );
-  const [providers = Object.values(ProviderType), setProviders] = useLocalStorage(
-    "providers",
-    Object.values(ProviderType)
+  const [btcProviders = [], setBtcProviders] = useLocalStorage(
+    `${Underlying.BTC}-providers`,
+    currencyProviders[Underlying.BTC]
   );
 
+  const providers = underlying === Underlying.ETH ? ethProviders : btcProviders;
+  const setProviders =
+    underlying === Underlying.ETH ? setEthProviders : setBtcProviders;
+
   const context = useMemo(
-    () => ({ underlying, setUnderlying, providers, setProviders, interestRate, setInterestRate }),
+    () => ({
+      underlying,
+      setUnderlying,
+      providers,
+      setProviders,
+      interestRate,
+      setInterestRate,
+    }),
     [underlying, providers]
   );
 

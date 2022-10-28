@@ -1,5 +1,6 @@
 import { OptionType } from "../../types";
-import { blackScholes } from "./blacksholes";
+import { blackScholes } from "./black-scholes/blacksholes";
+import { RFI_RATE } from "./constants";
 /**
  * Calculate a close estimate of implied volatility given an option price.  A
  * binary search type approach is used to determine the implied volatility.
@@ -20,7 +21,7 @@ export const getImpliedVolatility = (
   expiration: number,
   callPut: OptionType,
   estimate = 1,
-  rate = 0.05
+  rate = RFI_RATE
 ) => {
   let low = 0;
   let high = Infinity;

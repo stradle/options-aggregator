@@ -1,4 +1,4 @@
-import { MouseEventHandler, useState } from "react";
+import { useState } from "react";
 import {
   Card,
   Divider,
@@ -7,21 +7,20 @@ import {
   styled,
   Typography,
 } from "@mui/material";
-import moment from "moment";
 import { capitalize } from "lodash";
 import OpenInNewIcon from "@mui/icons-material/OpenInNew";
-import { formatCurrency, useEthPrice } from "../../services/util";
-import { getImpliedVolatility } from "../../services/util/implied-volatility";
+import { formatCurrency, useTokenPrice } from "../../services/util";
 import { ColoredOptionType, ProviderIcon } from "../index";
 import { getUrlByProvider } from "../../services/util/constants";
+import { useLyraStrikeId } from "../../providers/lyra";
+import { getIV } from "../../services/util/black-scholes";
 import {
   BuySellModes,
-  DealsFields,
   Instrument,
   OptionType,
   ProviderType,
 } from "../../types";
-import { useLyraStrikeId } from "../../providers/lyra";
+import { useAppContext } from "../../context/AppContext";
 
 const Row = styled("div")`
   display: flex;
@@ -46,30 +45,6 @@ const StyledCard = styled(Card)(({ theme }) => ({
   flexDirection: "column",
   color: theme.palette.text.secondary,
 }));
-
-const getIV = (
-  price: number,
-  instrument: Instrument,
-  dealMode: BuySellModes
-) => {
-  const momentExp = moment(instrument.expiration);
-  const duration = moment.duration(momentExp.diff(moment())).asYears();
-  const instrumentPrice = instrument?.[DealsFields[dealMode]];
-
-  const iv =
-    instrumentPrice &&
-    getImpliedVolatility(
-      instrumentPrice,
-      price,
-      instrument.strike,
-      duration,
-      instrument.type
-    ) * 100;
-
-  if (!iv) return null;
-
-  return iv > 500 ? ">500" : iv.toFixed();
-};
 
 const OptionLink = ({
   instrument,
@@ -105,7 +80,8 @@ const OptionPopover = ({
   handleClose: () => void;
   instrument: Instrument;
 }) => {
-  const { price } = useEthPrice();
+  const { underlying } = useAppContext();
+  const { price } = useTokenPrice(underlying);
   const buyIv = getIV(price, instrument, BuySellModes.BUY);
   const sellIv = getIV(price, instrument, BuySellModes.SELL);
 

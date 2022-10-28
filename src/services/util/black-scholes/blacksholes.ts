@@ -6,7 +6,7 @@
  * @param {Number} x The upper bound to integrate over.  This is P{Z <= x} where Z is a standard normal random variable.
  * @returns {Number} The probability that a standard normal random variable will be less than or equal to x
  */
-import { OptionType } from "../../types";
+import { OptionType } from "../../../types";
 
 export const stdNormCDF = (x: number) => {
   let probability = 0;

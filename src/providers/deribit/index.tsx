@@ -1,8 +1,15 @@
 import { useEffect, useMemo, useState } from "react";
 import moment from "moment";
 import { pick } from "lodash";
-import { useEthPrice } from "../../services/util";
-import { Instrument, OptionsMap, OptionType, ProviderType } from "../../types";
+import { useTokenPrice } from "../../services/util";
+import {
+  Instrument,
+  OptionsMap,
+  OptionType,
+  ProviderType,
+  Underlying,
+} from "../../types";
+import { useAppContext } from "../../context/AppContext";
 
 // const authRequest = {
 //   jsonrpc: "2.0",
@@ -17,15 +24,15 @@ import { Instrument, OptionsMap, OptionType, ProviderType } from "../../types";
 
 // DOCS: https://docs.deribit.com/?javascript#private-get_settlement_history_by_currency
 
-const ethOptions = {
+const getRequestMeta = (currency: Underlying) => ({
   jsonrpc: "2.0",
   id: 1,
   method: "public/get_book_summary_by_currency",
   params: {
-    currency: "ETH",
+    currency,
     kind: "option",
   },
-};
+});
 //     @ response data
 //     ask_price: null,
 //     base_currency: "ETH",
@@ -100,21 +107,33 @@ const useDeribitSocket = () => {
   return ws;
 };
 
-const useDeribitData = () => {
-  const [ethData, setEthData] = useState<DeribitItem[]>([]);
+const useDeribitData = (currency: Underlying) => {
+  const [rates, setRates] = useState<Record<Underlying, DeribitItem[]>>({
+    BTC: [],
+    ETH: [],
+    SOL: [],
+  });
   const ws = useDeribitSocket();
 
   useEffect(() => {
     if (!ws) return;
     let interval: NodeJS.Timer;
-    const triggerUpdate = () => ws.send(JSON.stringify(ethOptions));
+    const triggerUpdate = () => {
+      ws.send(JSON.stringify(getRequestMeta(Underlying.ETH)));
+      ws.send(JSON.stringify(getRequestMeta(Underlying.BTC)));
+      ws.send(JSON.stringify(getRequestMeta(Underlying.SOL)));
+    };
     console.log("sub again");
     ws.onopen = () => {
       triggerUpdate();
       interval = setInterval(triggerUpdate, 10000);
     };
     ws.onmessage = (e) => {
-      setEthData(JSON.parse(e.data).result);
+      const { result } = JSON.parse(e.data);
+      setRates((rates) => ({
+        ...rates,
+        [result[0].base_currency]: result,
+      }));
     };
 
     return () => {
@@ -123,12 +142,13 @@ const useDeribitData = () => {
     };
   }, [ws]);
 
-  return [ethData];
+  return useMemo(() => rates[currency], [currency, rates]);
 };
 
 export const useDeribitRates = () => {
-  const [data] = useDeribitData();
-  const { price } = useEthPrice();
+  const { underlying } = useAppContext();
+  const data = useDeribitData(underlying);
+  const { price } = useTokenPrice(underlying);
   const optionsMap = useMemo(
     () =>
       data

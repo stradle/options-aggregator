@@ -2,11 +2,12 @@ import { BigNumber, Contract } from "ethers";
 import { useQuery } from "@tanstack/react-query";
 import moment from "moment";
 import { formatUnits } from "ethers/lib/utils";
-import { useEthPrice, useExpirations } from "../../services/util";
+import { useExpirations, useTokenPrice } from "../../services/util";
 import { arbitrumProvider } from "../providers";
 import hegicAbi from "./abi.json";
 import contracts from "./contracts";
 import { OptionsMap, OptionType, ProviderType } from "../../types";
+import { useAppContext } from "../../context/AppContext";
 
 const getContractName = (offset: number, type: OptionType) => {
   let contractName = "HegicStrategy";
@@ -53,7 +54,8 @@ const getRoundedStrikeByEth = (eth: number) => (offset: number) => {
 export const useHegicRates = (
   lyraRates?: OptionsMap[]
 ): [OptionsMap[] | undefined] => {
-  const { price } = useEthPrice();
+  const { underlying } = useAppContext();
+  const { price } = useTokenPrice(underlying);
   const expirations = useExpirations(lyraRates, 7, 2);
   const getRoundedStrike = getRoundedStrikeByEth(price);
 

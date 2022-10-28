@@ -102,7 +102,7 @@ const getMarketData = async (market: Market) => {
 
 export const useLyraRates: () => [undefined | OptionsMap[], boolean] = () => {
   const { market } = useLyraMarket();
-  const { data, isLoading } = useQuery(
+  const { data, isFetching } = useQuery(
     ["lyra", market?.address],
     () => market?.liveBoards && getMarketData(market),
     {
@@ -110,7 +110,7 @@ export const useLyraRates: () => [undefined | OptionsMap[], boolean] = () => {
     }
   );
 
-  return [data, isLoading];
+  return [data, isFetching];
 };
 
 export const useLyraPositions = (): [ActivePosition[], boolean] => {

@@ -4,7 +4,9 @@ import { BasePriceWidget, Loader } from "../components";
 import { useAppContext } from "../context/AppContext";
 import { useRatesContext } from "../context/RatesProvider";
 import { ConfigSection } from "./styled";
-import { Underlying } from "../types";
+import { ProviderType, Underlying } from "../types";
+import { useAccount } from "wagmi";
+import { currencyProviders } from "../services/util/constants";
 
 const LayoutBase = styled("div")`
   max-width: 1120px;
@@ -21,7 +23,7 @@ const AssetSelector = () => {
   return (
     <ButtonGroup variant="outlined">
       {Object.values(Underlying).map((asset) =>
-        asset === Underlying.BTC ? (
+        asset === Underlying.SOL ? (
           <Tooltip key={asset} arrow title="Coming soon">
             <Button>{asset}</Button>
           </Tooltip>
@@ -41,7 +43,11 @@ const AssetSelector = () => {
 
 const Layout = () => {
   const rates = useRatesContext();
-  const showLoader = Object.values(rates).some((rates) => !rates);
+  const { underlying } = useAppContext();
+  const showLoader = Object.entries(rates).some(
+    ([provider, rates]) =>
+      currencyProviders[underlying].includes(provider as ProviderType) && !rates
+  );
 
   return (
     <LayoutBase>

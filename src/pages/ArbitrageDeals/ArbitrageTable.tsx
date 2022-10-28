@@ -14,10 +14,10 @@ import {
 } from "@mui/material";
 import { formatCurrency } from "../../services/util";
 import { ColoredOptionType } from "../../components";
-import ProviderSelector from "../../components/ProviderSelector";
 import { PageWrapper } from "../styled";
-import { BuySellModes, Deal, OptionType } from "../../types";
+import ProviderSelector from "../../components/ProviderSelector";
 import OptionValue from "../../components/OptionValue";
+import { BuySellModes, Deal, OptionType } from "../../types";
 
 function descendingComparator<T>(a: T, b: T, orderBy: keyof T) {
   if (b[orderBy] < a[orderBy]) {
@@ -79,7 +79,7 @@ const dealColumns: readonly HeadCell[] = [
   { numeric: true, disablePadding: false, id: "sell", label: "Sell" },
   { numeric: true, disablePadding: false, id: "amount", label: "Difference" },
   { numeric: true, disablePadding: false, id: "discount", label: "Discount" },
-  { numeric: true, disablePadding: false, id: "apy", label: "APY" },
+  { numeric: true, disablePadding: false, id: "apy", label: "APR" },
 ];
 
 const EnhancedTableHead = (props: {

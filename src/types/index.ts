@@ -11,7 +11,8 @@ export const DealsFields: Record<BuySellModes, "askPrice" | "bidPrice"> = {
 export enum ProviderType {
   LYRA = "LYRA",
   DERIBIT = "DERIBIT",
-  PREMIA = "PREMIA",
+  PREMIA_OP = "PREMIA_OP",
+  PREMIA_ARB = "PREMIA_ARB",
   HEGIC = "HEGIC",
 }
 
@@ -47,6 +48,7 @@ export type OptionsMap = InstrumentMeta & InstrumentCouple;
 export enum Underlying {
   ETH = "ETH",
   BTC = "BTC",
+  SOL = "SOL",
 }
 
 export type DealPart = { price: number; provider: ProviderType };

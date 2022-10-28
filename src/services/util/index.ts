@@ -1,10 +1,11 @@
 import { useQuery } from "@tanstack/react-query";
-import { useMemo } from "react";
+import { useEffect, useMemo } from "react";
 import moment from "moment";
 import { chain } from "lodash";
 import { getAddress } from "@ethersproject/address";
-import { STRIKE_CUTOFF } from "./constants";
-import { OptionsMap } from "../../types";
+import { APP_VERSION, STRIKE_CUTOFF } from "./constants";
+import { useAppContext } from "../../context/AppContext";
+import { OptionsMap, Underlying } from "../../types";
 
 export const formatCurrency = (val: number, maximumFractionDigits = 0) =>
   new Intl.NumberFormat("en-IN", {
@@ -14,20 +15,32 @@ export const formatCurrency = (val: number, maximumFractionDigits = 0) =>
   }).format(val);
 
 type UnderlyingResult = { price: number; change: number };
-export const fetchEthPrice = (): Promise<UnderlyingResult> =>
+
+const fetchTokenPrice = (tokenId: string): Promise<UnderlyingResult> =>
   fetch(
-    "https://api.coingecko.com/api/v3/simple/price?ids=ethereum&vs_currencies=usd&include_24hr_change=true"
+    `https://api.coingecko.com/api/v3/simple/price?ids=${tokenId}&vs_currencies=usd&include_24hr_change=true`
   )
     .then((response) => response.json())
-    .then(({ ethereum }) => ({
-      price: ethereum.usd,
-      change: ethereum.usd_24h_change,
-    }));
+    .then((res) => {
+      const { usd: price, usd_24h_change: change } = res[tokenId];
 
-export const useEthPrice = () => {
+      return {
+        price,
+        change,
+      };
+    });
+
+const TokenSymbolToId = {
+  [Underlying.BTC]: "bitcoin",
+  [Underlying.ETH]: "ethereum",
+  [Underlying.SOL]: "solana",
+  ["OSQTH"]: "opyn-squeeth",
+};
+export const useTokenPrice = (tokenSymbol: Underlying | "OSQTH") => {
+  const tokenId = TokenSymbolToId[tokenSymbol];
   const { data = { price: 0, change: 0 } } = useQuery(
-    ["eth-price"],
-    fetchEthPrice
+    [`${tokenId}-price`],
+    () => fetchTokenPrice(tokenId)
   );
 
   return data;
@@ -40,26 +53,34 @@ export type Strikes = {
   basePrice?: number;
 };
 
+const strikeRoundings = {
+  [Underlying.BTC]: 1000,
+  [Underlying.ETH]: 100,
+  [Underlying.SOL]: 2,
+};
 export const useStrikes = (): Strikes => {
-  const { price: basePrice } = useEthPrice();
+  const { underlying } = useAppContext();
+  const { price: basePrice } = useTokenPrice(underlying);
+  const rounding = strikeRoundings[underlying];
   // Call : 0.8x spot -> 2x spot
   // Put : 0.5x spot -> 1.2x spot
   return useMemo(() => {
     if (!basePrice) return {};
 
-    const roundedBase = Math.floor(basePrice / 100) * 100;
-    const callStart = Math.ceil((roundedBase * 0.9) / 100) * 100;
+    const roundedBase = Math.floor(basePrice / rounding) * rounding;
+    const callStart = Math.ceil((roundedBase * 0.9) / rounding) * rounding;
     const callEnd = roundedBase * STRIKE_CUTOFF;
-    const putStart = Math.ceil(roundedBase / STRIKE_CUTOFF / 100) * 100;
-    const putEnd = Math.floor((roundedBase * 1.1) / 100) * 100;
+    const putStart =
+      Math.ceil(roundedBase / STRIKE_CUTOFF / rounding) * rounding;
+    const putEnd = Math.floor((roundedBase * 1.1) / rounding) * rounding;
 
     const callStrikes: number[] = [];
     const putStrikes: number[] = [];
     const allStrikes: number[] = [];
 
-    for (let i = callStart; i <= callEnd; i += 100) callStrikes.push(i);
-    for (let i = putStart; i <= putEnd; i += 100) putStrikes.push(i);
-    for (let i = putStart; i <= callEnd; i += 100) allStrikes.push(i);
+    for (let i = callStart; i <= callEnd; i += rounding) callStrikes.push(i);
+    for (let i = putStart; i <= putEnd; i += rounding) putStrikes.push(i);
+    for (let i = putStart; i <= callEnd; i += rounding) allStrikes.push(i);
 
     return { allStrikes, callStrikes, putStrikes, basePrice };
   }, [basePrice]);
@@ -116,4 +137,17 @@ export const getExpirationTerm = (expiration: number) => {
   const term = moment(expiration).format("DDMMMYY").toUpperCase();
 
   return term.startsWith("0") ? term.slice(1) : term;
+};
+
+export const useCheckStorage = () => {
+  const cacheKey = "cache-ver";
+
+  useEffect(() => {
+    const cur = localStorage.getItem(cacheKey);
+
+    if (cur !== APP_VERSION) {
+      localStorage.clear();
+      localStorage.setItem(cacheKey, APP_VERSION);
+    }
+  }, []);
 };

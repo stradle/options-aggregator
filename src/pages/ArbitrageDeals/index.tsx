@@ -1,7 +1,7 @@
 import { useMemo } from "react";
 import { maxBy, minBy } from "lodash";
 import moment from "moment";
-import { formatCurrency, useEthPrice } from "../../services/util";
+import { formatCurrency, useTokenPrice } from "../../services/util";
 import { useRatesData } from "../../services/hooks";
 import { useAppContext } from "../../context/AppContext";
 import ArbitrageTable from "./ArbitrageTable";
@@ -73,7 +73,8 @@ const useDeals = () => {
 };
 
 const ArbitrageDeals = () => {
-  const { price } = useEthPrice();
+  const { underlying } = useAppContext();
+  const { price } = useTokenPrice(underlying);
   const [deals] = useDeals();
 
   const tableData = useMemo(() => {

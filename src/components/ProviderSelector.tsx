@@ -1,39 +1,72 @@
-import { Autocomplete, Box, Chip, TextField } from "@mui/material";
+import { useCallback } from "react";
+import {
+  Box,
+  Chip,
+  FormControl,
+  InputLabel,
+  MenuItem,
+  OutlinedInput,
+  Select,
+  SelectChangeEvent,
+  Typography,
+} from "@mui/material";
 import { useAppContext } from "../context/AppContext";
 import { ProviderIcon } from "./ProviderIcon";
 import { ProviderType } from "../types";
+import { currencyProviders } from "../services/util/constants";
 
 const ProviderSelector = () => {
-  const { providers, setProviders } = useAppContext();
+  const { providers, setProviders, underlying } = useAppContext();
+
+  const handleChange = useCallback(
+    (event: SelectChangeEvent<ProviderType[]>) => {
+      const {
+        target: { value },
+      } = event;
+      setProviders(
+        // On autofill we get a stringified value.
+        (typeof value === "string" ? value.split(",") : value) as ProviderType[]
+      );
+    },
+    [setProviders]
+  );
 
   return (
-    <Autocomplete
-      sx={{ width: "fit-content" }}
-      multiple
-      disableClearable
-      filterSelectedOptions
-      options={Object.values(ProviderType).filter((prov) => prov !== ProviderType.HEGIC)}
-      getOptionLabel={(option) => option}
-      renderOption={(props, option) => (
-        <Box component="li" sx={{ "& > svg": { mr: 2, flexShrink: 0 } }} {...props}>
-          <ProviderIcon marginLeft={5} provider={option} />
-          {option}
-        </Box>
-      )}
-      renderInput={(params) => <TextField {...params} label="Markets" />}
-      renderTags={(tagValue, getTagProps) =>
-        tagValue.map((option, index) => (
-          <Chip
-            icon={<ProviderIcon marginLeft={5} provider={option} />}
-            label={option}
-            {...getTagProps({ index })}
-            disabled={providers?.length === 2}
-          />
-        ))
-      }
-      onChange={(e, value) => setProviders(value)}
-      value={providers}
-    />
+    <FormControl>
+      <InputLabel id="providers">Markets</InputLabel>
+      <Select
+        labelId="providers"
+        id="providers"
+        sx={{ width: "fit-content" }}
+        multiple
+        input={<OutlinedInput label="Markets" />}
+        renderValue={(selected) => (
+          <Box sx={{ display: "flex", flexWrap: "wrap", gap: 0.5 }}>
+            {selected.map((option) => (
+              <Chip
+                key={option}
+                icon={<ProviderIcon marginLeft={5} provider={option} />}
+                label={option}
+                disabled={providers?.length === 2}
+              />
+            ))}
+          </Box>
+        )}
+        onChange={handleChange}
+        value={providers}
+      >
+        {currencyProviders[underlying].map((item) => (
+          <MenuItem
+            disabled={providers.includes(item) && providers.length <= 2}
+            key={item}
+            value={item}
+          >
+            <ProviderIcon marginLeft={5} provider={item} />
+            <Typography pl={"5px"}>{item}</Typography>
+          </MenuItem>
+        ))}
+      </Select>
+    </FormControl>
   );
 };
 export default ProviderSelector;

@@ -7,7 +7,8 @@ import { ProviderType } from "../types";
 const providerIcons = {
   [ProviderType.DERIBIT]: DeribitLogo,
   [ProviderType.LYRA]: LyraLogo,
-  [ProviderType.PREMIA]: PremiaLogo,
+  [ProviderType.PREMIA_ARB]: PremiaLogo,
+  [ProviderType.PREMIA_OP]: PremiaLogo,
   [ProviderType.HEGIC]: HegicLogo,
 };
 

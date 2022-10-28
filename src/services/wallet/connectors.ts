@@ -1,19 +1,9 @@
 import { configureChains, chain } from "wagmi";
-import { publicProvider } from "wagmi/providers/public";
-import { getDefaultWallets } from "@rainbow-me/rainbowkit";
+import { alchemyProvider } from "wagmi/providers/alchemy";
 
-// API key for Ethereum node
-// Two popular services are Infura (infura.io) and Alchemy (alchemy.com)
-const infuraId = process.env.REACT_APP_INFURA_ID;
+const apiKey = process.env.REACT_APP_ALCHEMY_KEY;
 
-// Configure chains for connectors to support
 export const { chains, provider } = configureChains(
   [chain.optimism, chain.arbitrum, chain.mainnet],
-  [publicProvider()]
+  [alchemyProvider({ apiKey })]
 );
-
-// Set up connectors
-export const { connectors } = getDefaultWallets({
-  appName: "My RainbowKit App",
-  chains,
-});

@@ -141,10 +141,10 @@ const AggregatedRates = () => {
             <tr>
               <th key={1}>
                 <div>
-                  <ColoredOptionType positive>CALL</ColoredOptionType>
+                  <ColoredOptionType positive>CALLS</ColoredOptionType>
                 </div>
                 <div>
-                  <ColoredOptionType>PUT</ColoredOptionType>
+                  <ColoredOptionType>PUTS</ColoredOptionType>
                 </div>
               </th>
               {expirations.map(([term]) => {

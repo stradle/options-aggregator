@@ -1,10 +1,21 @@
 import { Paper, Typography } from "@mui/material";
-import { formatCurrency, useEthPrice } from "../services/util";
+import { formatCurrency, useTokenPrice } from "../services/util";
 import EthIcon from "../assets/ethereum-logo.png";
+import BtcIcon from "../assets/bitcoin-logo.png";
+import SolIcon from "../assets/solana-logo.png";
 import { ColoredOptionType } from "./StyledTable";
+import { useAppContext } from "../context/AppContext";
+import { Underlying } from "../types";
+
+const CurrencyIcon = {
+  [Underlying.BTC]: BtcIcon,
+  [Underlying.ETH]: EthIcon,
+  [Underlying.SOL]: SolIcon,
+};
 
 const BasePriceWidget = () => {
-  const { price, change } = useEthPrice();
+  const { underlying } = useAppContext();
+  const { price, change } = useTokenPrice(underlying);
 
   return (
     <Paper
@@ -17,10 +28,17 @@ const BasePriceWidget = () => {
         width: "fit-content",
         cursor: "default",
         padding: "6px",
-      }}>
-      <img width={"32px"} src={EthIcon} alt={"ETH icon"} />
+      }}
+    >
+      <img
+        width={"32px"}
+        src={CurrencyIcon[underlying]}
+        alt={"Currency icon"}
+      />
       <Typography>{formatCurrency(price)}</Typography>
-      <ColoredOptionType positive={change > 0}>{change.toFixed(1)}%</ColoredOptionType>
+      <ColoredOptionType positive={change > 0}>
+        {change.toFixed(1)}%
+      </ColoredOptionType>
     </Paper>
   );
 };
