@@ -22,11 +22,11 @@ const useNavigationOptions = (): { navigationOptions: NavigationOption[] } => {
       path: routes.aggregatedRates,
       isActive: navigationService.matchRoutePath(location.pathname, routes.aggregatedRates),
     },
-    {
-      text: "Portfolio",
-      path: routes.portfolio,
-      isActive: navigationService.matchRoutePath(location.pathname, routes.portfolio),
-    },
+    // {
+    //   text: "Portfolio",
+    //   path: routes.portfolio,
+    //   isActive: navigationService.matchRoutePath(location.pathname, routes.portfolio),
+    // },
   ];
 
   return {
