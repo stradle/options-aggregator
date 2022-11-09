@@ -45,9 +45,8 @@ const ProviderSelector = () => {
             {selected.map((option) => (
               <Chip
                 key={option}
-                icon={<ProviderIcon marginLeft={5} provider={option} />}
                 label={option}
-                disabled={providers?.length === 2}
+                icon={<ProviderIcon marginLeft={5} provider={option} />}
               />
             ))}
           </Box>

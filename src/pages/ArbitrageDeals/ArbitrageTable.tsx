@@ -164,103 +164,98 @@ const ArbitrageTable = ({ data }: { data: DealsTableItem[] }) => {
     page > 0 ? Math.max(0, (1 + page) * rowsPerPage - data.length) : 0;
 
   return (
-    <PageWrapper gap="10px" width="100%">
-      <div style={{ display: "flex", justifyContent: "end", width: "100%" }}>
-        <ProviderSelector />
-      </div>
-      <Paper sx={{ width: "100%", mb: 2 }}>
-        <TableContainer>
-          <Table sx={{ minWidth: 750 }} size="medium">
-            <EnhancedTableHead
-              order={order}
-              orderBy={orderBy}
-              onRequestSort={handleRequestSort}
-              rowCount={data.length}
-            />
-            <TableBody>
-              {/* if you don't need to support IE11, you can replace the `stableSort` call with:
+    <Paper sx={{ width: "100%", mb: 2 }}>
+      <TableContainer>
+        <Table sx={{ minWidth: 750 }} size="medium">
+          <EnhancedTableHead
+            order={order}
+            orderBy={orderBy}
+            onRequestSort={handleRequestSort}
+            rowCount={data.length}
+          />
+          <TableBody>
+            {/* if you don't need to support IE11, you can replace the `stableSort` call with:
               data.slice().sort(getComparator(order, orderBy)) */}
-              {stableSort(data, getComparator(order, orderBy))
-                .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
-                .map((deal, index) => {
-                  const labelId = `enhanced-table-checkbox-${index}`;
+            {stableSort(data, getComparator(order, orderBy))
+              .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
+              .map((deal, index) => {
+                const labelId = `enhanced-table-checkbox-${index}`;
 
-                  return (
-                    <TableRow
-                      hover
-                      tabIndex={-1}
-                      key={deal.strike + deal.term + deal.type}
+                return (
+                  <TableRow
+                    hover
+                    tabIndex={-1}
+                    key={deal.strike + deal.term + deal.type}
+                  >
+                    <TableCell
+                      align="right"
+                      component="th"
+                      id={labelId}
+                      scope="row"
+                      padding="none"
                     >
-                      <TableCell
-                        align="right"
-                        component="th"
-                        id={labelId}
-                        scope="row"
-                        padding="none"
-                      >
-                        {formatCurrency(+deal.strike)}
-                      </TableCell>
-                      <TableCell align="center" component="th">
-                        {deal.term}
-                      </TableCell>
-                      <TableCell align="center">
-                        {
-                          <ColoredOptionType
-                            positive={deal.type === OptionType.CALL}
-                          >
-                            {deal.type}
-                          </ColoredOptionType>
-                        }
-                      </TableCell>
-                      <TableCell align="right">
-                        <OptionValue
-                          detailed
-                          instrument={deal.buy}
-                          dealMode={BuySellModes.BUY}
-                        />
-                      </TableCell>
-                      <TableCell align="right">
-                        <OptionValue
-                          detailed
-                          instrument={deal.sell}
-                          dealMode={BuySellModes.SELL}
-                        />
-                      </TableCell>
-                      <TableCell align="right">
-                        {formatCurrency(deal.amount, 2)}
-                      </TableCell>
-                      <TableCell align="right">
-                        {formatPercent(deal.discount)}
-                      </TableCell>
-                      <TableCell align="right">
-                        {formatPercent(deal.apy)}
-                      </TableCell>
-                    </TableRow>
-                  );
-                })}
-              {emptyRows > 0 && (
-                <TableRow
-                  style={{
-                    height: 53 * emptyRows,
-                  }}
-                >
-                  <TableCell colSpan={6} />
-                </TableRow>
-              )}
-            </TableBody>
-          </Table>
-        </TableContainer>
-        <TablePagination
-          rowsPerPageOptions={[10, 20, 30]}
-          component="div"
-          count={data.length}
-          rowsPerPage={rowsPerPage}
-          page={page}
-          onPageChange={handleChangePage}
-          onRowsPerPageChange={handleChangeRowsPerPage}
-        />
-      </Paper>
-    </PageWrapper>
+                      {formatCurrency(+deal.strike)}
+                    </TableCell>
+                    <TableCell align="center" component="th">
+                      {deal.term}
+                    </TableCell>
+                    <TableCell align="center">
+                      {
+                        <ColoredOptionType
+                          positive={deal.type === OptionType.CALL}
+                        >
+                          {deal.type}
+                        </ColoredOptionType>
+                      }
+                    </TableCell>
+                    <TableCell align="right">
+                      <OptionValue
+                        detailed
+                        instrument={deal.buy}
+                        dealMode={BuySellModes.BUY}
+                      />
+                    </TableCell>
+                    <TableCell align="right">
+                      <OptionValue
+                        detailed
+                        instrument={deal.sell}
+                        dealMode={BuySellModes.SELL}
+                      />
+                    </TableCell>
+                    <TableCell align="right">
+                      {formatCurrency(deal.amount, 2)}
+                    </TableCell>
+                    <TableCell align="right">
+                      {formatPercent(deal.discount)}
+                    </TableCell>
+                    <TableCell align="right">
+                      {formatPercent(deal.apy)}
+                    </TableCell>
+                  </TableRow>
+                );
+              })}
+            {emptyRows > 0 && (
+              <TableRow
+                style={{
+                  height: 53 * emptyRows,
+                }}
+              >
+                <TableCell colSpan={6} />
+              </TableRow>
+            )}
+          </TableBody>
+        </Table>
+      </TableContainer>
+      <TablePagination
+        rowsPerPageOptions={[10, 20, 30]}
+        component="div"
+        count={data.length}
+        rowsPerPage={rowsPerPage}
+        page={page}
+        onPageChange={handleChangePage}
+        onRowsPerPageChange={handleChangeRowsPerPage}
+      />
+    </Paper>
   );
 };
 

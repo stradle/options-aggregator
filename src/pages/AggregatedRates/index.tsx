@@ -118,7 +118,7 @@ const AggregatedRates = () => {
   );
 
   return (
-    <PageWrapper gap={"10px"} width={"100%"}>
+    <PageWrapper width={"100%"}>
       <ConfigSection sx={{ justifyContent: "space-between", width: "100%" }}>
         <DealModeSelector value={dealMode} setValue={setDealMode} />
         <FormControlLabel

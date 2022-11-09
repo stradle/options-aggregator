@@ -1,19 +1,11 @@
-import { Box, Button, styled } from "@mui/material";
-
-export const StyledProviderLink = styled(Button)`
-  display: flex;
-  align-items: center;
-  padding: 2px;
-  flex: 1;
-  min-width: 0px;
-  color: inherit;
-`;
+import { Box, styled } from "@mui/material";
 
 export const PageWrapper = styled(Box)`
   display: flex;
   flex-direction: column;
   align-items: flex-start;
   margin-top: 1rem;
+  gap: 10px
 `;
 
 export const ConfigSection = styled("div")`

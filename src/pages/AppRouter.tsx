@@ -13,7 +13,7 @@ const AppRouter = () => {
 
       <Routes>
         <Route element={<Layout />}>
-          <Route path={routes.root} element={<Navigate to={routes.aggregatedRates} />} />
+          <Route path={routes.root} element={<Navigate to={routes.arbitrageDeals} />} />
 
           <Route path={routes.arbitrageDeals} element={<ArbitrageDeals />} />
 

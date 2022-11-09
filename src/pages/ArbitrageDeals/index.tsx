@@ -7,6 +7,7 @@ import { useAppContext } from "../../context/AppContext";
 import ArbitrageTable from "./ArbitrageTable";
 import { PageWrapper } from "../styled";
 import { Deal, OptionType } from "../../types";
+import ProviderSelector from "../../components/ProviderSelector";
 
 const PROFIT_THRESHOLD = 3;
 
@@ -90,20 +91,24 @@ const ArbitrageDeals = () => {
     });
   }, [deals]);
 
-  return deals.length > 0 ? (
-    <ArbitrageTable data={tableData} />
-  ) : (
-    <PageWrapper>
-      <h4>
-        {`Currently there are no deals exceeding ${formatCurrency(
-          PROFIT_THRESHOLD,
-          2
-        )} delta
-          profit threshold`}
-        <br />
-        <br />
-        Come back later
-      </h4>
+  return (
+    <PageWrapper >
+      <div style={{ display: "flex", justifyContent: "end", width: "100%" }}>
+        <ProviderSelector />
+      </div>
+      {deals.length > 0 ? (
+        <ArbitrageTable data={tableData} />
+      ) : (
+        <h4>
+          {`Currently there are no deals exceeding ${formatCurrency(
+            PROFIT_THRESHOLD,
+            2
+          )} delta profit threshold`}
+          <br />
+          <br />
+          Come back later
+        </h4>
+      )}
     </PageWrapper>
   );
 };
