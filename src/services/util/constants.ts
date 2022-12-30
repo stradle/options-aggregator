@@ -24,7 +24,6 @@ export const currencyProviders = {
     ProviderType.LYRA,
     ProviderType.PREMIA_ARB,
   ],
-  [Underlying.SOL]: [ProviderType.DERIBIT, ProviderType.LYRA],
 };
 
 export enum CHAINS {

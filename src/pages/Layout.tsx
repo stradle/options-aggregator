@@ -28,21 +28,15 @@ const AssetSelector = () => {
 
   return (
     <ButtonGroup variant="outlined">
-      {Object.values(Underlying).map((asset) =>
-        asset === Underlying.SOL ? (
-          <Tooltip key={asset} arrow title="Coming soon">
-            <Button>{asset}</Button>
-          </Tooltip>
-        ) : (
-          <Button
-            key={asset}
-            variant={asset === underlying ? "contained" : undefined}
-            onClick={() => setUnderlying(asset)}
-          >
-            {asset}
-          </Button>
-        )
-      )}
+      {Object.values(Underlying).map((asset) => (
+        <Button
+          key={asset}
+          variant={asset === underlying ? "contained" : undefined}
+          onClick={() => setUnderlying(asset)}
+        >
+          {asset}
+        </Button>
+      ))}
     </ButtonGroup>
   );
 };

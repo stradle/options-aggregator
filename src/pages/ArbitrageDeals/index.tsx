@@ -9,7 +9,7 @@ import { PageWrapper } from "../styled";
 import { Deal, OptionType } from "../../types";
 import ProviderSelector from "../../components/ProviderSelector";
 
-const PROFIT_THRESHOLD = 3;
+const PROFIT_THRESHOLD = 2;
 
 const useDeals = () => {
   const { allRates } = useRatesData();

@@ -111,7 +111,6 @@ const useDeribitData = (currency: Underlying) => {
   const [rates, setRates] = useState<Record<Underlying, DeribitItem[]>>({
     BTC: [],
     ETH: [],
-    SOL: [],
   });
   const ws = useDeribitSocket();
 
@@ -121,7 +120,6 @@ const useDeribitData = (currency: Underlying) => {
     const triggerUpdate = () => {
       ws.send(JSON.stringify(getRequestMeta(Underlying.ETH)));
       ws.send(JSON.stringify(getRequestMeta(Underlying.BTC)));
-      ws.send(JSON.stringify(getRequestMeta(Underlying.SOL)));
     };
     console.log("sub again");
     ws.onopen = () => {

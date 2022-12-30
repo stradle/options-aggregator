@@ -10,7 +10,6 @@ import { Underlying } from "../types";
 const CurrencyIcon = {
   [Underlying.BTC]: BtcIcon,
   [Underlying.ETH]: EthIcon,
-  [Underlying.SOL]: SolIcon,
 };
 
 const BasePriceWidget = () => {

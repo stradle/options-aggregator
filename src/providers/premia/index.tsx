@@ -65,7 +65,6 @@ const chainsProviders = {
 const currenciesAmount = {
   [Underlying.ETH]: (1e18).toString(), // 1 ETH
   [Underlying.BTC]: 1e7, // 0.1 BTC
-  [Underlying.SOL]: "", // no sol on premia
 };
 
 const getContract = (currency: Underlying, chain: CHAINS) => {

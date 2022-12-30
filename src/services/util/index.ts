@@ -33,7 +33,6 @@ const fetchTokenPrice = (tokenId: string): Promise<UnderlyingResult> =>
 const TokenSymbolToId = {
   [Underlying.BTC]: "bitcoin",
   [Underlying.ETH]: "ethereum",
-  [Underlying.SOL]: "solana",
   ["OSQTH"]: "opyn-squeeth",
 };
 export const useTokenPrice = (tokenSymbol: Underlying | "OSQTH") => {
@@ -56,7 +55,6 @@ export type Strikes = {
 const strikeRoundings = {
   [Underlying.BTC]: 1000,
   [Underlying.ETH]: 100,
-  [Underlying.SOL]: 2,
 };
 export const useStrikes = (): Strikes => {
   const { underlying } = useAppContext();
